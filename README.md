@@ -29,4 +29,4 @@ Applications
 
 Maintainer
 ----------
-Campbell Scott
+tkornuta
