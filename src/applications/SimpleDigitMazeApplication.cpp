@@ -25,7 +25,7 @@ void RegisterApplication (void) {
 
 namespace applications {
 
-SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) : ContinuousLearningApplication(node_name_),
+SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) : OpenGLApplication(node_name_),
 		sdr_size("sdr_size", 8)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
@@ -65,18 +65,15 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 }
 
 
-void SimpleDigitMazeApplication::performLearning() {
+bool SimpleDigitMazeApplication::performSingleStep() {
 
-	LOG(LWARNING) << "Perform learning ";
+	LOG(LWARNING) << "Perform single step ";
+
+	return true;
 }
 
 
 
-void SimpleDigitMazeApplication::performTesting() {
-
-	LOG(LSTATUS) << "Perform testing ";
-
-}
 
 
 

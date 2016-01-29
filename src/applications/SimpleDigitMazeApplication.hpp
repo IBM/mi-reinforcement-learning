@@ -8,7 +8,7 @@
 #ifndef SRC_APPLICATIONS_SIMPLEDIGITMAZEAPPLICATION_HPP_
 #define SRC_APPLICATIONS_SIMPLEDIGITMAZEAPPLICATION_HPP_
 
-#include <opengl/application/ContinuousLearningApplication.hpp>
+#include <opengl/application/OpenGLApplication.hpp>
 
 #include <opengl/visualization/WindowChart.hpp>
 using namespace mic::opengl::visualization;
@@ -21,7 +21,7 @@ namespace applications {
  * \brief Class implementing a simple test application (currently zero functionality).
  * \author tkornuta
  */
-class SimpleDigitMazeApplication: public mic::opengl::application::ContinuousLearningApplication {
+class SimpleDigitMazeApplication: public mic::opengl::application::OpenGLApplication {
 public:
 	/*!
 	 * Default Constructor. Sets the application/node name, default values of variables, initializes classifier etc.
@@ -48,14 +48,9 @@ protected:
 	virtual void initialize(int argc, char* argv[]);
 
 	/*!
-	 * Performs learning.
+	 * Performs single step of computations.
 	 */
-	virtual void performLearning();
-
-	/*!
-	 * Performs testing.
-	 */
-	virtual void performTesting();
+	virtual bool performSingleStep();
 
 private:
 
