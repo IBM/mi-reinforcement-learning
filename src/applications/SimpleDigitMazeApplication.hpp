@@ -62,10 +62,10 @@ protected:
 
 	/*!
 	 * Perform "probabilistic" move.
-	 * @param dx_ Step along x
 	 * @param dy_ Step along y
+	 * @param dx_ Step along x
 	 */
-	void move (size_t dx_, size_t dy_);
+	void move (size_t dy_, size_t dx_);
 
 
 private:

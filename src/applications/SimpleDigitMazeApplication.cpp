@@ -127,7 +127,7 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 
 		// Display results.
 		LOG(LINFO) << (*mazes[m]);
-		LOG(LINFO) << (*maze_position_probabilities[m]);
+		//LOG(LINFO) << (*maze_position_probabilities[m]);
 	}//: for m
 
 
@@ -150,7 +150,7 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 			(*patch_probabilities)(i) /= 9.0;
 		}//: for
 
-		LOG(LINFO) << (*patch_probabilities);
+		//LOG(LINFO) << (*patch_probabilities);
 
 		maze_patch_probabilities.push_back(patch_probabilities);
 	}//: for m(azes)
@@ -167,7 +167,7 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 
 
 void SimpleDigitMazeApplication::sense (short obs_) {
-	LOG(LWARNING) << "Current observation=" << obs_;
+	LOG(LINFO) << "Current observation=" << obs_;
 
 	double hit_factor = 0.6;
 	double miss_factor = 0.2;
@@ -175,7 +175,7 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 	// Compute posterior distribution given Z (observation) - total probability.
 
 	// For all mazes.
-	size_t m =2 ; {//for (size_t m=0; m<3; m++) {
+	size_t m =1 ; {//for (size_t m=0; m<3; m++) {
 		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
 		std::shared_ptr < Matrix<short> > maze = mazes[m];
 
@@ -199,22 +199,22 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 		}//: for i
 
 		// Display results.
-		LOG(LINFO) << (*mazes[m]);
+		//LOG(LINFO) << (*mazes[m]);
 		LOG(LINFO) << (*maze_position_probabilities[m]);
 	}//: for m
 
 
 }
 
-void SimpleDigitMazeApplication::move (size_t dx_, size_t dy_) {
-	LOG(LWARNING) << "Current move= (" << dx_ << "," <<dy_ << ")";
+void SimpleDigitMazeApplication::move (size_t dy_, size_t dx_) {
+	LOG(LWARNING) << "Current move= (" << dy_ << "," <<dx_ << ")";
 
 /*	Matrix<double> tmp(4,2);
 	tmp(3,0) = 2;
 	std::cout << tmp;*/
 
 	// For all mazes.
-	size_t m =2 ; {//for (size_t m=0; m<3; m++) {
+	size_t m =1 ; {//for (size_t m=0; m<3; m++) {
 		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
 		Matrix<double> old_pose_probs = (*pos_probs);
 		(*pos_probs)(0,0) = 0;
@@ -233,14 +233,14 @@ void SimpleDigitMazeApplication::move (size_t dx_, size_t dy_) {
 
 		// Display results.
 		//LOG(LINFO) << (*mazes[m]);
-		LOG(LINFO) << (*maze_position_probabilities[m]);
+		LOG(LWARNING) << (*maze_position_probabilities[m]);
 	}//: for m
 
 	// Perform the REAL move.
 	hidden_x = (hidden_x + 3 + dx_) %3;
 	hidden_y = (hidden_y + 3 + dy_) %3;
 
-	LOG(LWARNING) << "Hidden position= (" << hidden_x << "," << hidden_y << ")";
+	LOG(LWARNING) << "Hidden position in maze " << hidden_maze << "= (" << hidden_y << "," << hidden_x << ")";
 
 }
 
