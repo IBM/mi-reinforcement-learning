@@ -13,6 +13,8 @@
 #include <opengl/visualization/WindowChart.hpp>
 using namespace mic::opengl::visualization;
 
+#include <types/matrix.h>
+#include <types/vector.h>
 
 namespace mic {
 namespace applications {
@@ -52,13 +54,46 @@ protected:
 	 */
 	virtual bool performSingleStep();
 
-private:
+	/*!
+	 * Perform "probabilistic" sensing - update probabilities basing on the current observation.
+	 * @param obs_ Current observation.
+	 */
+	void sense (short obs_);
 
-	/// Property: SDR size.
-	mic::configuration::Property<size_t> sdr_size;
+	/*!
+	 * Perform "probabilistic" move.
+	 * @param dx_ Step along x
+	 * @param dy_ Step along y
+	 */
+	void move (size_t dx_, size_t dy_);
+
+
+private:
 
 	/// Window for displaying chart with statistics.
 	WindowChart* w_chart;
+
+	/// List of mazes.
+	std::vector<std::shared_ptr< Matrix<short> > > mazes;
+
+
+	/// Variable storing the probability that we are currently moving in/observing a given maze.
+	std::vector<double> maze_probabilities;
+
+	/// Variable storing the probability that we are in a given maze position.
+	std::vector<std::shared_ptr< Matrix<double> > > maze_position_probabilities;
+
+
+	/// Variable storing the probability that we can find given patch in a given maze.
+	std::vector<std::shared_ptr< Vector<double> > > maze_patch_probabilities;
+
+	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
+	mic::configuration::Property<short> hidden_maze;
+	/// Property: variable denoting the x position are we right now (unknown, to be determined).
+	mic::configuration::Property<short> hidden_x;
+	/// Property: variable denoting the y position are we right now (unknown, to be determined).
+	mic::configuration::Property<short> hidden_y;
+
 
 };
 
