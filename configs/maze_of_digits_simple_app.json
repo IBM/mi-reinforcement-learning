@@ -1,0 +1,13 @@
+{
+	"app_state": {
+		"application_sleep_interval": "1000"
+	},
+	"maze_of_digits_simple_app": {
+		"hidden_maze": "1",
+		"hidden_x": "1",
+		"hidden_y": "1"
+	},
+	"maze_importer" : {
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/dataset/mazes-3x5.csv"
+	}
+}

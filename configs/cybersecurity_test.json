@@ -1,9 +1,0 @@
-{
-	"app_state": {
-		"application_sleep_interval": "1000"
-	},
-	"cybersecurity_test": {
-		"learning_iterations_to_test_ratio": "50",
-		"number_of_averaged_test_measures": "5"
-	}
-}

@@ -16,6 +16,8 @@ using namespace mic::opengl::visualization;
 #include <types/matrix.h>
 #include <types/vector.h>
 
+#include <data_io/MazeMatrixImporter.hpp>
+
 namespace mic {
 namespace applications {
 
@@ -76,6 +78,8 @@ private:
 	/// List of mazes.
 	std::vector<std::shared_ptr< Matrix<short> > > mazes;
 
+	/// Importer responsible for loading mazes from file.
+	mic::data_io::MazeMatrixImporter importer;
 
 	/// Variable storing the probability that we are currently moving in/observing a given maze.
 	std::vector<double> maze_probabilities;
@@ -88,12 +92,28 @@ private:
 	std::vector<std::shared_ptr< Vector<double> > > maze_patch_probabilities;
 
 	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
-	mic::configuration::Property<short> hidden_maze;
+	mic::configuration::Property<short> hidden_maze_number;
+
 	/// Property: variable denoting the x position are we right now (unknown, to be determined).
 	mic::configuration::Property<short> hidden_x;
+
 	/// Property: variable denoting the y position are we right now (unknown, to be determined).
 	mic::configuration::Property<short> hidden_y;
 
+	/// Problem dimensions - number of mazes.
+	int number_of_mazes;
+
+	/// Problem dimensions - width of a maze.
+	int maze_width;
+
+	/// Problem dimensions - height of a maze.
+	int maze_height;
+
+	/// Problem dimensions - number of distinctive patches (in here - number of different digits, i.e. 10).
+	int number_of_distinctive_patches;
+
+	/// Problem dimensions - number of mazes * their width * their height.
+	int problem_dimensions;
 
 };
 

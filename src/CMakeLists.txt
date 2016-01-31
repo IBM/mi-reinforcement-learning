@@ -33,6 +33,7 @@ if(${BUILD_APP_MAZE_OF_DIGITS_SIMPLE})
 	add_executable(maze_of_digits_simple_app 
 		applications/SimpleDigitMazeApplication.cpp
 		applications/console_application_main.cpp
+		data_io/MazeMatrixImporter.cpp
 		)
 	# Link it with shared libraries.
 	target_link_libraries(maze_of_digits_simple_app 
