@@ -8,6 +8,6 @@
 		"hidden_y": "0"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/dataset/maze-2x3.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/dataset/mazes-3x3.csv"
 	}
 }
