@@ -6,8 +6,8 @@
 		"hidden_maze": "0",
 		"hidden_x": "0",
 		"hidden_y": "0",
-		"hit_factor": "0.55",
-		"miss_factor": "0.45"
+		"hit_factor": "0.5",
+		"miss_factor": "0.1"
 	},
 	"maze_importer" : {
 		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/dataset/mazes-3x5.csv"

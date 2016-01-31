@@ -18,6 +18,8 @@ using namespace mic::opengl::visualization;
 
 #include <data_io/MazeMatrixImporter.hpp>
 
+#include <types/Action.hpp>
+
 namespace mic {
 namespace applications {
 
@@ -67,7 +69,7 @@ protected:
 	 * @param dy_ Step along y
 	 * @param dx_ Step along x
 	 */
-	void move (size_t dy_, size_t dx_);
+	void move (mic::types::Action2DInterface ac_);
 
 
 private:

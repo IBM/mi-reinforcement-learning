@@ -134,6 +134,7 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 	APP_DATA_SYNCHRONIZATION_SCOPED_LOCK();
 
 	// Add data to chart window.
+//	for (size_t m=0; m<number_of_mazes; m++) {
 	w_chart->addDataToContainer("Pa", maze_probabilities[0]);
 	w_chart->addDataToContainer("Pb", maze_probabilities[1]);
 	w_chart->addDataToContainer("Pc", maze_probabilities[2]);
@@ -153,10 +154,10 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 		std::shared_ptr < Matrix<int> > maze = mazes[m];
 
 		// Display results.
-		LOG(LERROR) << "Przed updatem";
+/*		LOG(LERROR) << "Przed updatem";
 		LOG(LERROR) << (*mazes[m]);
 		LOG(LERROR) << (*maze_position_probabilities[m]);
-
+*/
 
 		// Iterate through position probabilities and update them.
 		for (size_t y=0; y<importer.maze_height; y++) {
@@ -187,23 +188,23 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 
 }
 
-void SimpleDigitMazeApplication::move (size_t dy_, size_t dx_) {
-	LOG(LERROR) << "Current move dy,dx= ( " << dy_ << "," <<dx_ << ")";
+void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
+	LOG(LERROR) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
 
 	// For all mazes.
 	for (size_t m=0; m<number_of_mazes; m++) {
 		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
 		Matrix<double> old_pose_probs = (*pos_probs);
 
-		LOG(LERROR) << "Przed ruchem";
+/*		LOG(LERROR) << "Przed ruchem";
 		LOG(LERROR) << (*mazes[m]);
-		LOG(LERROR) << (*maze_position_probabilities[m]);
+		LOG(LERROR) << (*maze_position_probabilities[m]);*/
 
 		// Iterate through position probabilities and update them.
 		for (size_t y=0; y<importer.maze_height; y++) {
 			for (size_t x=0; x<importer.maze_width; x++) {
 				//std::cout << "i=" << i << " j=" << j << " dx=" << dx_ << " dy=" << dy_ << " (i - dx_) % 3 = " << (i +3 - dx_) % 3 << " (j - dy_) % 3=" << (j + 3 - dy_) % 3 << std::endl;
-				(*pos_probs)((y + importer.maze_height + dy_) %importer.maze_height, (x +importer.maze_width + dx_) % importer.maze_width) = old_pose_probs(y, x);
+				(*pos_probs)((y + importer.maze_height +  ac_.dy()) %importer.maze_height, (x +importer.maze_width +  ac_.dx()) % importer.maze_width) = old_pose_probs(y, x);
 
 			}//: for j
 		}//: for i
@@ -214,18 +215,18 @@ void SimpleDigitMazeApplication::move (size_t dy_, size_t dx_) {
 	}//: for m
 
 	// Perform the REAL move.
-	hidden_y = (hidden_y + importer.maze_height + dy_) % importer.maze_height;
-	hidden_x = (hidden_x + importer.maze_width + dx_) % importer.maze_width;
+	hidden_y = (hidden_y + importer.maze_height +  ac_.dy()) % importer.maze_height;
+	hidden_x = (hidden_x + importer.maze_width +  ac_.dx()) % importer.maze_width;
 
 	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
 
 }
 
 bool SimpleDigitMazeApplication::performSingleStep() {
-	LOG(LWARNING) << "Perform single step ";
+	LOG(LWARNING) << "Perform a single step ";
 
 	// Perform move.
-	move(1,0);
+	move(A_RANDOM);
 
 	// Get current observation.
 	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
