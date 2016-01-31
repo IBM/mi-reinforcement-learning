@@ -117,6 +117,9 @@ private:
 	/// Property: variable denoting the miss factor (the gain when the observation does not coincide with current position).
 	mic::configuration::Property<double> miss_factor;
 
+	/// Property: performed action (0-3: NESW, -1: random).
+	mic::configuration::Property<short> action;
+
 };
 
 } /* namespace applications */

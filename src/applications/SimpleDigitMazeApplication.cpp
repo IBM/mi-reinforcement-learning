@@ -9,7 +9,7 @@
 
 #include <application/ApplicationFactory.hpp>
 
-
+#include <random>
 namespace mic {
 namespace application {
 
@@ -30,7 +30,8 @@ SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) :
 		hidden_x("hidden_x", 0),
 		hidden_y("hidden_y", 0),
 		hit_factor("hit_factor", 0.6),
-		miss_factor("miss_factor", 0.2)
+		miss_factor("miss_factor", 0.2),
+		action("action", -1)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(hidden_maze_number);
@@ -38,6 +39,7 @@ SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) :
 	registerProperty(hidden_y);
 	registerProperty(hit_factor);
 	registerProperty(miss_factor);
+	registerProperty(action);
 
 	LOG(LINFO) << "Properties registered";
 
@@ -61,10 +63,6 @@ void SimpleDigitMazeApplication::initialize(int argc, char* argv[]) {
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_chart = new WindowChart("Statistics", 256, 512, 0, 326);
 
-	// Create data containers.
-	w_chart->createDataContainer("Pa", mic::types::color_rgba(255, 0, 0, 180));
-	w_chart->createDataContainer("Pb", mic::types::color_rgba(0, 255, 0, 180));
-	w_chart->createDataContainer("Pc", mic::types::color_rgba(0, 0, 255, 180));
 
 }
 
@@ -79,10 +77,27 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 	problem_dimensions = number_of_mazes * importer.maze_width * importer.maze_height;
 	number_of_distinctive_patches = 10;
 
+	// Create data containers.
+	// Random device used for generation of colors.
+	std::random_device rd;
+	std::mt19937_64 rng_mt19937_64(rd());
+	// Initialize uniform index distribution - integers.
+	std::uniform_int_distribution<> color_dist(50, 200);
+	// Create a single container for each maze.
+	for (size_t m=0; m<5; m++) {
+		std::string label = "P(m" + std::to_string(m) +")";
+		int r= color_dist(rng_mt19937_64);
+		int g= color_dist(rng_mt19937_64);
+		int b= color_dist(rng_mt19937_64);
+		std::cout << label << " g=" << r<< " g=" << r<< " b=" << b;
+
+		w_chart->createDataContainer(label, mic::types::color_rgba(r, g, b, 180));
+	}//: for
+
 	// Set pointer to data.
 	mazes = importer.getData();
 
-	// Assign initial probabilities for all mazes.
+	// Assign initial probabilities for all mazes/positions.
 	for (size_t m=0; m<number_of_mazes; m++) {
 		maze_probabilities.push_back((double) 1.0/ mazes.size());
 
@@ -124,20 +139,43 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 		maze_patch_probabilities.push_back(patch_probabilities);
 	}//: for m(azes)
 
+	{ // Enter critical section - with the use of scoped lock from AppState!
+		APP_DATA_SYNCHRONIZATION_SCOPED_LOCK();
+
+		// Add data to chart window.
+		for (size_t m=0; m<number_of_mazes; m++) {
+			std::string label = "P(m" + std::to_string(m) +")";
+			w_chart->addDataToContainer(label, maze_probabilities[m]);
+		}//: for
+	}//: end of critical section.
 
 	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
 	// Get current observation.
 	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
 	sense(obs);
 
-	// Enter critical section - with the use of scoped lock from AppState!
-	APP_DATA_SYNCHRONIZATION_SCOPED_LOCK();
+	// Update maze_probabilities.
+	for (size_t m=0; m<number_of_mazes; m++) {
+		// Reset probability.
+		maze_probabilities[m] = 0;
+		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+		// Sum probabilities of all positions.
+		for (size_t i=0; i<importer.maze_height; i++) {
+			for (size_t j=0; j<importer.maze_width; j++) {
+				maze_probabilities[m] += (*pos_probs)(i,j);
+			}//: for j
+		}//: for i
+	}//: for m
 
-	// Add data to chart window.
-//	for (size_t m=0; m<number_of_mazes; m++) {
-	w_chart->addDataToContainer("Pa", maze_probabilities[0]);
-	w_chart->addDataToContainer("Pb", maze_probabilities[1]);
-	w_chart->addDataToContainer("Pc", maze_probabilities[2]);
+	{ // Enter critical section - with the use of scoped lock from AppState!
+		APP_DATA_SYNCHRONIZATION_SCOPED_LOCK();
+
+		// Add data to chart window.
+		for (size_t m=0; m<number_of_mazes; m++) {
+			std::string label = "P(m" + std::to_string(m) +")";
+			w_chart->addDataToContainer(label, maze_probabilities[m]);
+		}//: for
+	}//: end of critical section.
 
 }
 
@@ -226,17 +264,34 @@ bool SimpleDigitMazeApplication::performSingleStep() {
 	LOG(LWARNING) << "Perform a single step ";
 
 	// Perform move.
-	move(A_RANDOM);
+	if (action == (short)-1)
+		move(A_RANDOM);
+	else
+		move(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)action));
+	//move(A_EAST);
 
 	// Get current observation.
 	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
 	sense(obs);
 
+	// Update maze_probabilities.
+	for (size_t m=0; m<number_of_mazes; m++) {
+		// Reset probability.
+		maze_probabilities[m] = 0;
+		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+		// Sum probabilities of all positions.
+		for (size_t i=0; i<importer.maze_height; i++) {
+			for (size_t j=0; j<importer.maze_width; j++) {
+				maze_probabilities[m] += (*pos_probs)(i,j);
+			}//: for j
+		}//: for i
+	}//: for m
 
 	// Add data to chart window.
-	w_chart->addDataToContainer("Pa", maze_probabilities[0]);
-	w_chart->addDataToContainer("Pb", maze_probabilities[1]);
-	w_chart->addDataToContainer("Pc", maze_probabilities[2]);
+	for (size_t m=0; m<number_of_mazes; m++) {
+		std::string label = "P(m" + std::to_string(m) +")";
+		w_chart->addDataToContainer(label, maze_probabilities[m]);
+	}//: for
 
 	return true;
 }
