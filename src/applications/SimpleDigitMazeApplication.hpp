@@ -109,6 +109,12 @@ private:
 	/// Problem dimensions - number of mazes * their width * their height.
 	int problem_dimensions;
 
+	/// Property: variable denoting the hit factor (the gain when the observation coincides with current position).
+	mic::configuration::Property<double> hit_factor;
+
+	/// Property: variable denoting the miss factor (the gain when the observation does not coincide with current position).
+	mic::configuration::Property<double> miss_factor;
+
 };
 
 } /* namespace applications */

@@ -28,12 +28,16 @@ namespace applications {
 SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) : OpenGLApplication(node_name_),
 		hidden_maze_number("hidden_maze", 0),
 		hidden_x("hidden_x", 0),
-		hidden_y("hidden_y", 0)
+		hidden_y("hidden_y", 0),
+		hit_factor("hit_factor", 0.6),
+		miss_factor("miss_factor", 0.2)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(hidden_maze_number);
 	registerProperty(hidden_x);
 	registerProperty(hidden_y);
+	registerProperty(hit_factor);
+	registerProperty(miss_factor);
 
 	LOG(LINFO) << "Properties registered";
 
@@ -140,9 +144,6 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 void SimpleDigitMazeApplication::sense (short obs_) {
 	LOG(LINFO) << "Current observation=" << obs_;
 
-	double hit_factor = 0.6;
-	double miss_factor = 0.2;
-
 	// Compute posterior distribution given Z (observation) - total probability.
 
 	// For all mazes.
@@ -151,14 +152,20 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
 		std::shared_ptr < Matrix<int> > maze = mazes[m];
 
+		// Display results.
+		LOG(LERROR) << "Przed updatem";
+		LOG(LERROR) << (*mazes[m]);
+		LOG(LERROR) << (*maze_position_probabilities[m]);
+
+
 		// Iterate through position probabilities and update them.
-		for (size_t i=0; i<importer.maze_height; i++) {
-			for (size_t j=0; j<importer.maze_width; j++) {
-				if ((*maze)(i,j) == obs_)
-					(*pos_probs)(i,j) *= hit_factor;
+		for (size_t y=0; y<importer.maze_height; y++) {
+			for (size_t x=0; x<importer.maze_width; x++) {
+				if ((*maze)(y,x) == obs_)
+					(*pos_probs)(y,x) *= hit_factor;
 				else
-					(*pos_probs)(i,j) *= miss_factor;
-				prob_sum += (*pos_probs)(i,j);
+					(*pos_probs)(y,x) *= miss_factor;
+				prob_sum += (*pos_probs)(y,x);
 			}//: for j
 		}//: for i
 	}//: for m
@@ -178,22 +185,25 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 		LOG(LINFO) << (*maze_position_probabilities[m]);
 	}//: for m
 
-
 }
 
 void SimpleDigitMazeApplication::move (size_t dy_, size_t dx_) {
-	LOG(LERROR) << "Current move= (" << dy_ << "," <<dx_ << ")";
+	LOG(LERROR) << "Current move dy,dx= ( " << dy_ << "," <<dx_ << ")";
 
 	// For all mazes.
 	for (size_t m=0; m<number_of_mazes; m++) {
 		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
 		Matrix<double> old_pose_probs = (*pos_probs);
 
+		LOG(LERROR) << "Przed ruchem";
+		LOG(LERROR) << (*mazes[m]);
+		LOG(LERROR) << (*maze_position_probabilities[m]);
+
 		// Iterate through position probabilities and update them.
-		for (size_t i=0; i<importer.maze_height; i++) {
-			for (size_t j=0; j<importer.maze_width; j++) {
+		for (size_t y=0; y<importer.maze_height; y++) {
+			for (size_t x=0; x<importer.maze_width; x++) {
 				//std::cout << "i=" << i << " j=" << j << " dx=" << dx_ << " dy=" << dy_ << " (i - dx_) % 3 = " << (i +3 - dx_) % 3 << " (j - dy_) % 3=" << (j + 3 - dy_) % 3 << std::endl;
-				(*pos_probs)((j + importer.maze_height + dy_) %importer.maze_height, (i +importer.maze_width + dx_) % importer.maze_width) = old_pose_probs(j, i);
+				(*pos_probs)((y + importer.maze_height + dy_) %importer.maze_height, (x +importer.maze_width + dx_) % importer.maze_width) = old_pose_probs(y, x);
 
 			}//: for j
 		}//: for i
