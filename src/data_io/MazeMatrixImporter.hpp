@@ -39,6 +39,13 @@ public:
 	 */
 	virtual void initializePropertyDependentVariables() { };
 
+	/// Width of a maze.
+	int maze_width;
+
+	/// Height of a maze.
+	int maze_height;
+
+
 protected:
 	/*!
 	 * Property: directory/Name of file containing mazes.

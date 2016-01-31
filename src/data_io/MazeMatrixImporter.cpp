@@ -30,8 +30,6 @@ bool MazeMatrixImporter::importData(){
 
 	std::string line;
 
-	int maze_width, maze_height;
-
 	// If managed to open the file properly.
 	if (data_file.is_open()) {
 
@@ -50,16 +48,16 @@ bool MazeMatrixImporter::importData(){
 		ss >> maze_height;
 
 
-		LOG(LINFO) << "maze_width=" << maze_width << " maze_height=" << maze_height ;
+		LOG(LDEBUG) << "maze_width=" << maze_width << " maze_height=" << maze_height ;
 
 		// Read third line - second header.
 	    line.clear();
 		std::getline(data_file, line);
-		LOG(LINFO) << "2nd header : " << line ;
+		LOG(LDEBUG)  << "2nd header : " << line ;
 
 		// Read mazes.
 	    while (std::getline(data_file, line)) {
-			std::cout << line << '\n';
+	    	LOG(LDEBUG)  << line << '\n';
 
 			// Create new matrix of MNIST image size.
 			std::shared_ptr< mic::types::Matrix<int> > mat (new mic::types::Matrix<int>(maze_height, maze_width));
@@ -69,12 +67,12 @@ bool MazeMatrixImporter::importData(){
 			std::stringstream ss(line);
 			// Parse line and get consecutire values..
 			while (ss >> value) {
-				std::cout<< value;
 				// Compute matrix index.
 				unsigned row = i / maze_width;
-				unsigned col = i % maze_height;
+				unsigned col = i - ( row * maze_width);
 				// Set value
 				(*mat)(row, col) = value;
+				LOG(LDEBUG) << " " << i <<"("<< row<<","<< col <<")|" << value;
 				// Increment index.
 				i++;
 
@@ -83,13 +81,13 @@ bool MazeMatrixImporter::importData(){
 					ss.ignore();
 			}//: while i in line
 
-			LOG(LINFO) << *mat;
+			LOG(LDEBUG) << *mat;
 			// Add matrix do vector.
 			data.push_back(mat);
 		}//: while line
 
 
-		LOG(LINFO) << "Imported " << data.size() << " mazes";
+		LOG(LINFO) << "Imported " << data.size() << " mazes of size (h x w) = " << maze_height << " x " << maze_width;
 		LOG(LINFO) << "Data import finished";
 		data_file.close();
 

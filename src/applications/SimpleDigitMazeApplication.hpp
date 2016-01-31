@@ -75,18 +75,18 @@ private:
 	/// Window for displaying chart with statistics.
 	WindowChart* w_chart;
 
-	/// List of mazes.
-	std::vector<std::shared_ptr< Matrix<short> > > mazes;
-
 	/// Importer responsible for loading mazes from file.
 	mic::data_io::MazeMatrixImporter importer;
 
-	/// Variable storing the probability that we are currently moving in/observing a given maze.
-	std::vector<double> maze_probabilities;
+	/// Vector of mazes - pointer to vector of mazes returned by importer.
+	std::vector<std::shared_ptr< Matrix<int> > > mazes;
 
 	/// Variable storing the probability that we are in a given maze position.
 	std::vector<std::shared_ptr< Matrix<double> > > maze_position_probabilities;
 
+
+	/// Variable storing the probability that we are currently moving in/observing a given maze.
+	std::vector<double> maze_probabilities;
 
 	/// Variable storing the probability that we can find given patch in a given maze.
 	std::vector<std::shared_ptr< Vector<double> > > maze_patch_probabilities;
@@ -102,12 +102,6 @@ private:
 
 	/// Problem dimensions - number of mazes.
 	int number_of_mazes;
-
-	/// Problem dimensions - width of a maze.
-	int maze_width;
-
-	/// Problem dimensions - height of a maze.
-	int maze_height;
 
 	/// Problem dimensions - number of distinctive patches (in here - number of different digits, i.e. 10).
 	int number_of_distinctive_patches;
