@@ -84,7 +84,7 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 	// Initialize uniform index distribution - integers.
 	std::uniform_int_distribution<> color_dist(50, 200);
 	// Create a single container for each maze.
-	for (size_t m=0; m<5; m++) {
+	for (size_t m=0; m<number_of_mazes; m++) {
 		std::string label = "P(m" + std::to_string(m) +")";
 		int r= color_dist(rng_mt19937_64);
 		int g= color_dist(rng_mt19937_64);
@@ -111,8 +111,8 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 		maze_position_probabilities.push_back(position_probabilities);
 
 		// Display results.
-		LOG(LINFO) << (*mazes[m]);
-		//LOG(LINFO) << (*maze_position_probabilities[m]);
+		LOG(LDEBUG) << (*mazes[m]);
+		//LOG(LDEBUG) << (*maze_position_probabilities[m]);
 	}//: for m
 
 
@@ -221,7 +221,7 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 
 		// Display results.
 		LOG(LDEBUG) << (*mazes[m]);
-		LOG(LINFO) << (*maze_position_probabilities[m]);
+		LOG(LDEBUG) << (*maze_position_probabilities[m]);
 	}//: for m
 
 }
@@ -249,7 +249,7 @@ void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
 
 		// Display results.
 		LOG(LDEBUG) << (*mazes[m]);
-		LOG(LWARNING) << (*maze_position_probabilities[m]);
+		LOG(LDEBUG) << (*maze_position_probabilities[m]);
 	}//: for m
 
 	// Perform the REAL move.

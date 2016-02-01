@@ -20,7 +20,7 @@ def main(argv):
 	mazes =1
 	width = 3
 	height = 3
-	filename = "maze-3x3.csv"
+	filename = "1maze-3x3.csv"
 	
 	# Parse arguments.
 	for opt, arg in opts:
@@ -39,18 +39,22 @@ def main(argv):
 	# Generate mazes and write them to a file.
 	print "Generating mazes - please wait..."
 	with open(filename, 'wb') as csvfile:
-		spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+		spamwriter = csv.writer(csvfile, delimiter=',', quotechar=' ', quoting=csv.QUOTE_MINIMAL)
 		spamwriter.writerow(['maze width', 'maze height'])
 		spamwriter.writerow([width, height])
+		spamwriter.writerow(['mazes'])
 		for maze in range(mazes):
-			tmp_maze = numpy.random.randint(10, size=(height*width))
-			tmp_str = str(tmp_maze)
-			# Concatenate brackets
-			tmp_str = tmp_str[1:len(tmp_str)-1]
-			# Change delimiter to coma.
-			tmp_str.replace(", ,", ",")
-			print tmp_str
-			spamwriter.writerow(tmp_str)
+			# Random maze of digits.
+			tmp_maze = numpy.random.randint(1,9, size=(height*width))
+			# Randomly overwrite a single 0 and 9.
+			zero_pos = numpy.random.randint(height*width);
+			tmp_maze[zero_pos] = 0;
+			nine_pos = zero_pos
+			while (nine_pos == zero_pos):
+				nine_pos = numpy.random.randint(height*width);
+			tmp_maze[nine_pos] = 9;
+			# Write maze to file.
+			spamwriter.writerow(tmp_maze)
 	print "Successfuly generated ", filename, " containing ",mazes," random maze(s) of size (",height,"x",width,")."
 
 def usage():
@@ -58,7 +62,7 @@ def usage():
 	print " -M(=1) sets number of mazes"
 	print " -W(=3) sets maze width" 
 	print " -H(=3) sets maze height" 
-	print " -F(=maze-3x3.csv) sets filename" 
+	print " -F(=1maze-3x3.csv) sets filename" 
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

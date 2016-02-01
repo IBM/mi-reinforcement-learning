@@ -3,14 +3,14 @@
 		"application_sleep_interval": "1000"
 	},
 	"maze_of_digits_simple_app": {
-		"hidden_maze": "0",
-		"hidden_x": "0",
-		"hidden_y": "0",
+		"hidden_maze": "15",
+		"hidden_x": "20",
+		"hidden_y": "10",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
 		"action": "-1"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/dataset/mazes-3x5.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/100mazes-28x28.csv"
 	}
 }
