@@ -82,3 +82,5 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 add_subdirectory(src)
 
 add_subdirectory(configs)
+
+add_subdirectory(datasets)
