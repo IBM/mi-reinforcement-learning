@@ -8,9 +8,9 @@
 		"hidden_y": "10",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
-		"action": "-1"
+		"action": "2"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/100mazes-28x28.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/5mazes-3x5.csv"
 	}
 }

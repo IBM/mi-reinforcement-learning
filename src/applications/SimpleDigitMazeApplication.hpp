@@ -71,11 +71,23 @@ protected:
 	 */
 	void move (mic::types::Action2DInterface ac_);
 
+	/*!
+	 * Updates aggregated probabilities of current maze number, x and y coordinates as well as add them to data containsers.
+	 * @param synchronize_ If true enters critical section when adding data to containers.
+	 */
+	void updateAggregatedProbabilities(bool synchronize_);
+
 
 private:
 
-	/// Window for displaying chart with statistics.
-	WindowChart* w_chart;
+	/// Window for displaying chart with statistics on current maze number.
+	WindowChart* w_current_maze_chart;
+
+	/// Window for displaying chart with statistics on current x coordinate.
+	WindowChart* w_current_coordinate_x;
+
+	/// Window for displaying chart with statistics on current y coordinate.
+	WindowChart* w_current_coordinate_y;
 
 	/// Importer responsible for loading mazes from file.
 	mic::data_io::MazeMatrixImporter importer;
@@ -89,6 +101,12 @@ private:
 
 	/// Variable storing the probability that we are currently moving in/observing a given maze.
 	std::vector<double> maze_probabilities;
+
+	/// Variable storing the probability that we are currently in a given x coordinate.
+	std::vector<double> maze_x_coordinate_probilities;
+
+	/// Variable storing the probability that we are currently in a given y coordinate.
+	std::vector<double> maze_y_coordinate_probilities;
 
 	/// Variable storing the probability that we can find given patch in a given maze.
 	std::vector<std::shared_ptr< Vector<double> > > maze_patch_probabilities;
