@@ -72,10 +72,25 @@ protected:
 	void move (mic::types::Action2DInterface ac_);
 
 	/*!
-	 * Updates aggregated probabilities of current maze number, x and y coordinates as well as add them to data containsers.
+	 * Assigns initial probabilities (uniform distribution) to all variables.
+	 */
+	void assignInitialProbabilities();
+
+	/*!
+	 * Creates data containers - for visualization/data export purposes.
+	 */
+	void createDataContainers();
+
+	/*!
+	 * Stores current state in data containers.
 	 * @param synchronize_ If true enters critical section when adding data to containers.
 	 */
-	void updateAggregatedProbabilities(bool synchronize_);
+	void storeCurrentStateInDataContainers(bool synchronize_);
+
+	/*!
+	 * Updates aggregated probabilities of current maze number, x and y coordinates.
+	 */
+	void updateAggregatedProbabilities();
 
 
 private:
@@ -109,7 +124,7 @@ private:
 	std::vector<double> maze_y_coordinate_probilities;
 
 	/// Variable storing the probability that we can find given patch in a given maze.
-	std::vector<std::shared_ptr< Vector<double> > > maze_patch_probabilities;
+	std::vector<double> maze_patch_probabilities;
 
 	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
 	mic::configuration::Property<short> hidden_maze_number;

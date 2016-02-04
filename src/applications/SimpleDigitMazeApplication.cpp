@@ -89,7 +89,39 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 	// Set pointer to data.
 	mazes = importer.getData();
 
+	// Show mazes.
+	for (size_t m=0; m<number_of_mazes; m++) {
+		// Display results.
+		LOG(LDEBUG) << (*mazes[m]);
+	}//: for
+
+	// Assign initial probabilities to all variables (uniform distribution).s
+	assignInitialProbabilities();
+
+	// Create data containers - for visualization.
+	createDataContainers();
+
+	// Store the "zero" state.
+	storeCurrentStateInDataContainers(true);
+
+	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+	// Get first observation.
+	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
+	sense(obs);
+
+	// Update aggregated probabilities.
+	updateAggregatedProbabilities();
+
+	// Store the first state.
+	storeCurrentStateInDataContainers(true);
+
+}
+
+
+void SimpleDigitMazeApplication::assignInitialProbabilities() {
+
 	// Assign initial probabilities for all mazes/positions.
+	LOG(LDEBUG) << "Initial maze_position_probabilities:";
 	for (size_t m=0; m<number_of_mazes; m++) {
 
 		std::shared_ptr < Matrix<double> > position_probabilities(new Matrix <double> (importer.maze_height, importer.maze_width));
@@ -101,13 +133,50 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 
 		maze_position_probabilities.push_back(position_probabilities);
 
-		// Display results.
-		LOG(LDEBUG) << (*mazes[m]);
-		//LOG(LDEBUG) << (*maze_position_probabilities[m]);
+		LOG(LDEBUG) << (*maze_position_probabilities[m]);
 	}//: for m
 
+	// Assign initial probabilities to maze - for visualization.
+	for (size_t m=0; m<number_of_mazes; m++) {
+		maze_probabilities.push_back((double) 1.0/ mazes.size());
+	}//: for
 
-	// Create data containers.
+
+	//  Assign initial probabilities to x coordinate - for visualization.
+	for (size_t x=0; x<importer.maze_width; x++) {
+		maze_x_coordinate_probilities.push_back((double) 1.0/ importer.maze_width);
+	}//: for
+
+	//  Assign initial probabilities to y coordinate - for visualization.
+	for (size_t y=0; y<importer.maze_height; y++) {
+		maze_y_coordinate_probilities.push_back((double) 1.0/ importer.maze_height);
+	}//: for
+
+	// Collect statistics for all mazes - number of appearances of a given "patch" (i.e. digit).
+	maze_patch_probabilities.resize(number_of_distinctive_patches);
+	for (size_t m=0; m<number_of_mazes; m++) {
+		std::shared_ptr < Matrix<int> > maze = mazes[m];
+
+		// Iterate through maze and collect occurrences.
+		for (size_t i=0; i<importer.maze_height; i++) {
+			for (size_t j=0; j<importer.maze_width; j++) {
+				short patch_id = (*maze)(i,j);
+				maze_patch_probabilities[patch_id] += 1.0;
+			}//: for j
+		}//: for i
+
+	}//: for m(azes)
+
+	// Divide by problem dimensions (number of mazes * width * height) -> probabilities.
+	LOG(LDEBUG) << "maze_patch_probabilities:";
+	for (size_t i=0; i<number_of_distinctive_patches; i++) {
+		maze_patch_probabilities[i] /= problem_dimensions;
+		LOG(LDEBUG) << maze_patch_probabilities[i];
+	}//: for
+
+}
+
+void SimpleDigitMazeApplication::createDataContainers() {
 	// Random device used for generation of colors.
 	std::random_device rd;
 	std::mt19937_64 rng_mt19937_64(rd());
@@ -119,101 +188,43 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 		int r= color_dist(rng_mt19937_64);
 		int g= color_dist(rng_mt19937_64);
 		int b= color_dist(rng_mt19937_64);
-		std::cout << label << " g=" << r<< " g=" << r<< " b=" << b;
+		//std::cout << label << " g=" << r<< " g=" << r<< " b=" << b;
 
 		// Add container to chart.
 		w_current_maze_chart->createDataContainer(label, mic::types::color_rgba(r, g, b, 180));
 
-		// Assign initial probabilities to maze - for visualization.
-		maze_probabilities.push_back((double) 1.0/ mazes.size());
 	}//: for
 
 
-	//  Assign initial probabilities to x coordinate - for visualization.
+	// Create a single container for each x coordinate.
 	for (size_t x=0; x<importer.maze_width; x++) {
 		std::string label = "P(x" + std::to_string(x) +")";
 		int r= color_dist(rng_mt19937_64);
 		int g= color_dist(rng_mt19937_64);
 		int b= color_dist(rng_mt19937_64);
-		std::cout << label << " g=" << r<< " g=" << r<< " b=" << b;
 
 		// Add container to chart.
 		w_current_coordinate_x->createDataContainer(label, mic::types::color_rgba(r, g, b, 180));
 
-		maze_x_coordinate_probilities.push_back((double) 1.0/ importer.maze_width);
 	}//: for
 
-	//  Assign initial probabilities to y coordinate - for visualization.
+
+	// Create a single container for each y coordinate.
 	for (size_t y=0; y<importer.maze_height; y++) {
 		std::string label = "P(y" + std::to_string(y) +")";
 		int r= color_dist(rng_mt19937_64);
 		int g= color_dist(rng_mt19937_64);
 		int b= color_dist(rng_mt19937_64);
-		std::cout << label << " g=" << r<< " g=" << r<< " b=" << b;
 
 		// Add container to chart.
 		w_current_coordinate_y->createDataContainer(label, mic::types::color_rgba(r, g, b, 180));
-
-		maze_y_coordinate_probilities.push_back((double) 1.0/ importer.maze_height);
 	}//: for
 
-
-
-	// Collect statistics for all mazes - number of appearances of given "patch" (i.e. digit).
-	for (size_t m=0; m<number_of_mazes; m++) {
-		std::shared_ptr < Matrix<int> > maze = mazes[m];
-		std::shared_ptr < mic::types::Vector<double> > patch_probabilities(new mic::types::Vector <double> (number_of_distinctive_patches));
-
-		// Iterate through maze and collect occurences.
-		for (size_t i=0; i<importer.maze_height; i++) {
-			for (size_t j=0; j<importer.maze_width; j++) {
-				short patch_id = (*maze)(i,j);
-				(*patch_probabilities)(patch_id) += 1.0;
-			}//: for j
-		}//: for i
-
-		// Divide by number of maze elements -> probabilities.
-		for (size_t i=0; i<number_of_distinctive_patches; i++) {
-			(*patch_probabilities)(i) /= number_of_mazes;
-		}//: for
-
-		//LOG(LINFO) << (*patch_probabilities);
-
-		maze_patch_probabilities.push_back(patch_probabilities);
-	}//: for m(azes)
-
-	{ // Enter critical section - with the use of scoped lock from AppState!
-		APP_DATA_SYNCHRONIZATION_SCOPED_LOCK();
-
-		// Add labels to chart window with mazes.
-		for (size_t m=0; m<number_of_mazes; m++) {
-			std::string label = "P(m" + std::to_string(m) +")";
-			w_current_maze_chart->addDataToContainer(label, maze_probabilities[m]);
-		}//: for
-
-		// Add labels to chart window with x coordinate.
-		for (size_t x=0; x<importer.maze_width; x++) {
-			std::string label = "P(x" + std::to_string(x) +")";
-			w_current_coordinate_x->addDataToContainer(label, maze_x_coordinate_probilities[x]);
-		}//: for
-
-		// Add labels to chart window with x coordinate.
-		for (size_t y=0; y<importer.maze_height; y++) {
-			std::string label = "P(y" + std::to_string(y) +")";
-			w_current_coordinate_y->addDataToContainer(label, maze_y_coordinate_probilities[y]);
-		}//: for
-
-	}//: end of critical section.
-
-	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
-	// Get current observation.
-	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
-	sense(obs);
-
-	// Update agregated probabilities.
-	updateAggregatedProbabilities(true);
-
 }
+
+
+void storeCurrentStateInDataContainers(bool synchronize_);
+
 
 
 void SimpleDigitMazeApplication::sense (short obs_) {
@@ -262,80 +273,7 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 
 }
 
-void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
-	LOG(LERROR) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
-
-	// For all mazes.
-	for (size_t m=0; m<number_of_mazes; m++) {
-		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
-		Matrix<double> old_pose_probs = (*pos_probs);
-
-/*		LOG(LERROR) << "Przed ruchem";
-		LOG(LERROR) << (*mazes[m]);
-		LOG(LERROR) << (*maze_position_probabilities[m]);*/
-
-		// Iterate through position probabilities and update them.
-		for (size_t y=0; y<importer.maze_height; y++) {
-			for (size_t x=0; x<importer.maze_width; x++) {
-				//std::cout << "i=" << i << " j=" << j << " dx=" << dx_ << " dy=" << dy_ << " (i - dx_) % 3 = " << (i +3 - dx_) % 3 << " (j - dy_) % 3=" << (j + 3 - dy_) % 3 << std::endl;
-				(*pos_probs)((y + importer.maze_height +  ac_.dy()) %importer.maze_height, (x +importer.maze_width +  ac_.dx()) % importer.maze_width) = old_pose_probs(y, x);
-
-			}//: for j
-		}//: for i
-
-		// Display results.
-		LOG(LDEBUG) << (*mazes[m]);
-		LOG(LDEBUG) << (*maze_position_probabilities[m]);
-	}//: for m
-
-	// Perform the REAL move.
-	hidden_y = (hidden_y + importer.maze_height +  ac_.dy()) % importer.maze_height;
-	hidden_x = (hidden_x + importer.maze_width +  ac_.dx()) % importer.maze_width;
-
-	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
-
-}
-
-void SimpleDigitMazeApplication::updateAggregatedProbabilities(bool synchronize_) {
-	// Update maze_probabilities.
-	for (size_t m=0; m<number_of_mazes; m++) {
-		// Reset probability.
-		maze_probabilities[m] = 0;
-		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
-		// Sum probabilities of all positions.
-		for (size_t i=0; i<importer.maze_height; i++) {
-			for (size_t j=0; j<importer.maze_width; j++) {
-				maze_probabilities[m] += (*pos_probs)(i,j);
-			}//: for j
-		}//: for i
-	}//: for m
-
-	// Update maze_x_coordinate_probilities.
-	for (size_t x=0; x<importer.maze_width; x++) {
-		// Reset probability.
-		maze_x_coordinate_probilities[x] = 0;
-		for (size_t m=0; m<number_of_mazes; m++) {
-			std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
-			// Sum probabilities of all positions.
-			for (size_t y=0; y<importer.maze_height; y++) {
-				maze_x_coordinate_probilities[x] += (*pos_probs)(y,x);
-				}//: for y
-		}//: for m
-	}//: for x
-
-
-	// Update maze_y_coordinate_probilities.
-	for (size_t y=0; y<importer.maze_height; y++) {
-		// Reset probability.
-		maze_y_coordinate_probilities[y] = 0;
-		for (size_t m=0; m<number_of_mazes; m++) {
-			std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
-			// Sum probabilities of all positions.
-			for (size_t x=0; x<importer.maze_width; x++) {
-				maze_y_coordinate_probilities[y] += (*pos_probs)(y,x);
-				}//: for x
-		}//: for m
-	}//: for y
+void SimpleDigitMazeApplication::storeCurrentStateInDataContainers(bool synchronize_) {
 
 	if (synchronize_)
 	{ // Enter critical section - with the use of scoped lock from AppState!
@@ -379,6 +317,83 @@ void SimpleDigitMazeApplication::updateAggregatedProbabilities(bool synchronize_
 }
 
 
+void SimpleDigitMazeApplication::updateAggregatedProbabilities() {
+	// Update maze_probabilities.
+	for (size_t m=0; m<number_of_mazes; m++) {
+		// Reset probability.
+		maze_probabilities[m] = 0;
+		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+		// Sum probabilities of all positions.
+		for (size_t i=0; i<importer.maze_height; i++) {
+			for (size_t j=0; j<importer.maze_width; j++) {
+				maze_probabilities[m] += (*pos_probs)(i,j);
+			}//: for j
+		}//: for i
+	}//: for m
+
+	// Update maze_x_coordinate_probilities.
+	for (size_t x=0; x<importer.maze_width; x++) {
+		// Reset probability.
+		maze_x_coordinate_probilities[x] = 0;
+		for (size_t m=0; m<number_of_mazes; m++) {
+			std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+			// Sum probabilities of all positions.
+			for (size_t y=0; y<importer.maze_height; y++) {
+				maze_x_coordinate_probilities[x] += (*pos_probs)(y,x);
+				}//: for y
+		}//: for m
+	}//: for x
+
+
+	// Update maze_y_coordinate_probilities.
+	for (size_t y=0; y<importer.maze_height; y++) {
+		// Reset probability.
+		maze_y_coordinate_probilities[y] = 0;
+		for (size_t m=0; m<number_of_mazes; m++) {
+			std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+			// Sum probabilities of all positions.
+			for (size_t x=0; x<importer.maze_width; x++) {
+				maze_y_coordinate_probilities[y] += (*pos_probs)(y,x);
+				}//: for x
+		}//: for m
+	}//: for y
+
+}
+
+void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
+	LOG(LERROR) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
+
+	// For all mazes.
+	for (size_t m=0; m<number_of_mazes; m++) {
+		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+		Matrix<double> old_pose_probs = (*pos_probs);
+
+/*		LOG(LERROR) << "Przed ruchem";
+		LOG(LERROR) << (*mazes[m]);
+		LOG(LERROR) << (*maze_position_probabilities[m]);*/
+
+		// Iterate through position probabilities and update them.
+		for (size_t y=0; y<importer.maze_height; y++) {
+			for (size_t x=0; x<importer.maze_width; x++) {
+				//std::cout << "i=" << i << " j=" << j << " dx=" << dx_ << " dy=" << dy_ << " (i - dx_) % 3 = " << (i +3 - dx_) % 3 << " (j - dy_) % 3=" << (j + 3 - dy_) % 3 << std::endl;
+				(*pos_probs)((y + importer.maze_height +  ac_.dy()) %importer.maze_height, (x +importer.maze_width +  ac_.dx()) % importer.maze_width) = old_pose_probs(y, x);
+
+			}//: for j
+		}//: for i
+
+		// Display results.
+		LOG(LDEBUG) << (*mazes[m]);
+		LOG(LDEBUG) << (*maze_position_probabilities[m]);
+	}//: for m
+
+	// Perform the REAL move.
+	hidden_y = (hidden_y + importer.maze_height +  ac_.dy()) % importer.maze_height;
+	hidden_x = (hidden_x + importer.maze_width +  ac_.dx()) % importer.maze_width;
+
+	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+
+}
+
 bool SimpleDigitMazeApplication::performSingleStep() {
 	LOG(LWARNING) << "Perform a single step ";
 
@@ -387,13 +402,16 @@ bool SimpleDigitMazeApplication::performSingleStep() {
 		move(A_RANDOM);
 	else
 		move(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)action));
-	//move(A_EAST);
 
 	// Get current observation.
 	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
 	sense(obs);
 
-	updateAggregatedProbabilities(false);
+	// Update state.
+	updateAggregatedProbabilities();
+
+	// Store collected data for visualization/export.
+	storeCurrentStateInDataContainers(false);
 
 	return true;
 }
