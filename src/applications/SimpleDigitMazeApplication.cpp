@@ -90,9 +90,10 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 	mazes = importer.getData();
 
 	// Show mazes.
+	LOG(LINFO) << "Loaded mazes";
 	for (size_t m=0; m<number_of_mazes; m++) {
 		// Display results.
-		LOG(LDEBUG) << (*mazes[m]);
+		LOG(LINFO) << (*mazes[m]);
 	}//: for
 
 	// Assign initial probabilities to all variables (uniform distribution).s
@@ -121,7 +122,7 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 void SimpleDigitMazeApplication::assignInitialProbabilities() {
 
 	// Assign initial probabilities for all mazes/positions.
-	LOG(LDEBUG) << "Initial maze_position_probabilities:";
+	LOG(LINFO) << "Initial maze_position_probabilities:";
 	for (size_t m=0; m<number_of_mazes; m++) {
 
 		std::shared_ptr < Matrix<double> > position_probabilities(new Matrix <double> (importer.maze_height, importer.maze_width));
@@ -133,7 +134,7 @@ void SimpleDigitMazeApplication::assignInitialProbabilities() {
 
 		maze_position_probabilities.push_back(position_probabilities);
 
-		LOG(LDEBUG) << (*maze_position_probabilities[m]);
+		LOG(LINFO) << (*maze_position_probabilities[m]);
 	}//: for m
 
 	// Assign initial probabilities to maze - for visualization.
@@ -168,10 +169,10 @@ void SimpleDigitMazeApplication::assignInitialProbabilities() {
 	}//: for m(azes)
 
 	// Divide by problem dimensions (number of mazes * width * height) -> probabilities.
-	LOG(LDEBUG) << "maze_patch_probabilities:";
+	LOG(LNOTICE) << "maze_patch_probabilities:";
 	for (size_t i=0; i<number_of_distinctive_patches; i++) {
 		maze_patch_probabilities[i] /= problem_dimensions;
-		LOG(LDEBUG) << maze_patch_probabilities[i];
+		LOG(LNOTICE) << maze_patch_probabilities[i];
 	}//: for
 
 }
@@ -267,8 +268,8 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 		}//: for i
 
 		// Display results.
-		LOG(LDEBUG) << (*mazes[m]);
-		LOG(LDEBUG) << (*maze_position_probabilities[m]);
+		LOG(LNOTICE) << (*mazes[m]);
+		LOG(LNOTICE) << (*maze_position_probabilities[m]);
 	}//: for m
 
 }
@@ -361,7 +362,7 @@ void SimpleDigitMazeApplication::updateAggregatedProbabilities() {
 }
 
 void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
-	LOG(LERROR) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
+	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
 
 	// For all mazes.
 	for (size_t m=0; m<number_of_mazes; m++) {
@@ -382,20 +383,20 @@ void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
 		}//: for i
 
 		// Display results.
-		LOG(LDEBUG) << (*mazes[m]);
-		LOG(LDEBUG) << (*maze_position_probabilities[m]);
+		LOG(LNOTICE) << (*mazes[m]);
+		LOG(LNOTICE) << (*maze_position_probabilities[m]);
 	}//: for m
 
 	// Perform the REAL move.
 	hidden_y = (hidden_y + importer.maze_height +  ac_.dy()) % importer.maze_height;
 	hidden_x = (hidden_x + importer.maze_width +  ac_.dx()) % importer.maze_width;
 
-	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+	LOG(LINFO) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
 
 }
 
 bool SimpleDigitMazeApplication::performSingleStep() {
-	LOG(LWARNING) << "Perform a single step ";
+	LOG(LINFO) << "Performing a single step ";
 
 	// Perform move.
 	if (action == (short)-1)
