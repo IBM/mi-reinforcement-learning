@@ -10,12 +10,12 @@
 
 #include <data_io/Importer.hpp>
 
-#include <types/matrix.h>
+#include <types/MatrixTypes.hpp>
 
 namespace mic {
 namespace data_io {
 
-class MazeMatrixImporter : public mic::data_io::Importer< mic::types::Matrix<int> , int> {
+class MazeMatrixImporter : public mic::data_io::Importer< mic::types::matrixi_t , int> {
 public:
 	/*!
 	 * Constructor. Sets MNIST image default properties. Registers properties.
@@ -53,12 +53,6 @@ protected:
 	mic::configuration::Property<std::string> data_filename;
 
 };
-
-/*!
- * \brief The matrix-int pair returned by the Importer get(Random/Next)Sample method.
- * \author tkornuta
- */
-typedef std::pair< std::shared_ptr< mic::types::Matrix<int> >, std::shared_ptr<int> > matrix_int_pair_t;
 
 } /* namespace data_io */
 } /* namespace mic */

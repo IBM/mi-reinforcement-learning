@@ -13,8 +13,7 @@
 #include <opengl/visualization/WindowChart.hpp>
 using namespace mic::opengl::visualization;
 
-#include <types/matrix.h>
-#include <types/vector.h>
+#include <types/MatrixTypes.hpp>
 
 #include <data_io/MazeMatrixImporter.hpp>
 
@@ -92,7 +91,6 @@ protected:
 	 */
 	void updateAggregatedProbabilities();
 
-
 private:
 
 	/// Window for displaying chart with statistics on current maze number.
@@ -108,10 +106,10 @@ private:
 	mic::data_io::MazeMatrixImporter importer;
 
 	/// Vector of mazes - pointer to vector of mazes returned by importer.
-	std::vector<std::shared_ptr< Matrix<int> > > mazes;
+	std::vector<mic::types::matrixi_ptr_t> mazes;
 
 	/// Variable storing the probability that we are in a given maze position.
-	std::vector<std::shared_ptr< Matrix<double> > > maze_position_probabilities;
+	std::vector<mic::types::matrixd_ptr_t> maze_position_probabilities;
 
 
 	/// Variable storing the probability that we are currently moving in/observing a given maze.

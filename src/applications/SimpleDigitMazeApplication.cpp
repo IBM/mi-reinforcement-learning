@@ -50,7 +50,7 @@ SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) :
 
 
 SimpleDigitMazeApplication::~SimpleDigitMazeApplication() {
-	LOG(LINFO) << "Empty for now";
+
 }
 
 
@@ -90,10 +90,10 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 	mazes = importer.getData();
 
 	// Show mazes.
-	LOG(LINFO) << "Loaded mazes";
+	LOG(LNOTICE) << "Loaded mazes";
 	for (size_t m=0; m<number_of_mazes; m++) {
 		// Display results.
-		LOG(LINFO) << (*mazes[m]);
+		LOG(LNOTICE) << (*mazes[m]);
 	}//: for
 
 	// Assign initial probabilities to all variables (uniform distribution).s
@@ -122,10 +122,10 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 void SimpleDigitMazeApplication::assignInitialProbabilities() {
 
 	// Assign initial probabilities for all mazes/positions.
-	LOG(LINFO) << "Initial maze_position_probabilities:";
+	LOG(LNOTICE) << "Initial maze_position_probabilities:";
 	for (size_t m=0; m<number_of_mazes; m++) {
 
-		std::shared_ptr < Matrix<double> > position_probabilities(new Matrix <double> (importer.maze_height, importer.maze_width));
+		mic::types::matrixd_ptr_t position_probabilities(new mic::types::matrixd_t (importer.maze_height, importer.maze_width));
 		for (size_t i=0; i<importer.maze_height; i++) {
 			for (size_t j=0; j<importer.maze_width; j++) {
 				(*position_probabilities)(i,j) = (double) 1.0/(problem_dimensions);
@@ -134,7 +134,7 @@ void SimpleDigitMazeApplication::assignInitialProbabilities() {
 
 		maze_position_probabilities.push_back(position_probabilities);
 
-		LOG(LINFO) << (*maze_position_probabilities[m]);
+		LOG(LNOTICE) << (*maze_position_probabilities[m]);
 	}//: for m
 
 	// Assign initial probabilities to maze - for visualization.
@@ -156,7 +156,7 @@ void SimpleDigitMazeApplication::assignInitialProbabilities() {
 	// Collect statistics for all mazes - number of appearances of a given "patch" (i.e. digit).
 	maze_patch_probabilities.resize(number_of_distinctive_patches);
 	for (size_t m=0; m<number_of_mazes; m++) {
-		std::shared_ptr < Matrix<int> > maze = mazes[m];
+		mic::types::matrixi_ptr_t maze = mazes[m];
 
 		// Iterate through maze and collect occurrences.
 		for (size_t i=0; i<importer.maze_height; i++) {
@@ -224,10 +224,6 @@ void SimpleDigitMazeApplication::createDataContainers() {
 }
 
 
-void storeCurrentStateInDataContainers(bool synchronize_);
-
-
-
 void SimpleDigitMazeApplication::sense (short obs_) {
 	LOG(LINFO) << "Current observation=" << obs_;
 
@@ -236,8 +232,8 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 	// For all mazes.
 	double prob_sum = 0;
 	for (size_t m=0; m<number_of_mazes; m++) {
-		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
-		std::shared_ptr < Matrix<int> > maze = mazes[m];
+		mic::types::matrixd_ptr_t pos_probs = maze_position_probabilities[m];
+		mic::types::matrixi_ptr_t maze = mazes[m];
 
 		// Display results.
 /*		LOG(LERROR) << "Przed updatem";
@@ -260,7 +256,7 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 	prob_sum = 1/prob_sum;
 	// Normalize probabilities for all mazes.
 	for (size_t m=0; m<number_of_mazes; m++) {
-		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+		mic::types::matrixd_ptr_t pos_probs = maze_position_probabilities[m];
 		for (size_t i=0; i<importer.maze_height; i++) {
 			for (size_t j=0; j<importer.maze_width; j++) {
 				(*pos_probs)(i,j) *= prob_sum;
@@ -323,7 +319,7 @@ void SimpleDigitMazeApplication::updateAggregatedProbabilities() {
 	for (size_t m=0; m<number_of_mazes; m++) {
 		// Reset probability.
 		maze_probabilities[m] = 0;
-		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+		mic::types::matrixd_ptr_t pos_probs = maze_position_probabilities[m];
 		// Sum probabilities of all positions.
 		for (size_t i=0; i<importer.maze_height; i++) {
 			for (size_t j=0; j<importer.maze_width; j++) {
@@ -337,7 +333,7 @@ void SimpleDigitMazeApplication::updateAggregatedProbabilities() {
 		// Reset probability.
 		maze_x_coordinate_probilities[x] = 0;
 		for (size_t m=0; m<number_of_mazes; m++) {
-			std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+			mic::types::matrixd_ptr_t pos_probs = maze_position_probabilities[m];
 			// Sum probabilities of all positions.
 			for (size_t y=0; y<importer.maze_height; y++) {
 				maze_x_coordinate_probilities[x] += (*pos_probs)(y,x);
@@ -351,7 +347,7 @@ void SimpleDigitMazeApplication::updateAggregatedProbabilities() {
 		// Reset probability.
 		maze_y_coordinate_probilities[y] = 0;
 		for (size_t m=0; m<number_of_mazes; m++) {
-			std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
+			mic::types::matrixd_ptr_t pos_probs = maze_position_probabilities[m];
 			// Sum probabilities of all positions.
 			for (size_t x=0; x<importer.maze_width; x++) {
 				maze_y_coordinate_probilities[y] += (*pos_probs)(y,x);
@@ -366,8 +362,8 @@ void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
 
 	// For all mazes.
 	for (size_t m=0; m<number_of_mazes; m++) {
-		std::shared_ptr < Matrix<double> > pos_probs = maze_position_probabilities[m];
-		Matrix<double> old_pose_probs = (*pos_probs);
+		mic::types::matrixd_ptr_t pos_probs = maze_position_probabilities[m];
+		mic::types::matrixd_t old_pose_probs = (*pos_probs);
 
 /*		LOG(LERROR) << "Przed ruchem";
 		LOG(LERROR) << (*mazes[m]);

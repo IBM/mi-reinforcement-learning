@@ -25,10 +25,6 @@ find_package(Boost 1.58 REQUIRED COMPONENTS system thread random)
 # Try to include Boost as system directory to suppress it's warnings
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
-# Find OpenBLAS package
-find_package( OpenBLAS REQUIRED )
-include_directories(${OpenBLAS_INCLUDE_DIR})
-
 # Find GLUT package
 find_package(GLUT REQUIRED)
 include_directories(${GLUT_INCLUDE_DIRS})
