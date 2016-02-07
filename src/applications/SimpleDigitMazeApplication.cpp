@@ -10,6 +10,9 @@
 #include <application/ApplicationFactory.hpp>
 
 #include <random>
+#include  <data_utils/RandomGenerator.hpp>
+
+
 namespace mic {
 namespace application {
 
@@ -79,11 +82,24 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 	problem_dimensions = number_of_mazes * importer.maze_width * importer.maze_height;
 	number_of_distinctive_patches = 10;
 
-	// "Truncate" hidden location to maze number/width/height.
-	hidden_maze_number = hidden_maze_number % number_of_mazes;
-	hidden_x = hidden_x % importer.maze_width;
-	hidden_y = hidden_y % importer.maze_height;
-	LOG(LWARNING) << "After truncation: hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+	// Get "hidden" maze number.
+	if ((int)hidden_maze_number == -1) {
+		hidden_maze_number = RAN_GEN->uniRandInt(0,number_of_mazes-1);
+	} else
+		hidden_maze_number = hidden_maze_number % number_of_mazes;
+
+	// Get "hidden" maze x coordinate.
+	if ((int)hidden_x == -1) {
+		hidden_x = RAN_GEN->uniRandInt(0,importer.maze_width-1);
+	} else
+		hidden_x = hidden_x % importer.maze_width;
+
+	// Get "hidden" maze y coordinate.
+if ((int)hidden_y == -1) {
+	hidden_y = RAN_GEN->uniRandInt(0,importer.maze_height-1);
+	} else
+		hidden_y = hidden_y % importer.maze_height;
+	LOG(LWARNING) << "After truncation/random: hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
 
 
 	// Set pointer to data.
@@ -93,7 +109,7 @@ void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
 	LOG(LNOTICE) << "Loaded mazes";
 	for (size_t m=0; m<number_of_mazes; m++) {
 		// Display results.
-		LOG(LNOTICE) << (*mazes[m]);
+		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (*mazes[m]);
 	}//: for
 
 	// Assign initial probabilities to all variables (uniform distribution).s
@@ -134,7 +150,7 @@ void SimpleDigitMazeApplication::assignInitialProbabilities() {
 
 		maze_position_probabilities.push_back(position_probabilities);
 
-		LOG(LNOTICE) << (*maze_position_probabilities[m]);
+		LOG(LNOTICE) << "maze_position_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
 	}//: for m
 
 	// Assign initial probabilities to maze - for visualization.
@@ -172,7 +188,7 @@ void SimpleDigitMazeApplication::assignInitialProbabilities() {
 	LOG(LNOTICE) << "maze_patch_probabilities:";
 	for (size_t i=0; i<number_of_distinctive_patches; i++) {
 		maze_patch_probabilities[i] /= problem_dimensions;
-		LOG(LNOTICE) << maze_patch_probabilities[i];
+		LOG(LNOTICE) << "maze_patch_prob(" <<i<<"):\n" << maze_patch_probabilities[i];
 	}//: for
 
 }
@@ -264,8 +280,8 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 		}//: for i
 
 		// Display results.
-		LOG(LNOTICE) << (*mazes[m]);
-		LOG(LNOTICE) << (*maze_position_probabilities[m]);
+		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (*mazes[m]);
+		LOG(LNOTICE) << "maze_pose_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
 	}//: for m
 
 }
@@ -379,8 +395,8 @@ void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
 		}//: for i
 
 		// Display results.
-		LOG(LNOTICE) << (*mazes[m]);
-		LOG(LNOTICE) << (*maze_position_probabilities[m]);
+		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (*mazes[m]);
+		LOG(LNOTICE) << "maze_pose_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
 	}//: for m
 
 	// Perform the REAL move.
@@ -391,14 +407,58 @@ void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
 
 }
 
+mic::types::Action2DInterface SimpleDigitMazeApplication::mostInfrequentPatchActionSelection() {
+	double most_probable_rarest_patch_prob = 0.0;
+	size_t most_probable_rarest_patch_action = -1;
+
+	// Calculate probabilities of all actions.
+	for (size_t act_t=0; act_t < 4; act_t++) {
+		mic::types::NESWAction ac((NESW_action_type_t)act_t);
+
+		// Check the score of a given action.
+		for (size_t m=0; m<number_of_mazes; m++) {
+
+			for (size_t y=0; y<importer.maze_height; y++) {
+				for (size_t x=0; x<importer.maze_width; x++) {
+					// Check result of the next motion.
+					// Compute resulting coordinates.
+					size_t new_y = (y + importer.maze_height + ac.dy()) % importer.maze_height;
+					size_t new_x = (x + importer.maze_width + ac.dx()) % importer.maze_width;
+					// Get image patch.
+					short patch = (*mazes[m])(new_y, new_x);
+					std::cout << "maze [" << m << "] (y=" << y <<",x="<< x <<") move="<< act_t << "=> (y+dy=" << new_y << ",x+dx=" << new_x <<" patch=" << patch << std::endl;
+					// Get patch probability.
+					double patch_prob = maze_patch_probabilities[patch];
+					// Check the action result.
+					double maze_patch_prob = maze_probabilities[m] * maze_x_coordinate_probilities[x] * maze_y_coordinate_probilities[y] * (1- patch_prob);
+					std::cout << "patch_prob= " << patch_prob << " maze_patch_prob=" << maze_patch_prob << std::endl;
+					if (maze_patch_prob > most_probable_rarest_patch_prob) {
+						most_probable_rarest_patch_prob = maze_patch_prob;
+						most_probable_rarest_patch_action = act_t;
+						std::cout << "found most probable action: " << act_t << std::endl;
+					}
+				}//: for j
+			}//: for i
+
+		}//: for each maze
+	}//: for each action type
+
+	mic::types::NESWAction a((NESW_action_type_t) most_probable_rarest_patch_action);
+	return a;
+}
+
 bool SimpleDigitMazeApplication::performSingleStep() {
 	LOG(LINFO) << "Performing a single step ";
 
 	// Perform move.
-	if (action == (short)-1)
+	if (action == (short)-2)
 		move(A_RANDOM);
+	else if (action == (short)-1)
+		move(mostInfrequentPatchActionSelection());
 	else
 		move(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)action));
+
+
 
 	// Get current observation.
 	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);

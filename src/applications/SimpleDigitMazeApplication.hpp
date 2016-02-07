@@ -91,6 +91,11 @@ protected:
 	 */
 	void updateAggregatedProbabilities();
 
+	/*!
+	 * Selects action based on analysis of current state and patch distributions.
+	 */
+	mic::types::Action2DInterface mostInfrequentPatchActionSelection();
+
 private:
 
 	/// Window for displaying chart with statistics on current maze number.
