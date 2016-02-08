@@ -407,9 +407,9 @@ void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
 
 }
 
-mic::types::Action2DInterface SimpleDigitMazeApplication::mostInfrequentPatchActionSelection() {
-	double most_probable_rarest_patch_prob = 0.0;
-	size_t most_probable_rarest_patch_action = -1;
+mic::types::Action2DInterface SimpleDigitMazeApplication::mostUniquePatchActionSelection() {
+	double best_action_utility = 0.0;
+	size_t best_action = -1;
 
 	// Calculate probabilities of all actions.
 	for (size_t act_t=0; act_t < 4; act_t++) {
@@ -426,16 +426,16 @@ mic::types::Action2DInterface SimpleDigitMazeApplication::mostInfrequentPatchAct
 					size_t new_x = (x + importer.maze_width + ac.dx()) % importer.maze_width;
 					// Get image patch.
 					short patch = (*mazes[m])(new_y, new_x);
-					std::cout << "maze [" << m << "] (y=" << y <<",x="<< x <<") move="<< act_t << "=> (y+dy=" << new_y << ",x+dx=" << new_x <<" patch=" << patch << std::endl;
+					std::cout << "maze [" << m << "] (y=" << y <<",x="<< x <<") move="<< act_t << "=> (y+dy=" << new_y << ",x+dx=" << new_x <<") patch=" << patch << std::endl;
 					// Get patch probability.
 					double patch_prob = maze_patch_probabilities[patch];
-					// Check the action result.
-					double maze_patch_prob = maze_probabilities[m] * maze_x_coordinate_probilities[x] * maze_y_coordinate_probilities[y] * (1- patch_prob);
-					std::cout << "patch_prob= " << patch_prob << " maze_patch_prob=" << maze_patch_prob << std::endl;
-					if (maze_patch_prob > most_probable_rarest_patch_prob) {
-						most_probable_rarest_patch_prob = maze_patch_prob;
-						most_probable_rarest_patch_action = act_t;
-						std::cout << "found most probable action: " << act_t << std::endl;
+					// Check the action utility.
+					double action_utility = maze_probabilities[m] * maze_x_coordinate_probilities[x] * maze_y_coordinate_probilities[y] * (1- patch_prob);
+					std::cout << "patch_prob= " << patch_prob << " action_utility=" << action_utility << std::endl;
+					if (action_utility > best_action_utility) {
+						best_action_utility = action_utility;
+						best_action = act_t;
+						std::cout << "found action " << best_action << " with biggest utility " << best_action_utility << std::endl;
 					}
 				}//: for j
 			}//: for i
@@ -443,18 +443,77 @@ mic::types::Action2DInterface SimpleDigitMazeApplication::mostInfrequentPatchAct
 		}//: for each maze
 	}//: for each action type
 
-	mic::types::NESWAction a((NESW_action_type_t) most_probable_rarest_patch_action);
+	mic::types::NESWAction a((NESW_action_type_t) best_action);
 	return a;
 }
+
+
+mic::types::Action2DInterface SimpleDigitMazeApplication::sumOfMostUniquePatchesActionSelection() {
+	mic::types::vectord_t action_utilities(4);
+	action_utilities.setZero();
+
+
+	// Calculate probabilities of all actions.
+	for (size_t act_t=0; act_t < 4; act_t++) {
+		mic::types::NESWAction ac((NESW_action_type_t)act_t);
+
+		// Check the score of a given action.
+		for (size_t m=0; m<number_of_mazes; m++) {
+
+			for (size_t y=0; y<importer.maze_height; y++) {
+				for (size_t x=0; x<importer.maze_width; x++) {
+					// Check result of the next motion.
+					// Compute resulting coordinates.
+					size_t new_y = (y + importer.maze_height + ac.dy()) % importer.maze_height;
+					size_t new_x = (x + importer.maze_width + ac.dx()) % importer.maze_width;
+					// Get image patch.
+					short patch = (*mazes[m])(new_y, new_x);
+					std::cout << "maze [" << m << "] (y=" << y <<",x="<< x <<") move="<< act_t << "=> (y+dy=" << new_y << ",x+dx=" << new_x <<") patch=" << patch << std::endl;
+					// Get patch probability.
+					double patch_prob = maze_patch_probabilities[patch];
+					// Check the action result.
+					double tmp_action_utility = maze_probabilities[m] * maze_x_coordinate_probilities[x] * maze_y_coordinate_probilities[y] * (1- patch_prob);
+					std::cout << "patch_prob= " << patch_prob << " action_utility=" << tmp_action_utility << std::endl;
+
+					// Add action utility.
+					action_utilities(act_t) += tmp_action_utility;
+				}//: for j
+			}//: for i
+
+		}//: for each maze
+	}//: for each action type
+
+	// Select best action
+	size_t best_action = -1;
+	double best_action_utility = 0.0;
+	for (size_t act_t=0; act_t < 4; act_t++) {
+		if (action_utilities(act_t) > best_action_utility) {
+			best_action_utility = action_utilities(act_t);
+			best_action = act_t;
+			std::cout << "found action " << best_action << " with biggest utility " << best_action_utility << std::endl;
+		}
+
+	}//: for each action type
+
+
+	mic::types::NESWAction a((NESW_action_type_t) best_action);
+	return a;
+}
+
+
 
 bool SimpleDigitMazeApplication::performSingleStep() {
 	LOG(LINFO) << "Performing a single step ";
 
+	// epsilon-greedy action selection.
+
 	// Perform move.
-	if (action == (short)-2)
+	if (action == (short)-3)
 		move(A_RANDOM);
+	else if (action == (short)-2)
+		move(sumOfMostUniquePatchesActionSelection());
 	else if (action == (short)-1)
-		move(mostInfrequentPatchActionSelection());
+		move(mostUniquePatchActionSelection());
 	else
 		move(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)action));
 

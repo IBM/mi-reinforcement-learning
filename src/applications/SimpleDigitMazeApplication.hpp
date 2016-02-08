@@ -93,8 +93,16 @@ protected:
 
 	/*!
 	 * Selects action based on analysis of current state and patch distributions.
+	 * The functions tries to find the maximum action utility, taking into consideration probabilites of being in given maze in given x,y-position.
 	 */
-	mic::types::Action2DInterface mostInfrequentPatchActionSelection();
+	mic::types::Action2DInterface mostUniquePatchActionSelection();
+
+
+	/*!
+	 * Selects action based on analysis of current state and patch distributions.
+	 * The functions finds the maximum action usefulness, suming the results of taking given aciton taking into accoung the probabilites of being in given maze in given x,y-position.
+	 */
+	mic::types::Action2DInterface sumOfMostUniquePatchesActionSelection();
 
 private:
 
@@ -156,6 +164,9 @@ private:
 	/// Property: performed action (0-3: NESW, -1: random).
 	mic::configuration::Property<short> action;
 
+
+	/// Property: variable denoting epsilon in aciton selection (the probability "below" which a random action will be selected).
+	mic::configuration::Property<double> epsilon;
 };
 
 } /* namespace applications */
