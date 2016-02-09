@@ -13,6 +13,6 @@
 		"action": "-2"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/3mazes-3x3.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/1000mazes-28x28.csv"
 	}
 }
