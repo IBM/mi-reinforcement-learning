@@ -31,19 +31,28 @@ HistogramFilterMazeLocalization::HistogramFilterMazeLocalization(std::string nod
 		hidden_maze_number("hidden_maze", 0),
 		hidden_x("hidden_x", 0),
 		hidden_y("hidden_y", 0),
+		action("action", -1),
+		epsilon("epsilon", 0.0),
 		hit_factor("hit_factor", 0.6),
 		miss_factor("miss_factor", 0.2),
-		action("action", -1),
-		epsilon("epsilon", 0.0)
+		exact_move_probability("exact_move_probability", 1.0),
+		overshoot_move_probability("overshoot_move_probability", 0.0),
+		undershoot_move_probability("undershoot_move_probability", 0.0)
+
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(hidden_maze_number);
 	registerProperty(hidden_x);
 	registerProperty(hidden_y);
-	registerProperty(hit_factor);
-	registerProperty(miss_factor);
 	registerProperty(action);
 	registerProperty(epsilon);
+
+	registerProperty(hit_factor);
+	registerProperty(miss_factor);
+	registerProperty(exact_move_probability);
+	registerProperty(overshoot_move_probability);
+	registerProperty(undershoot_move_probability);
+
 	LOG(LINFO) << "Properties registered";
 }
 
@@ -403,6 +412,49 @@ void HistogramFilterMazeLocalization::move (mic::types::Action2DInterface ac_) {
 
 }
 
+void HistogramFilterMazeLocalization::probabilisticMove (mic::types::Action2DInterface ac_) {
+
+	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
+
+	// For all mazes.
+	for (size_t m=0; m<number_of_mazes; m++) {
+		mic::types::matrixd_ptr_t pos_probs = maze_position_probabilities[m];
+		// Make a copy of probabilities.
+		mic::types::matrixd_t old_pose_probs = (*pos_probs);
+		// Set probabilities to zero.
+		(*pos_probs).setZero();
+
+		// Iterate through position probabilities and update them.
+		for (size_t y=0; y<importer.maze_height; y++) {
+			for (size_t x=0; x<importer.maze_width; x++) {
+				size_t exact_y = (y + importer.maze_height +  ac_.dy()) %importer.maze_height;
+				size_t overshoot_y = (y + importer.maze_height +  ac_.dy() + 1) %importer.maze_height;
+				size_t undershoot_y = (y + importer.maze_height +  ac_.dy() - 1) %importer.maze_height;
+
+				size_t exact_x = (x + importer.maze_width +  ac_.dx()) %importer.maze_width;
+				size_t overshoot_x = (x + importer.maze_width +  ac_.dx() + 1) %importer.maze_width;
+				size_t undershoot_x = (x + importer.maze_width +  ac_.dx() - 1) %importer.maze_width;
+
+				(*pos_probs)(exact_y, exact_x) += exact_move_probability  * old_pose_probs(y, x);
+				(*pos_probs)(overshoot_y, overshoot_x) += overshoot_move_probability  * old_pose_probs(y, x);
+				(*pos_probs)(undershoot_y, undershoot_x) += undershoot_move_probability  * old_pose_probs(y, x);
+
+			}//: for j
+		}//: for i
+
+		// Display results.
+		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (*mazes[m]);
+		LOG(LNOTICE) << "maze_pose_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
+	}//: for m
+
+	// Perform the REAL move.
+	hidden_y = (hidden_y + importer.maze_height +  ac_.dy()) % importer.maze_height;
+	hidden_x = (hidden_x + importer.maze_width +  ac_.dx()) % importer.maze_width;
+
+	LOG(LINFO) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+}
+
+
 mic::types::Action2DInterface HistogramFilterMazeLocalization::mostUniquePatchActionSelection() {
 	double best_action_utility = 0.0;
 	size_t best_action = -1;
@@ -504,17 +556,17 @@ bool HistogramFilterMazeLocalization::performSingleStep() {
 	// epsilon-greedy action selection.
 	 if ((double)epsilon > 0) {
 		 if (RAN_GEN->uniRandReal() < (double)epsilon)
-				move(A_RANDOM);
+			 probabilisticMove(A_RANDOM);
 	 } else {
 			// Perform move.
 			if (action == (short)-3)
-				move(A_RANDOM);
+				probabilisticMove(A_RANDOM);
 			else if (action == (short)-2)
-				move(sumOfMostUniquePatchesActionSelection());
+				probabilisticMove(sumOfMostUniquePatchesActionSelection());
 			else if (action == (short)-1)
-				move(mostUniquePatchActionSelection());
+				probabilisticMove(mostUniquePatchActionSelection());
 			else
-				move(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)action));
+				probabilisticMove(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)action));
 	 }//: else
 
 

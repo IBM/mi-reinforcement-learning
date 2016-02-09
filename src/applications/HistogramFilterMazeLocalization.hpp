@@ -64,11 +64,16 @@ protected:
 	void sense (short obs_);
 
 	/*!
-	 * Perform "probabilistic" move.
-	 * @param dy_ Step along y
-	 * @param dx_ Step along x
+	 * Perform "deterministic" move.
+	 * @param ac_ Performed action.
 	 */
 	void move (mic::types::Action2DInterface ac_);
+
+	/*!
+	 * Perform "probabilistic" move.
+	 * @param ac_ Performed action.
+	 */
+	void probabilisticMove (mic::types::Action2DInterface ac_);
 
 	/*!
 	 * Assigns initial probabilities (uniform distribution) to all variables.
@@ -155,18 +160,27 @@ private:
 	/// Problem dimensions - number of mazes * their width * their height.
 	int problem_dimensions;
 
+	/// Property: performed action (0-3: NESW, -3: random, -2: sumOfMostUniquePatchesActionSelection, -1: mostUniquePatchActionSelection).
+	mic::configuration::Property<short> action;
+
+	/// Property: variable denoting epsilon in aciton selection (the probability "below" which a random action will be selected).
+	mic::configuration::Property<double> epsilon;
+
 	/// Property: variable denoting the hit factor (the gain when the observation coincides with current position).
 	mic::configuration::Property<double> hit_factor;
 
 	/// Property: variable denoting the miss factor (the gain when the observation does not coincide with current position).
 	mic::configuration::Property<double> miss_factor;
 
-	/// Property: performed action (0-3: NESW, -3: random, -2: sumOfMostUniquePatchesActionSelection, -1: mostUniquePatchActionSelection).
-	mic::configuration::Property<short> action;
+	/// Property: variable storing the probability that we made the exact move (x+dx).
+	mic::configuration::Property<double> exact_move_probability;
 
+	/// Property: variable storing the probability that we made the "overshoot" move (d+dx+1).
+	mic::configuration::Property<double> overshoot_move_probability;
 
-	/// Property: variable denoting epsilon in aciton selection (the probability "below" which a random action will be selected).
-	mic::configuration::Property<double> epsilon;
+	/// Property: variable storing the probability that we made the "undershoot" move (d+dx-1).
+	mic::configuration::Property<double> undershoot_move_probability;
+
 };
 
 } /* namespace applications */

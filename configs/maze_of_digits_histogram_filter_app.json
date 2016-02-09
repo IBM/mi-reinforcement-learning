@@ -1,18 +1,21 @@
 {
 	"app_state": {
 		"application_sleep_interval": "1000",
-		"single_step_mode": 0
+		"single_step_mode": 1
 	},
 	"maze_of_digits_histogram_filter_app": {
 		"hidden_maze": "-1",
 		"hidden_x": "-1",
 		"hidden_y": "-1",
+		"epsilon": "0.2",
+		"action": "-2",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
-		"epsilon": "0.2",
-		"action": "-2"
+		"exact_move_probability": "0.8",
+		"overshoot_move_probability": "0.1",
+		"undershoot_move_probability": "0.1"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/3mazes-3x3.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/1maze-3x5.csv"
 	}
 }
