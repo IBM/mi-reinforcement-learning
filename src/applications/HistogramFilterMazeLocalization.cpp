@@ -1,16 +1,15 @@
 /*!
- * \file TestApplication.cpp
- * \brief File contains definition of methods of simple exemplary application.
+ * \file HistogramFilterMazeLocalization.cpp
+ * \brief File contains definition of methods of histogram filter based maze localization application.
  * \author tkornut
  * \date Jan 27, 2016
  */
 
-#include <applications/SimpleDigitMazeApplication.hpp>
-
 #include <application/ApplicationFactory.hpp>
 
-#include <random>
-#include  <data_utils/RandomGenerator.hpp>
+//#include <random>
+#include <data_utils/RandomGenerator.hpp>
+#include <applications/HistogramFilterMazeLocalization.hpp>
 
 
 namespace mic {
@@ -21,14 +20,14 @@ namespace application {
  * \author tkornuta
  */
 void RegisterApplication (void) {
-	REGISTER_APPLICATION(mic::applications::SimpleDigitMazeApplication);
+	REGISTER_APPLICATION(mic::applications::HistogramFilterMazeLocalization);
 }
 
 } /* namespace application */
 
 namespace applications {
 
-SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) : OpenGLApplication(node_name_),
+HistogramFilterMazeLocalization::HistogramFilterMazeLocalization(std::string node_name_) : OpenGLApplication(node_name_),
 		hidden_maze_number("hidden_maze", 0),
 		hidden_x("hidden_x", 0),
 		hidden_y("hidden_y", 0),
@@ -45,21 +44,16 @@ SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) :
 	registerProperty(miss_factor);
 	registerProperty(action);
 	registerProperty(epsilon);
-
 	LOG(LINFO) << "Properties registered";
+}
 
-	// Turn single step on.
-	APP_STATE->pressSingleStep();
+
+HistogramFilterMazeLocalization::~HistogramFilterMazeLocalization() {
 
 }
 
 
-SimpleDigitMazeApplication::~SimpleDigitMazeApplication() {
-
-}
-
-
-void SimpleDigitMazeApplication::initialize(int argc, char* argv[]) {
+void HistogramFilterMazeLocalization::initialize(int argc, char* argv[]) {
 	LOG(LSTATUS) << "In here you should initialize Glut and create all OpenGL windows";
 
 	// Initialize GLUT! :]
@@ -73,7 +67,7 @@ void SimpleDigitMazeApplication::initialize(int argc, char* argv[]) {
 
 }
 
-void SimpleDigitMazeApplication::initializePropertyDependentVariables() {
+void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 
 	// Import mazes.
 	if (!importer.importData())
@@ -137,7 +131,7 @@ if ((int)hidden_y == -1) {
 }
 
 
-void SimpleDigitMazeApplication::assignInitialProbabilities() {
+void HistogramFilterMazeLocalization::assignInitialProbabilities() {
 
 	// Assign initial probabilities for all mazes/positions.
 	LOG(LNOTICE) << "Initial maze_position_probabilities:";
@@ -195,7 +189,7 @@ void SimpleDigitMazeApplication::assignInitialProbabilities() {
 
 }
 
-void SimpleDigitMazeApplication::createDataContainers() {
+void HistogramFilterMazeLocalization::createDataContainers() {
 	// Random device used for generation of colors.
 	std::random_device rd;
 	std::mt19937_64 rng_mt19937_64(rd());
@@ -242,7 +236,7 @@ void SimpleDigitMazeApplication::createDataContainers() {
 }
 
 
-void SimpleDigitMazeApplication::sense (short obs_) {
+void HistogramFilterMazeLocalization::sense (short obs_) {
 	LOG(LINFO) << "Current observation=" << obs_;
 
 	// Compute posterior distribution given Z (observation) - total probability.
@@ -288,7 +282,7 @@ void SimpleDigitMazeApplication::sense (short obs_) {
 
 }
 
-void SimpleDigitMazeApplication::storeCurrentStateInDataContainers(bool synchronize_) {
+void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool synchronize_) {
 
 	if (synchronize_)
 	{ // Enter critical section - with the use of scoped lock from AppState!
@@ -332,7 +326,7 @@ void SimpleDigitMazeApplication::storeCurrentStateInDataContainers(bool synchron
 }
 
 
-void SimpleDigitMazeApplication::updateAggregatedProbabilities() {
+void HistogramFilterMazeLocalization::updateAggregatedProbabilities() {
 	// Update maze_probabilities.
 	for (size_t m=0; m<number_of_mazes; m++) {
 		// Reset probability.
@@ -375,7 +369,7 @@ void SimpleDigitMazeApplication::updateAggregatedProbabilities() {
 
 }
 
-void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
+void HistogramFilterMazeLocalization::move (mic::types::Action2DInterface ac_) {
 	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
 
 	// For all mazes.
@@ -409,7 +403,7 @@ void SimpleDigitMazeApplication::move (mic::types::Action2DInterface ac_) {
 
 }
 
-mic::types::Action2DInterface SimpleDigitMazeApplication::mostUniquePatchActionSelection() {
+mic::types::Action2DInterface HistogramFilterMazeLocalization::mostUniquePatchActionSelection() {
 	double best_action_utility = 0.0;
 	size_t best_action = -1;
 
@@ -450,7 +444,7 @@ mic::types::Action2DInterface SimpleDigitMazeApplication::mostUniquePatchActionS
 }
 
 
-mic::types::Action2DInterface SimpleDigitMazeApplication::sumOfMostUniquePatchesActionSelection() {
+mic::types::Action2DInterface HistogramFilterMazeLocalization::sumOfMostUniquePatchesActionSelection() {
 	mic::types::vectord_t action_utilities(4);
 	action_utilities.setZero();
 
@@ -504,7 +498,7 @@ mic::types::Action2DInterface SimpleDigitMazeApplication::sumOfMostUniquePatches
 
 
 
-bool SimpleDigitMazeApplication::performSingleStep() {
+bool HistogramFilterMazeLocalization::performSingleStep() {
 	LOG(LINFO) << "Performing a single step ";
 
 	// epsilon-greedy action selection.

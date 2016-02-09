@@ -21,22 +21,22 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl")
 set(DEFAULT_SDR_LENGTH 1024 CACHE STRING "Default length of SDR")
 add_definitions(-DDEFAULT_SDR_LENGTH=${DEFAULT_SDR_LENGTH})
 
-set(BUILD_APP_MAZE_OF_DIGITS_SIMPLE ON CACHE BOOL "Build the application implementing simple, probability-based solution to maze-of-digits problem.")
+set(BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE ON CACHE BOOL "Build the application implementing histogram filter based solution of the maze-of-digits problem.")
 
 
 # =======================================================================
 # Build MI Reinforcement Learning Apps.
 # =======================================================================
 
-if(${BUILD_APP_MAZE_OF_DIGITS_SIMPLE})
+if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 	# Create exeutable.
-	add_executable(maze_of_digits_simple_app 
-		applications/SimpleDigitMazeApplication.cpp
+	add_executable(maze_of_digits_histogram_filter_app 
+		applications/HistogramFilterMazeLocalization.cpp
 		applications/console_application_main.cpp
 		data_io/MazeMatrixImporter.cpp
 		)
 	# Link it with shared libraries.
-	target_link_libraries(maze_of_digits_simple_app 
+	target_link_libraries(maze_of_digits_histogram_filter_app 
 		logger
 		application
 		types
@@ -51,7 +51,7 @@ if(${BUILD_APP_MAZE_OF_DIGITS_SIMPLE})
 		)
 
 	# install test to bin directory
-	install(TARGETS maze_of_digits_simple_app RUNTIME DESTINATION bin)
+	install(TARGETS maze_of_digits_histogram_filter_app RUNTIME DESTINATION bin)
 	
-endif(${BUILD_APP_MAZE_OF_DIGITS_SIMPLE})
+endif(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 

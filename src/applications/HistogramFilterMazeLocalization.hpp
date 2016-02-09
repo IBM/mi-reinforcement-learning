@@ -1,12 +1,12 @@
 /*!
- * \file TestApplication.hpp
- * \brief Declaration of a class being a simple example of application.
+ * \file HistogramFilterMazeLocalization.hpp
+ * \brief Declaration of a class being a histogram filter based maze localization application.
  * \author tkornut
  * \date Jan 27, 2016
  */
 
-#ifndef SRC_APPLICATIONS_SIMPLEDIGITMAZEAPPLICATION_HPP_
-#define SRC_APPLICATIONS_SIMPLEDIGITMAZEAPPLICATION_HPP_
+#ifndef SRC_APPLICATIONS_HISTOGRAMFILTERMAZELOCALIZATION_HPP_
+#define SRC_APPLICATIONS_HISTOGRAMFILTERMAZELOCALIZATION_HPP_
 
 #include <opengl/application/OpenGLApplication.hpp>
 
@@ -23,21 +23,21 @@ namespace mic {
 namespace applications {
 
 /*!
- * \brief Class implementing a simple test application (currently zero functionality).
+ * \brief Class implementing a histogram filter based solution of the maze-of-digits problem.
  * \author tkornuta
  */
-class SimpleDigitMazeApplication: public mic::opengl::application::OpenGLApplication {
+class HistogramFilterMazeLocalization: public mic::opengl::application::OpenGLApplication {
 public:
 	/*!
 	 * Default Constructor. Sets the application/node name, default values of variables, initializes classifier etc.
 	 * @param node_name_ Name of the application/node (in configuration file).
 	 */
-	SimpleDigitMazeApplication(std::string node_name_ = "application");
+	HistogramFilterMazeLocalization(std::string node_name_ = "application");
 
 	/*!
 	 * Destructor.
 	 */
-	virtual ~SimpleDigitMazeApplication();
+	virtual ~HistogramFilterMazeLocalization();
 
 protected:
 	/*!
@@ -172,4 +172,4 @@ private:
 } /* namespace applications */
 } /* namespace mic */
 
-#endif /* SRC_APPLICATIONS_SIMPLEDIGITMAZEAPPLICATION_HPP_ */
+#endif /* SRC_APPLICATIONS_HISTOGRAMFILTERMAZELOCALIZATION_HPP_ */
