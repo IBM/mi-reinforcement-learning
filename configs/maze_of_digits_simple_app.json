@@ -8,6 +8,7 @@
 		"hidden_y": "-1",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
+		"epsilon": "0.2",
 		"action": "-2"
 	},
 	"maze_importer" : {

@@ -34,7 +34,8 @@ SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) :
 		hidden_y("hidden_y", 0),
 		hit_factor("hit_factor", 0.6),
 		miss_factor("miss_factor", 0.2),
-		action("action", -1)
+		action("action", -1),
+		epsilon("epsilon", 0.0)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(hidden_maze_number);
@@ -43,6 +44,7 @@ SimpleDigitMazeApplication::SimpleDigitMazeApplication(std::string node_name_) :
 	registerProperty(hit_factor);
 	registerProperty(miss_factor);
 	registerProperty(action);
+	registerProperty(epsilon);
 
 	LOG(LINFO) << "Properties registered";
 
@@ -506,16 +508,21 @@ bool SimpleDigitMazeApplication::performSingleStep() {
 	LOG(LINFO) << "Performing a single step ";
 
 	// epsilon-greedy action selection.
+	 if ((double)epsilon > 0) {
+		 if (RAN_GEN->uniRandReal() < (double)epsilon)
+				move(A_RANDOM);
+	 } else {
+			// Perform move.
+			if (action == (short)-3)
+				move(A_RANDOM);
+			else if (action == (short)-2)
+				move(sumOfMostUniquePatchesActionSelection());
+			else if (action == (short)-1)
+				move(mostUniquePatchActionSelection());
+			else
+				move(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)action));
+	 }//: else
 
-	// Perform move.
-	if (action == (short)-3)
-		move(A_RANDOM);
-	else if (action == (short)-2)
-		move(sumOfMostUniquePatchesActionSelection());
-	else if (action == (short)-1)
-		move(mostUniquePatchActionSelection());
-	else
-		move(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)action));
 
 
 
