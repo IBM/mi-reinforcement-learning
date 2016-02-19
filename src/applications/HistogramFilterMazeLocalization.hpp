@@ -128,20 +128,20 @@ private:
 	std::vector<mic::types::MatrixXiPtr> mazes;
 
 	/// Variable storing the probability that we are in a given maze position.
-	std::vector<mic::types::MatrixXfPtr> maze_position_probabilities;
+	std::vector<mic::types::MatrixXdPtr> maze_position_probabilities;
 
 
 	/// Variable storing the probability that we are currently moving in/observing a given maze.
-	std::vector<float> maze_probabilities;
+	std::vector<double> maze_probabilities;
 
 	/// Variable storing the probability that we are currently in a given x coordinate.
-	std::vector<float> maze_x_coordinate_probilities;
+	std::vector<double> maze_x_coordinate_probilities;
 
 	/// Variable storing the probability that we are currently in a given y coordinate.
-	std::vector<float> maze_y_coordinate_probilities;
+	std::vector<double> maze_y_coordinate_probilities;
 
 	/// Variable storing the probability that we can find given patch in a given maze.
-	std::vector<float> maze_patch_probabilities;
+	std::vector<double> maze_patch_probabilities;
 
 	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
 	mic::configuration::Property<short> hidden_maze_number;
@@ -165,21 +165,21 @@ private:
 	mic::configuration::Property<short> action;
 
 	/// Property: variable denoting epsilon in aciton selection (the probability "below" which a random action will be selected).
-	mic::configuration::Property<float> epsilon;
+	mic::configuration::Property<double> epsilon;
 
 	/// Property: variable denoting the hit factor (the gain when the observation coincides with current position).
-	mic::configuration::Property<float> hit_factor;
+	mic::configuration::Property<double> hit_factor;
 
 	/// Property: variable denoting the miss factor (the gain when the observation does not coincide with current position).
-	mic::configuration::Property<float> miss_factor;
+	mic::configuration::Property<double> miss_factor;
 	/// Property: variable storing the probability that we made the exact move (x+dx).
-	mic::configuration::Property<float> exact_move_probability;
+	mic::configuration::Property<double> exact_move_probability;
 
 	/// Property: variable storing the probability that we made the "overshoot" move (d+dx+1).
-	mic::configuration::Property<float> overshoot_move_probability;
+	mic::configuration::Property<double> overshoot_move_probability;
 
 	/// Property: variable storing the probability that we made the "undershoot" move (d+dx-1).
-	mic::configuration::Property<float> undershoot_move_probability;
+	mic::configuration::Property<double> undershoot_move_probability;
 
 };
 

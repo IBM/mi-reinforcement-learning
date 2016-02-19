@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# file: generate_mazes_in_csv_file.py
 # author: tkornuta
 # brief: generate a csv file containing m mazes of size w by h with random digits (from 1 to 9, with a single 0 and 9).
 # date: Feb 2, 2016

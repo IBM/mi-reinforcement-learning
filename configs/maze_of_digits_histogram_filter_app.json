@@ -11,11 +11,11 @@
 		"action": "-2",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
-		"exact_move_probability": "0.8",
-		"overshoot_move_probability": "0.1",
-		"undershoot_move_probability": "0.1"
+		"exact_move_probability": "1.0",
+		"overshoot_move_probability": "0.0",
+		"undershoot_move_probability": "0.0"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/1maze-3x5.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/100mazes-28x28.csv"
 	}
 }
