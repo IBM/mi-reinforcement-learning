@@ -11,14 +11,14 @@ The library contains solutions and applications related to reinforcement learnin
 MIC dependencies
 ------------
    * MIToolchain - core library of MIC.
-   * MIAlgorithms - contains basic (core) types and algorithms
-   * MIAlgorithms - contains OpenGL-based visualization.
+   * MIAlgorithms - contains basic (core) types and algorithms.
+   * MIVisualization - contains OpenGL-based visualization.
 
 External dependencies
 ------------
 Additionally it depends on the following external libraries:
    * Boost - library of free (open source) peer-reviewed portable C++ source libraries.
-   * OpenBlas - an optimized BLAS library based on GotoBLAS2 1.13 BSD version (Matrix<T> dependency).
+   * Eigen - a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.
    * OpenGL - a cross-language, cross-platform application programming interface for rendering 2D and 3D vector graphics.
 
 
