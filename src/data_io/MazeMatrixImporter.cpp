@@ -60,7 +60,7 @@ bool MazeMatrixImporter::importData(){
 	    	LOG(LDEBUG)  << line << '\n';
 
 			// Create new matrix of MNIST image size.
-			mic::types::matrixi_ptr_t mat (new mic::types::matrixi_t(maze_height, maze_width));
+			mic::types::MatrixXiPtr mat (new mic::types::MatrixXi(maze_height, maze_width));
 
 			int value;
 			size_t i = 0;

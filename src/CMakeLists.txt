@@ -17,12 +17,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl")
 # Add CMAKE variables.
 # =======================================================================
 
-# Default length of SDR.
-set(DEFAULT_SDR_LENGTH 1024 CACHE STRING "Default length of SDR")
-add_definitions(-DDEFAULT_SDR_LENGTH=${DEFAULT_SDR_LENGTH})
-
 set(BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE ON CACHE BOOL "Build the application implementing histogram filter based solution of the maze-of-digits problem.")
-
 
 # =======================================================================
 # Build MI Reinforcement Learning Apps.
@@ -46,7 +41,7 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 		classifiers
 		auto_encoders
 		configuration
-		visualization_opengl ${OPENGL_LIBRARIES} ${GLUT_LIBRARY}
+		visualization_opengl
 		${Boost_LIBRARIES}  
 		)
 

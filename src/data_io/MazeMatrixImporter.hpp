@@ -15,7 +15,7 @@
 namespace mic {
 namespace data_io {
 
-class MazeMatrixImporter : public mic::data_io::Importer< mic::types::matrixi_t , int> {
+class MazeMatrixImporter : public mic::data_io::Importer< mic::types::MatrixXi , int> {
 public:
 	/*!
 	 * Constructor. Sets MNIST image default properties. Registers properties.

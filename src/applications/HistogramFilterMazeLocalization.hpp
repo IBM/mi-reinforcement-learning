@@ -19,6 +19,7 @@ using namespace mic::opengl::visualization;
 
 #include <types/Action.hpp>
 
+
 namespace mic {
 namespace applications {
 
@@ -98,14 +99,14 @@ protected:
 
 	/*!
 	 * Selects action based on analysis of current state and patch distributions.
-	 * The functions tries to find the maximum action utility, taking into consideration probabilites of being in given maze in given x,y-position.
+	 * The functions tries to find the maximum action utility, taking into consideration probabilities of being in given maze in given x,y-position.
 	 */
 	mic::types::Action2DInterface mostUniquePatchActionSelection();
 
 
 	/*!
 	 * Selects action based on analysis of current state and patch distributions.
-	 * The functions finds the maximum action usefulness, suming the results of taking given aciton taking into accoung the probabilites of being in given maze in given x,y-position.
+	 * The functions finds the maximum action utility, summing the results of taking given action taking into account the probabilities of being in given maze in given x,y-position.
 	 */
 	mic::types::Action2DInterface sumOfMostUniquePatchesActionSelection();
 
@@ -124,23 +125,23 @@ private:
 	mic::data_io::MazeMatrixImporter importer;
 
 	/// Vector of mazes - pointer to vector of mazes returned by importer.
-	std::vector<mic::types::matrixi_ptr_t> mazes;
+	std::vector<mic::types::MatrixXiPtr> mazes;
 
 	/// Variable storing the probability that we are in a given maze position.
-	std::vector<mic::types::matrixd_ptr_t> maze_position_probabilities;
+	std::vector<mic::types::MatrixXfPtr> maze_position_probabilities;
 
 
 	/// Variable storing the probability that we are currently moving in/observing a given maze.
-	std::vector<double> maze_probabilities;
+	std::vector<float> maze_probabilities;
 
 	/// Variable storing the probability that we are currently in a given x coordinate.
-	std::vector<double> maze_x_coordinate_probilities;
+	std::vector<float> maze_x_coordinate_probilities;
 
 	/// Variable storing the probability that we are currently in a given y coordinate.
-	std::vector<double> maze_y_coordinate_probilities;
+	std::vector<float> maze_y_coordinate_probilities;
 
 	/// Variable storing the probability that we can find given patch in a given maze.
-	std::vector<double> maze_patch_probabilities;
+	std::vector<float> maze_patch_probabilities;
 
 	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
 	mic::configuration::Property<short> hidden_maze_number;
@@ -164,22 +165,21 @@ private:
 	mic::configuration::Property<short> action;
 
 	/// Property: variable denoting epsilon in aciton selection (the probability "below" which a random action will be selected).
-	mic::configuration::Property<double> epsilon;
+	mic::configuration::Property<float> epsilon;
 
 	/// Property: variable denoting the hit factor (the gain when the observation coincides with current position).
-	mic::configuration::Property<double> hit_factor;
+	mic::configuration::Property<float> hit_factor;
 
 	/// Property: variable denoting the miss factor (the gain when the observation does not coincide with current position).
-	mic::configuration::Property<double> miss_factor;
-
+	mic::configuration::Property<float> miss_factor;
 	/// Property: variable storing the probability that we made the exact move (x+dx).
-	mic::configuration::Property<double> exact_move_probability;
+	mic::configuration::Property<float> exact_move_probability;
 
 	/// Property: variable storing the probability that we made the "overshoot" move (d+dx+1).
-	mic::configuration::Property<double> overshoot_move_probability;
+	mic::configuration::Property<float> overshoot_move_probability;
 
 	/// Property: variable storing the probability that we made the "undershoot" move (d+dx-1).
-	mic::configuration::Property<double> undershoot_move_probability;
+	mic::configuration::Property<float> undershoot_move_probability;
 
 };
 
