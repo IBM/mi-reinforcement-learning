@@ -5,12 +5,8 @@
  * \date Jan 27, 2016
  */
 
+#include <application/HistogramFilterMazeLocalization.hpp>
 #include <application/ApplicationFactory.hpp>
-
-//#include <random>
-#include <data_utils/RandomGenerator.hpp>
-#include <applications/HistogramFilterMazeLocalization.hpp>
-
 
 namespace mic {
 namespace application {
@@ -20,12 +16,9 @@ namespace application {
  * \author tkornuta
  */
 void RegisterApplication (void) {
-	REGISTER_APPLICATION(mic::applications::HistogramFilterMazeLocalization);
+	REGISTER_APPLICATION(mic::application::HistogramFilterMazeLocalization);
 }
 
-} /* namespace application */
-
-namespace applications {
 
 HistogramFilterMazeLocalization::HistogramFilterMazeLocalization(std::string node_name_) : OpenGLApplication(node_name_),
 		hidden_maze_number("hidden_maze", 0),
@@ -73,6 +66,7 @@ void HistogramFilterMazeLocalization::initialize(int argc, char* argv[]) {
 	w_current_coordinate_x = new WindowChart("Current_x", 256, 256, 0, 326);
 	w_current_coordinate_y = new WindowChart("Current_y", 256, 256, 326, 326);
 
+	w_current_max_probabilities = new WindowChart("Max_probabilities", 256, 256, 326, 0);
 
 }
 
@@ -84,8 +78,6 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 		exit(0);
 	}//: if
 
-	hf = new mic::algorithms::MazeHistogramFilter(importer.getData(), hidden_maze_number, hidden_x, hidden_y);
-
 	// Show mazes.
 	LOG(LNOTICE) << "Loaded mazes";
 	for (size_t m=0; m<importer.getData().size(); m++) {
@@ -93,8 +85,12 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (importer.getData()[m]);
 	}//: for
 
+	hf.setMazes(importer.getData(), 10);
+
+	hf.setHiddenPose(hidden_maze_number, hidden_x, hidden_y);
+
 	// Assign initial probabilities to all variables (uniform distribution).s
-	hf->assignInitialProbabilities();
+	hf.assignInitialProbabilities();
 
 	// Create data containers - for visualization.
 	createDataContainers();
@@ -102,13 +98,11 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 	// Store the "zero" state.
 	storeCurrentStateInDataContainers(true);
 
-	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
-
 	// Get first observation.
-	hf->sense(hit_factor, miss_factor);
+	hf.sense(hit_factor, miss_factor);
 
 	// Update aggregated probabilities.
-	hf->updateAggregatedProbabilities();
+	hf.updateAggregatedProbabilities();
 
 	// Store the first state.
 	storeCurrentStateInDataContainers(true);
@@ -136,7 +130,6 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 
 	}//: for
 
-
 	// Create a single container for each x coordinate.
 	for (size_t x=0; x<importer.maze_width; x++) {
 		std::string label = "P(x" + std::to_string(x) +")";
@@ -161,9 +154,18 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 		w_current_coordinate_y->createDataContainer(label, mic::types::color_rgba(r, g, b, 180));
 	}//: for
 
+	// Create containers for three max probabilites.
+	w_current_max_probabilities->createDataContainer("Max(Pm)", mic::types::color_rgba(255, 0, 0, 180));
+	w_current_max_probabilities->createDataContainer("Max(Px)", mic::types::color_rgba(0, 255, 0, 180));
+	w_current_max_probabilities->createDataContainer("Max(Py)", mic::types::color_rgba(0, 0, 255, 180));
+
 }
 
 void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool synchronize_) {
+
+	double max_pm = 0;
+	double max_px = 0;
+	double max_py = 0;
 
 	if (synchronize_)
 	{ // Enter critical section - with the use of scoped lock from AppState!
@@ -172,44 +174,57 @@ void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool syn
 		// Add data to chart windows.
 		for (size_t m=0; m<importer.getData().size(); m++) {
 			std::string label = "P(m" + std::to_string(m) +")";
-			w_current_maze_chart->addDataToContainer(label, hf->maze_probabilities[m]);
+			w_current_maze_chart->addDataToContainer(label, hf.maze_probabilities[m]);
+			max_pm = ( hf.maze_probabilities[m] > max_pm ) ? hf.maze_probabilities[m] : max_pm;
 		}//: for
 
 		for (size_t x=0; x<importer.maze_width; x++) {
 			std::string label = "P(x" + std::to_string(x) +")";
-			w_current_coordinate_x->addDataToContainer(label, hf->maze_x_coordinate_probilities[x]);
+			w_current_coordinate_x->addDataToContainer(label, hf.maze_x_coordinate_probilities[x]);
+			max_px = ( hf.maze_x_coordinate_probilities[x] > max_px ) ? hf.maze_x_coordinate_probilities[x] : max_px;
 		}//: for
 
 		for (size_t y=0; y<importer.maze_height; y++) {
 			std::string label = "P(y" + std::to_string(y) +")";
-			w_current_coordinate_y->addDataToContainer(label, hf->maze_y_coordinate_probilities[y]);
+			w_current_coordinate_y->addDataToContainer(label, hf.maze_y_coordinate_probilities[y]);
+			max_py = ( hf.maze_y_coordinate_probilities[y] > max_py ) ? hf.maze_y_coordinate_probilities[y] : max_py;
 		}//: for
+
+		w_current_max_probabilities->addDataToContainer("Max(Pm)", max_pm);
+		w_current_max_probabilities->addDataToContainer("Max(Px)", max_px);
+		w_current_max_probabilities->addDataToContainer("Max(Py)", max_py);
 
 	}//: end of critical section.
 	else {
 		// Add data to chart windows.
 		for (size_t m=0; m<importer.getData().size(); m++) {
 			std::string label = "P(m" + std::to_string(m) +")";
-			w_current_maze_chart->addDataToContainer(label, hf->maze_probabilities[m]);
+			w_current_maze_chart->addDataToContainer(label, hf.maze_probabilities[m]);
+			max_pm = ( hf.maze_probabilities[m] > max_pm ) ? hf.maze_probabilities[m] : max_pm;
 		}//: for
 
 		for (size_t x=0; x<importer.maze_width; x++) {
 			std::string label = "P(x" + std::to_string(x) +")";
-			w_current_coordinate_x->addDataToContainer(label, hf->maze_x_coordinate_probilities[x]);
+			w_current_coordinate_x->addDataToContainer(label, hf.maze_x_coordinate_probilities[x]);
+			max_px = ( hf.maze_x_coordinate_probilities[x] > max_px ) ? hf.maze_x_coordinate_probilities[x] : max_px;
 		}//: for
 
 		for (size_t y=0; y<importer.maze_height; y++) {
 			std::string label = "P(y" + std::to_string(y) +")";
-			w_current_coordinate_y->addDataToContainer(label, hf->maze_y_coordinate_probilities[y]);
+			w_current_coordinate_y->addDataToContainer(label, hf.maze_y_coordinate_probilities[y]);
+			max_py = ( hf.maze_y_coordinate_probilities[y] > max_py ) ? hf.maze_y_coordinate_probilities[y] : max_py;
 		}//: for
 
+		w_current_max_probabilities->addDataToContainer("Max(Pm)", max_pm);
+		w_current_max_probabilities->addDataToContainer("Max(Px)", max_px);
+		w_current_max_probabilities->addDataToContainer("Max(Py)", max_py);
 	}//: else
 }
 
 
 
 bool HistogramFilterMazeLocalization::performSingleStep() {
-	LOG(LINFO) << "Performing a single step ";
+	LOG(LINFO) << "Performing a single step (" << iteration << ")";
 
 	short tmp_action = action;
 
@@ -225,22 +240,22 @@ bool HistogramFilterMazeLocalization::performSingleStep() {
 	case (short)-3:
 			act = A_RANDOM; break;
 	case (short)-2:
-			act = hf->sumOfMostUniquePatchesActionSelection(); break;
+			act = hf.sumOfMostUniquePatchesActionSelection(); break;
 	case (short)-1:
-			act = hf->mostUniquePatchActionSelection(); break;
+			act = hf.mostUniquePatchActionSelection(); break;
 	default:
 		act = mic::types::NESWAction((mic::types::NESW_action_type_t) (short)tmp_action);
 	}//: switch action
 
 	// Perform move.
-	hf->probabilisticMove(act, exact_move_probability, overshoot_move_probability, undershoot_move_probability);
+	hf.probabilisticMove(act, exact_move_probability, overshoot_move_probability, undershoot_move_probability);
 
 
 	// Get current observation.
-	hf->sense(hit_factor, miss_factor);
+	hf.sense(hit_factor, miss_factor);
 
 	// Update state.
-	hf->updateAggregatedProbabilities();
+	hf.updateAggregatedProbabilities();
 
 	// Store collected data for visualization/export.
 	storeCurrentStateInDataContainers(false);
@@ -253,5 +268,5 @@ bool HistogramFilterMazeLocalization::performSingleStep() {
 
 
 
-} /* namespace applications */
+} /* namespace application */
 } /* namespace mic */

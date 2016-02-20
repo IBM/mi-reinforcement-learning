@@ -11,42 +11,96 @@ namespace mic {
 namespace algorithms {
 
 
+MazeHistogramFilter::MazeHistogramFilter(){
+	// Reset variables.
+	hidden_maze_number = hidden_y = hidden_y = 0;
+	number_of_mazes = maze_width = maze_height = problem_dimensions = number_of_distinctive_patches = 0;
+
+}
+
+void MazeHistogramFilter::setMazes(std::vector<mic::types::MatrixXiPtr> & mazes_, unsigned int number_of_distinctive_patches_)
+{
+	mazes = mazes_;
+	// Set problem dimensions.
+	number_of_mazes = mazes.size();
+	maze_width = mazes[0]->cols();
+	maze_height = mazes[0]->rows();
+	problem_dimensions = number_of_mazes * maze_width * maze_height;
+	number_of_distinctive_patches = number_of_distinctive_patches_;
+
+	// Create matrices with probabilities.
+	for (size_t m=0; m<number_of_mazes; m++) {
+		mic::types::MatrixXdPtr position_probabilities(new mic::types::MatrixXd (maze_height, maze_width));
+		maze_position_probabilities.push_back(position_probabilities);
+	}
+
+	maze_probabilities.resize(number_of_mazes);
+	maze_x_coordinate_probilities.resize(maze_width);
+	maze_y_coordinate_probilities.resize(maze_height);
+
+	maze_patch_probabilities.resize(number_of_distinctive_patches);
+
+}
+
+
+void MazeHistogramFilter::setHiddenPose(int hidden_maze_number_, int hidden_x_, int hidden_y_)
+{
+	// Get "hidden" maze number.
+	if (hidden_maze_number_ == -1) {
+		hidden_maze_number = RAN_GEN->uniRandInt(0,number_of_mazes-1);
+	} else
+		hidden_maze_number = hidden_maze_number_ % number_of_mazes;
+
+	// Get "hidden" maze x coordinate.
+	if (hidden_x_ == -1) {
+		hidden_x = RAN_GEN->uniRandInt(0,maze_width-1);
+	} else
+		hidden_x = hidden_x_ % maze_width;
+
+	// Get "hidden" maze y coordinate.
+	if (hidden_y == -1) {
+		hidden_y = RAN_GEN->uniRandInt(0,maze_height-1);
+	} else
+		hidden_y = hidden_y_ % maze_height;
+
+	LOG(LWARNING) << "After truncation/random: hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+
+}
+
+
 void MazeHistogramFilter::assignInitialProbabilities() {
 
 	// Assign initial probabilities for all mazes/positions.
 	LOG(LNOTICE) << "Initial maze_position_probabilities:";
 	for (size_t m=0; m<number_of_mazes; m++) {
+		mic::types::MatrixXdPtr position_probabilities = maze_position_probabilities[m];
 
-		mic::types::MatrixXdPtr position_probabilities(new mic::types::MatrixXd (maze_height, maze_width));
 		for (size_t i=0; i<maze_height; i++) {
 			for (size_t j=0; j<maze_width; j++) {
 				(*position_probabilities)(i,j) = (double) 1.0/(problem_dimensions);
 			}//: for j
 		}//: for i
 
-		maze_position_probabilities.push_back(position_probabilities);
-
 		LOG(LNOTICE) << "maze_position_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
 	}//: for m
 
 	// Assign initial probabilities to maze - for visualization.
 	for (size_t m=0; m<number_of_mazes; m++) {
-		maze_probabilities.push_back((double) 1.0/ mazes.size());
+		maze_probabilities[m] = ((double) 1.0/ mazes.size());
 	}//: for
 
 
 	//  Assign initial probabilities to x coordinate - for visualization.
 	for (size_t x=0; x<maze_width; x++) {
-		maze_x_coordinate_probilities.push_back((double) 1.0/ maze_width);
+		maze_x_coordinate_probilities[x] = ((double) 1.0/ maze_width);
 	}//: for
 
 	//  Assign initial probabilities to y coordinate - for visualization.
 	for (size_t y=0; y<maze_height; y++) {
-		maze_y_coordinate_probilities.push_back((double) 1.0/ maze_height);
+		maze_y_coordinate_probilities[y] = ((double) 1.0/ maze_height);
 	}//: for
 
 	// Collect statistics for all mazes - number of appearances of a given "patch" (i.e. digit).
-	maze_patch_probabilities.resize(number_of_distinctive_patches);
 	for (size_t m=0; m<number_of_mazes; m++) {
 		mic::types::MatrixXiPtr maze = mazes[m];
 
@@ -150,7 +204,7 @@ void MazeHistogramFilter::move (mic::types::Action2DInterface ac_) {
 	hidden_y = (hidden_y + maze_height +  ac_.dy()) % maze_height;
 	hidden_x = (hidden_x + maze_width +  ac_.dx()) % maze_width;
 
-	LOG(LINFO) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
 
 }
 
@@ -193,7 +247,7 @@ void MazeHistogramFilter::probabilisticMove (mic::types::Action2DInterface ac_, 
 	hidden_y = (hidden_y + maze_height +  ac_.dy()) % maze_height;
 	hidden_x = (hidden_x + maze_width +  ac_.dx()) % maze_width;
 
-	LOG(LINFO) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
 }
 
 

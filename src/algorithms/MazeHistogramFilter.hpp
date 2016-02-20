@@ -20,44 +20,32 @@
 namespace mic {
 namespace algorithms {
 
+/*!
+ * \brief Class implementing a histogram filter based solution of the maze-of-digits localization problem.
+ * \author tkornuta
+ */
 class MazeHistogramFilter {
 public:
 	/*!
-	 * Constructor
-	 * @param mazes_ Vector of mazes.
+	 * Constructor. Resets variables.
 	 */
-	MazeHistogramFilter(std::vector<mic::types::MatrixXiPtr> & mazes_, int hidden_maze_number_, int hidden_x_, int hidden_y_) :
-		mazes(mazes_)
-	{
-		// Set problem dimensions.
-		number_of_mazes = mazes.size();
-		maze_width = mazes[0]->cols();
-		maze_height = mazes[0]->rows();
-		problem_dimensions = number_of_mazes * maze_width * maze_height;
-		number_of_distinctive_patches = 10;
+	MazeHistogramFilter();
 
-		// Initialize position.
-		// Get "hidden" maze number.
-		if (hidden_maze_number_ == -1) {
-			hidden_maze_number = RAN_GEN->uniRandInt(0,number_of_mazes-1);
-		} else
-			hidden_maze_number = hidden_maze_number_ % number_of_mazes;
 
-		// Get "hidden" maze x coordinate.
-		if (hidden_x_ == -1) {
-			hidden_x = RAN_GEN->uniRandInt(0,maze_width-1);
-		} else
-			hidden_x = hidden_x_ % maze_width;
+	/*!
+	 * Copies pointer to mazes, sets problem dimensions.
+	 * @param mazes_ Vector of mazes.
+	 * @param number_of_distinctive_patches_ Number of distinctive patches.
+	 */
+	void setMazes(std::vector<mic::types::MatrixXiPtr> & mazes_, unsigned int number_of_distinctive_patches_);
 
-		// Get "hidden" maze y coordinate.
-		if (hidden_y == -1) {
-			hidden_y = RAN_GEN->uniRandInt(0,maze_height-1);
-		} else
-			hidden_y = hidden_y_ % maze_height;
-
-		LOG(LWARNING) << "After truncation/random: hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
-
-	}
+	/*!
+	 * Sets hidden pose. If required
+	 * @param hidden_maze_number_ Hidden maze number (-1 = random)
+	 * @param hidden_x_ Maze x coordinate  (-1 = random)
+	 * @param hidden_y_ Maze y coordinate  (-1 = random)
+	 */
+	void setHiddenPose(int hidden_maze_number_, int hidden_x_, int hidden_y_);
 
 	/*!
 	 * Destructor. Empty for now.
@@ -108,8 +96,6 @@ public:
 	 * The functions finds the maximum action utility, summing the results of taking given action taking into account the probabilities of being in given maze in given x,y-position.
 	 */
 	mic::types::Action2DInterface sumOfMostUniquePatchesActionSelection();
-
-
 
 
 private:
