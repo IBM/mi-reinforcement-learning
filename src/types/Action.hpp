@@ -46,12 +46,12 @@ public:
 	 */
 	int dy() { return d_y; };
 
-protected:
 	/*!
 	 * Default constructor. (Re)sets increments. Protected - to be used by derived classes.
 	 */
 	Action2DInterface() : d_x(0), d_y(0) { };
 
+protected:
 	/// Increment according to x axis.
 	int d_x;
 

@@ -16,6 +16,6 @@
 		"undershoot_move_probability": "0.0"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/100mazes-28x28.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/20mazes-28x28.csv"
 	}
 }

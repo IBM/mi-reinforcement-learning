@@ -84,43 +84,17 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 		exit(0);
 	}//: if
 
-	// Set problem dimensions.
-	number_of_mazes = importer.getData().size();
-	problem_dimensions = number_of_mazes * importer.maze_width * importer.maze_height;
-	number_of_distinctive_patches = 10;
-
-	// Get "hidden" maze number.
-	if ((int)hidden_maze_number == -1) {
-		hidden_maze_number = RAN_GEN->uniRandInt(0,number_of_mazes-1);
-	} else
-		hidden_maze_number = hidden_maze_number % number_of_mazes;
-
-	// Get "hidden" maze x coordinate.
-	if ((int)hidden_x == -1) {
-		hidden_x = RAN_GEN->uniRandInt(0,importer.maze_width-1);
-	} else
-		hidden_x = hidden_x % importer.maze_width;
-
-	// Get "hidden" maze y coordinate.
-if ((int)hidden_y == -1) {
-	hidden_y = RAN_GEN->uniRandInt(0,importer.maze_height-1);
-	} else
-		hidden_y = hidden_y % importer.maze_height;
-	LOG(LWARNING) << "After truncation/random: hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
-
-
-	// Set pointer to data.
-	mazes = importer.getData();
+	hf = new mic::algorithms::MazeHistogramFilter(importer.getData(), hidden_maze_number, hidden_x, hidden_y);
 
 	// Show mazes.
 	LOG(LNOTICE) << "Loaded mazes";
-	for (size_t m=0; m<number_of_mazes; m++) {
+	for (size_t m=0; m<importer.getData().size(); m++) {
 		// Display results.
-		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (*mazes[m]);
+		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (importer.getData()[m]);
 	}//: for
 
 	// Assign initial probabilities to all variables (uniform distribution).s
-	assignInitialProbabilities();
+	hf->assignInitialProbabilities();
 
 	// Create data containers - for visualization.
 	createDataContainers();
@@ -129,12 +103,12 @@ if ((int)hidden_y == -1) {
 	storeCurrentStateInDataContainers(true);
 
 	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
+
 	// Get first observation.
-	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
-	sense(obs);
+	hf->sense(hit_factor, miss_factor);
 
 	// Update aggregated probabilities.
-	updateAggregatedProbabilities();
+	hf->updateAggregatedProbabilities();
 
 	// Store the first state.
 	storeCurrentStateInDataContainers(true);
@@ -142,63 +116,6 @@ if ((int)hidden_y == -1) {
 }
 
 
-void HistogramFilterMazeLocalization::assignInitialProbabilities() {
-
-	// Assign initial probabilities for all mazes/positions.
-	LOG(LNOTICE) << "Initial maze_position_probabilities:";
-	for (size_t m=0; m<number_of_mazes; m++) {
-
-		mic::types::MatrixXdPtr position_probabilities(new mic::types::MatrixXd (importer.maze_height, importer.maze_width));
-		for (size_t i=0; i<importer.maze_height; i++) {
-			for (size_t j=0; j<importer.maze_width; j++) {
-				(*position_probabilities)(i,j) = (double) 1.0/(problem_dimensions);
-			}//: for j
-		}//: for i
-
-		maze_position_probabilities.push_back(position_probabilities);
-
-		LOG(LNOTICE) << "maze_position_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
-	}//: for m
-
-	// Assign initial probabilities to maze - for visualization.
-	for (size_t m=0; m<number_of_mazes; m++) {
-		maze_probabilities.push_back((double) 1.0/ mazes.size());
-	}//: for
-
-
-	//  Assign initial probabilities to x coordinate - for visualization.
-	for (size_t x=0; x<importer.maze_width; x++) {
-		maze_x_coordinate_probilities.push_back((double) 1.0/ importer.maze_width);
-	}//: for
-
-	//  Assign initial probabilities to y coordinate - for visualization.
-	for (size_t y=0; y<importer.maze_height; y++) {
-		maze_y_coordinate_probilities.push_back((double) 1.0/ importer.maze_height);
-	}//: for
-
-	// Collect statistics for all mazes - number of appearances of a given "patch" (i.e. digit).
-	maze_patch_probabilities.resize(number_of_distinctive_patches);
-	for (size_t m=0; m<number_of_mazes; m++) {
-		mic::types::MatrixXiPtr maze = mazes[m];
-
-		// Iterate through maze and collect occurrences.
-		for (size_t i=0; i<importer.maze_height; i++) {
-			for (size_t j=0; j<importer.maze_width; j++) {
-				short patch_id = (*maze)(i,j);
-				maze_patch_probabilities[patch_id] += 1.0;
-			}//: for j
-		}//: for i
-
-	}//: for m(azes)
-
-	// Divide by problem dimensions (number of mazes * width * height) -> probabilities.
-	LOG(LNOTICE) << "maze_patch_probabilities:";
-	for (size_t i=0; i<number_of_distinctive_patches; i++) {
-		maze_patch_probabilities[i] /= problem_dimensions;
-		LOG(LNOTICE) << "maze_patch_prob(" <<i<<"):\n" << maze_patch_probabilities[i];
-	}//: for
-
-}
 
 void HistogramFilterMazeLocalization::createDataContainers() {
 	// Random device used for generation of colors.
@@ -207,7 +124,7 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 	// Initialize uniform index distribution - integers.
 	std::uniform_int_distribution<> color_dist(50, 200);
 	// Create a single container for each maze.
-	for (size_t m=0; m<number_of_mazes; m++) {
+	for (size_t m=0; m<importer.getData().size(); m++) {
 		std::string label = "P(m" + std::to_string(m) +")";
 		int r= color_dist(rng_mt19937_64);
 		int g= color_dist(rng_mt19937_64);
@@ -246,53 +163,6 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 
 }
 
-
-void HistogramFilterMazeLocalization::sense (short obs_) {
-	LOG(LINFO) << "Current observation=" << obs_;
-
-	// Compute posterior distribution given Z (observation) - total probability.
-
-	// For all mazes.
-	double prob_sum = 0;
-	for (size_t m=0; m<number_of_mazes; m++) {
-		mic::types::MatrixXdPtr pos_probs = maze_position_probabilities[m];
-		mic::types::MatrixXiPtr maze = mazes[m];
-
-		// Display results.
-/*		LOG(LERROR) << "Przed updatem";
-		LOG(LERROR) << (*mazes[m]);
-		LOG(LERROR) << (*maze_position_probabilities[m]);
-*/
-
-		// Iterate through position probabilities and update them.
-		for (size_t y=0; y<importer.maze_height; y++) {
-			for (size_t x=0; x<importer.maze_width; x++) {
-				if ((*maze)(y,x) == obs_)
-					(*pos_probs)(y,x) *= hit_factor;
-				else
-					(*pos_probs)(y,x) *= miss_factor;
-				prob_sum += (*pos_probs)(y,x);
-			}//: for j
-		}//: for i
-	}//: for m
-
-	prob_sum = 1/prob_sum;
-	// Normalize probabilities for all mazes.
-	for (size_t m=0; m<number_of_mazes; m++) {
-		mic::types::MatrixXdPtr pos_probs = maze_position_probabilities[m];
-		for (size_t i=0; i<importer.maze_height; i++) {
-			for (size_t j=0; j<importer.maze_width; j++) {
-				(*pos_probs)(i,j) *= prob_sum;
-			}//: for j
-		}//: for i
-
-		// Display results.
-		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (*mazes[m]);
-		LOG(LNOTICE) << "maze_pose_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
-	}//: for m
-
-}
-
 void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool synchronize_) {
 
 	if (synchronize_)
@@ -300,254 +170,40 @@ void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool syn
 		APP_DATA_SYNCHRONIZATION_SCOPED_LOCK();
 
 		// Add data to chart windows.
-		for (size_t m=0; m<number_of_mazes; m++) {
+		for (size_t m=0; m<importer.getData().size(); m++) {
 			std::string label = "P(m" + std::to_string(m) +")";
-			w_current_maze_chart->addDataToContainer(label, maze_probabilities[m]);
+			w_current_maze_chart->addDataToContainer(label, hf->maze_probabilities[m]);
 		}//: for
 
 		for (size_t x=0; x<importer.maze_width; x++) {
 			std::string label = "P(x" + std::to_string(x) +")";
-			w_current_coordinate_x->addDataToContainer(label, maze_x_coordinate_probilities[x]);
+			w_current_coordinate_x->addDataToContainer(label, hf->maze_x_coordinate_probilities[x]);
 		}//: for
 
 		for (size_t y=0; y<importer.maze_height; y++) {
 			std::string label = "P(y" + std::to_string(y) +")";
-			w_current_coordinate_y->addDataToContainer(label, maze_y_coordinate_probilities[y]);
+			w_current_coordinate_y->addDataToContainer(label, hf->maze_y_coordinate_probilities[y]);
 		}//: for
 
 	}//: end of critical section.
 	else {
 		// Add data to chart windows.
-		for (size_t m=0; m<number_of_mazes; m++) {
+		for (size_t m=0; m<importer.getData().size(); m++) {
 			std::string label = "P(m" + std::to_string(m) +")";
-			w_current_maze_chart->addDataToContainer(label, maze_probabilities[m]);
+			w_current_maze_chart->addDataToContainer(label, hf->maze_probabilities[m]);
 		}//: for
 
 		for (size_t x=0; x<importer.maze_width; x++) {
 			std::string label = "P(x" + std::to_string(x) +")";
-			w_current_coordinate_x->addDataToContainer(label, maze_x_coordinate_probilities[x]);
+			w_current_coordinate_x->addDataToContainer(label, hf->maze_x_coordinate_probilities[x]);
 		}//: for
 
 		for (size_t y=0; y<importer.maze_height; y++) {
 			std::string label = "P(y" + std::to_string(y) +")";
-			w_current_coordinate_y->addDataToContainer(label, maze_y_coordinate_probilities[y]);
+			w_current_coordinate_y->addDataToContainer(label, hf->maze_y_coordinate_probilities[y]);
 		}//: for
 
 	}//: else
-}
-
-
-void HistogramFilterMazeLocalization::updateAggregatedProbabilities() {
-	// Update maze_probabilities.
-	for (size_t m=0; m<number_of_mazes; m++) {
-		// Reset probability.
-		maze_probabilities[m] = 0;
-		mic::types::MatrixXdPtr pos_probs = maze_position_probabilities[m];
-		// Sum probabilities of all positions.
-		for (size_t i=0; i<importer.maze_height; i++) {
-			for (size_t j=0; j<importer.maze_width; j++) {
-				maze_probabilities[m] += (*pos_probs)(i,j);
-			}//: for j
-		}//: for i
-	}//: for m
-
-	// Update maze_x_coordinate_probilities.
-	for (size_t x=0; x<importer.maze_width; x++) {
-		// Reset probability.
-		maze_x_coordinate_probilities[x] = 0;
-		for (size_t m=0; m<number_of_mazes; m++) {
-			mic::types::MatrixXdPtr pos_probs = maze_position_probabilities[m];
-			// Sum probabilities of all positions.
-			for (size_t y=0; y<importer.maze_height; y++) {
-				maze_x_coordinate_probilities[x] += (*pos_probs)(y,x);
-				}//: for y
-		}//: for m
-	}//: for x
-
-
-	// Update maze_y_coordinate_probilities.
-	for (size_t y=0; y<importer.maze_height; y++) {
-		// Reset probability.
-		maze_y_coordinate_probilities[y] = 0;
-		for (size_t m=0; m<number_of_mazes; m++) {
-			mic::types::MatrixXdPtr pos_probs = maze_position_probabilities[m];
-			// Sum probabilities of all positions.
-			for (size_t x=0; x<importer.maze_width; x++) {
-				maze_y_coordinate_probilities[y] += (*pos_probs)(y,x);
-				}//: for x
-		}//: for m
-	}//: for y
-
-}
-
-void HistogramFilterMazeLocalization::move (mic::types::Action2DInterface ac_) {
-	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
-
-	// For all mazes.
-	for (size_t m=0; m<number_of_mazes; m++) {
-		mic::types::MatrixXdPtr pos_probs = maze_position_probabilities[m];
-		mic::types::MatrixXd old_pose_probs = (*pos_probs);
-
-/*		LOG(LERROR) << "Przed ruchem";
-		LOG(LERROR) << (*mazes[m]);
-		LOG(LERROR) << (*maze_position_probabilities[m]);*/
-
-		// Iterate through position probabilities and update them.
-		for (size_t y=0; y<importer.maze_height; y++) {
-			for (size_t x=0; x<importer.maze_width; x++) {
-				//std::cout << "i=" << i << " j=" << j << " dx=" << dx_ << " dy=" << dy_ << " (i - dx_) % 3 = " << (i +3 - dx_) % 3 << " (j - dy_) % 3=" << (j + 3 - dy_) % 3 << std::endl;
-				(*pos_probs)((y + importer.maze_height +  ac_.dy()) %importer.maze_height, (x +importer.maze_width +  ac_.dx()) % importer.maze_width) = old_pose_probs(y, x);
-
-			}//: for j
-		}//: for i
-
-		// Display results.
-		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (*mazes[m]);
-		LOG(LNOTICE) << "maze_pose_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
-	}//: for m
-
-	// Perform the REAL move.
-	hidden_y = (hidden_y + importer.maze_height +  ac_.dy()) % importer.maze_height;
-	hidden_x = (hidden_x + importer.maze_width +  ac_.dx()) % importer.maze_width;
-
-	LOG(LINFO) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
-
-}
-
-void HistogramFilterMazeLocalization::probabilisticMove (mic::types::Action2DInterface ac_) {
-
-	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
-
-	// For all mazes.
-	for (size_t m=0; m<number_of_mazes; m++) {
-		mic::types::MatrixXdPtr pos_probs = maze_position_probabilities[m];
-		// Make a copy of probabilities.
-		mic::types::MatrixXd old_pose_probs = (*pos_probs);
-		// Set probabilities to zero.
-		(*pos_probs).setZero();
-
-		// Iterate through position probabilities and update them.
-		for (size_t y=0; y<importer.maze_height; y++) {
-			for (size_t x=0; x<importer.maze_width; x++) {
-				size_t exact_y = (y + importer.maze_height +  ac_.dy()) %importer.maze_height;
-				size_t overshoot_y = (y + importer.maze_height +  ac_.dy() + 1) %importer.maze_height;
-				size_t undershoot_y = (y + importer.maze_height +  ac_.dy() - 1) %importer.maze_height;
-
-				size_t exact_x = (x + importer.maze_width +  ac_.dx()) %importer.maze_width;
-				size_t overshoot_x = (x + importer.maze_width +  ac_.dx() + 1) %importer.maze_width;
-				size_t undershoot_x = (x + importer.maze_width +  ac_.dx() - 1) %importer.maze_width;
-
-				(*pos_probs)(exact_y, exact_x) += exact_move_probability  * old_pose_probs(y, x);
-				(*pos_probs)(overshoot_y, overshoot_x) += overshoot_move_probability  * old_pose_probs(y, x);
-				(*pos_probs)(undershoot_y, undershoot_x) += undershoot_move_probability  * old_pose_probs(y, x);
-
-			}//: for j
-		}//: for i
-
-		// Display results.
-		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (*mazes[m]);
-		LOG(LNOTICE) << "maze_pose_prob(" <<m<<"):\n" << (*maze_position_probabilities[m]);
-	}//: for m
-
-	// Perform the REAL move.
-	hidden_y = (hidden_y + importer.maze_height +  ac_.dy()) % importer.maze_height;
-	hidden_x = (hidden_x + importer.maze_width +  ac_.dx()) % importer.maze_width;
-
-	LOG(LINFO) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
-}
-
-
-mic::types::Action2DInterface HistogramFilterMazeLocalization::mostUniquePatchActionSelection() {
-	double best_action_utility = 0.0;
-	size_t best_action = -1;
-
-	// Calculate probabilities of all actions.
-	for (size_t act_t=0; act_t < 4; act_t++) {
-		mic::types::NESWAction ac((NESW_action_type_t)act_t);
-
-		// Check the score of a given action.
-		for (size_t m=0; m<number_of_mazes; m++) {
-
-			for (size_t y=0; y<importer.maze_height; y++) {
-				for (size_t x=0; x<importer.maze_width; x++) {
-					// Check result of the next motion.
-					// Compute resulting coordinates.
-					size_t new_y = (y + importer.maze_height + ac.dy()) % importer.maze_height;
-					size_t new_x = (x + importer.maze_width + ac.dx()) % importer.maze_width;
-					// Get image patch.
-					short patch = (*mazes[m])(new_y, new_x);
-					LOG(LDEBUG) << "maze [" << m << "] (y=" << y <<",x="<< x <<") move="<< act_t << "=> (y+dy=" << new_y << ",x+dx=" << new_x <<") patch=" << patch << std::endl;
-					// Get patch probability.
-					double patch_prob = maze_patch_probabilities[patch];
-					// Check the action utility.
-					double action_utility = maze_probabilities[m] * maze_x_coordinate_probilities[x] * maze_y_coordinate_probilities[y] * (1- patch_prob);
-					LOG(LDEBUG) << "patch_prob= " << patch_prob << " action_utility=" << action_utility << std::endl;
-					if (action_utility > best_action_utility) {
-						best_action_utility = action_utility;
-						best_action = act_t;
-						LOG(LDEBUG) << "found action " << best_action << " with biggest utility " << best_action_utility << std::endl;
-					}
-				}//: for j
-			}//: for i
-
-		}//: for each maze
-	}//: for each action type
-
-	mic::types::NESWAction a((NESW_action_type_t) best_action);
-	return a;
-}
-
-
-mic::types::Action2DInterface HistogramFilterMazeLocalization::sumOfMostUniquePatchesActionSelection() {
-	mic::types::VectorXf action_utilities(4);
-	action_utilities.setZero();
-
-
-	// Calculate probabilities of all actions.
-	for (size_t act_t=0; act_t < 4; act_t++) {
-		mic::types::NESWAction ac((NESW_action_type_t)act_t);
-
-		// Check the score of a given action.
-		for (size_t m=0; m<number_of_mazes; m++) {
-
-			for (size_t y=0; y<importer.maze_height; y++) {
-				for (size_t x=0; x<importer.maze_width; x++) {
-					// Check result of the next motion.
-					// Compute resulting coordinates.
-					size_t new_y = (y + importer.maze_height + ac.dy()) % importer.maze_height;
-					size_t new_x = (x + importer.maze_width + ac.dx()) % importer.maze_width;
-					// Get image patch.
-					short patch = (*mazes[m])(new_y, new_x);
-					LOG(LDEBUG) << "maze [" << m << "] (y=" << y <<",x="<< x <<") move="<< act_t << "=> (y+dy=" << new_y << ",x+dx=" << new_x <<") patch=" << patch << std::endl;
-					// Get patch probability.
-					double patch_prob = maze_patch_probabilities[patch];
-					// Check the action result.
-					double tmp_action_utility = maze_probabilities[m] * maze_x_coordinate_probilities[x] * maze_y_coordinate_probilities[y] * (1- patch_prob);
-					LOG(LDEBUG) << "patch_prob= " << patch_prob << " action_utility=" << tmp_action_utility << std::endl;
-
-					// Add action utility.
-					action_utilities(act_t) += tmp_action_utility;
-				}//: for j
-			}//: for i
-
-		}//: for each maze
-	}//: for each action type
-
-	// Select best action
-	size_t best_action = -1;
-	double best_action_utility = 0.0;
-	for (size_t act_t=0; act_t < 4; act_t++) {
-		if (action_utilities(act_t) > best_action_utility) {
-			best_action_utility = action_utilities(act_t);
-			best_action = act_t;
-			LOG(LDEBUG) << "found action " << best_action << " with biggest utility " << best_action_utility << std::endl;
-		}
-
-	}//: for each action type
-
-
-	mic::types::NESWAction a((NESW_action_type_t) best_action);
-	return a;
 }
 
 
@@ -558,32 +214,33 @@ bool HistogramFilterMazeLocalization::performSingleStep() {
 	short tmp_action = action;
 
 	// Check epsilon-greedy action selection.
-	 if ((double)epsilon > 0) {
-		 if (RAN_GEN->uniRandReal() < (double)epsilon)
-			 tmp_action = -3;
-	 }//: if
+	if ((double)epsilon > 0) {
+		if (RAN_GEN->uniRandReal() < (double)epsilon)
+				tmp_action = -3;
+	}//: if
 
-	// Perform move.
+	// Determine action.
+	mic::types::Action2DInterface act;
 	switch(tmp_action){
 	case (short)-3:
-			probabilisticMove(A_RANDOM); break;
+			act = A_RANDOM; break;
 	case (short)-2:
-			probabilisticMove(sumOfMostUniquePatchesActionSelection()); break;
+			act = hf->sumOfMostUniquePatchesActionSelection(); break;
 	case (short)-1:
-			probabilisticMove(mostUniquePatchActionSelection()); break;
+			act = hf->mostUniquePatchActionSelection(); break;
 	default:
-		probabilisticMove(mic::types::NESWAction((mic::types::NESW_action_type_t) (short)tmp_action));
+		act = mic::types::NESWAction((mic::types::NESW_action_type_t) (short)tmp_action);
 	}//: switch action
 
-
+	// Perform move.
+	hf->probabilisticMove(act, exact_move_probability, overshoot_move_probability, undershoot_move_probability);
 
 
 	// Get current observation.
-	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
-	sense(obs);
+	hf->sense(hit_factor, miss_factor);
 
 	// Update state.
-	updateAggregatedProbabilities();
+	hf->updateAggregatedProbabilities();
 
 	// Store collected data for visualization/export.
 	storeCurrentStateInDataContainers(false);

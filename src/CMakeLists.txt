@@ -28,6 +28,7 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 	add_executable(maze_of_digits_histogram_filter_app 
 		applications/HistogramFilterMazeLocalization.cpp
 		applications/console_application_main.cpp
+		algorithms/MazeHistogramFilter.cpp
 		data_io/MazeMatrixImporter.cpp
 		)
 	# Link it with shared libraries.

@@ -19,6 +19,8 @@ using namespace mic::opengl::visualization;
 
 #include <types/Action.hpp>
 
+#include <algorithms/MazeHistogramFilter.hpp>
+
 
 namespace mic {
 namespace applications {
@@ -59,29 +61,6 @@ protected:
 	virtual bool performSingleStep();
 
 	/*!
-	 * Perform "probabilistic" sensing - update probabilities basing on the current observation.
-	 * @param obs_ Current observation.
-	 */
-	void sense (short obs_);
-
-	/*!
-	 * Perform "deterministic" move.
-	 * @param ac_ Performed action.
-	 */
-	void move (mic::types::Action2DInterface ac_);
-
-	/*!
-	 * Perform "probabilistic" move.
-	 * @param ac_ Performed action.
-	 */
-	void probabilisticMove (mic::types::Action2DInterface ac_);
-
-	/*!
-	 * Assigns initial probabilities (uniform distribution) to all variables.
-	 */
-	void assignInitialProbabilities();
-
-	/*!
 	 * Creates data containers - for visualization/data export purposes.
 	 */
 	void createDataContainers();
@@ -91,24 +70,6 @@ protected:
 	 * @param synchronize_ If true enters critical section when adding data to containers.
 	 */
 	void storeCurrentStateInDataContainers(bool synchronize_);
-
-	/*!
-	 * Updates aggregated probabilities of current maze number, x and y coordinates.
-	 */
-	void updateAggregatedProbabilities();
-
-	/*!
-	 * Selects action based on analysis of current state and patch distributions.
-	 * The functions tries to find the maximum action utility, taking into consideration probabilities of being in given maze in given x,y-position.
-	 */
-	mic::types::Action2DInterface mostUniquePatchActionSelection();
-
-
-	/*!
-	 * Selects action based on analysis of current state and patch distributions.
-	 * The functions finds the maximum action utility, summing the results of taking given action taking into account the probabilities of being in given maze in given x,y-position.
-	 */
-	mic::types::Action2DInterface sumOfMostUniquePatchesActionSelection();
 
 private:
 
@@ -124,24 +85,8 @@ private:
 	/// Importer responsible for loading mazes from file.
 	mic::data_io::MazeMatrixImporter importer;
 
-	/// Vector of mazes - pointer to vector of mazes returned by importer.
-	std::vector<mic::types::MatrixXiPtr> mazes;
-
-	/// Variable storing the probability that we are in a given maze position.
-	std::vector<mic::types::MatrixXdPtr> maze_position_probabilities;
-
-
-	/// Variable storing the probability that we are currently moving in/observing a given maze.
-	std::vector<double> maze_probabilities;
-
-	/// Variable storing the probability that we are currently in a given x coordinate.
-	std::vector<double> maze_x_coordinate_probilities;
-
-	/// Variable storing the probability that we are currently in a given y coordinate.
-	std::vector<double> maze_y_coordinate_probilities;
-
-	/// Variable storing the probability that we can find given patch in a given maze.
-	std::vector<double> maze_patch_probabilities;
+	/// Histogram filter.
+	mic::algorithms::MazeHistogramFilter *hf;
 
 	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
 	mic::configuration::Property<short> hidden_maze_number;
@@ -152,14 +97,6 @@ private:
 	/// Property: variable denoting the y position are we right now (unknown, to be determined).
 	mic::configuration::Property<short> hidden_y;
 
-	/// Problem dimensions - number of mazes.
-	int number_of_mazes;
-
-	/// Problem dimensions - number of distinctive patches (in here - number of different digits, i.e. 10).
-	int number_of_distinctive_patches;
-
-	/// Problem dimensions - number of mazes * their width * their height.
-	int problem_dimensions;
 
 	/// Property: performed action (0-3: NESW, -3: random, -2: sumOfMostUniquePatchesActionSelection, -1: mostUniquePatchActionSelection).
 	mic::configuration::Property<short> action;
@@ -172,6 +109,7 @@ private:
 
 	/// Property: variable denoting the miss factor (the gain when the observation does not coincide with current position).
 	mic::configuration::Property<double> miss_factor;
+
 	/// Property: variable storing the probability that we made the exact move (x+dx).
 	mic::configuration::Property<double> exact_move_probability;
 
