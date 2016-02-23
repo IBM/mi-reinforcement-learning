@@ -9,8 +9,7 @@
 #define SRC_APPLICATION_EPISODICHISTOGRAMFILTERMAZELOCALIZATION_HPP_
 
 #include <opengl/application/OpenGLEpisodicApplication.hpp>
-
-#include <opengl/visualization/WindowChart.hpp>
+#include <opengl/visualization/WindowFloatCollectorChart.hpp>
 using namespace mic::opengl::visualization;
 
 #include <types/MatrixTypes.hpp>
@@ -75,8 +74,11 @@ protected:
 
 private:
 
+	/// Data collector.
+	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
+
 	/// Window for displaying chart with statistics on current maze number.
-	WindowChart* w_localization_time_chart;
+	WindowFloatCollectorChart* w_localization_time_chart;
 
 	/// Importer responsible for loading mazes from file.
 	mic::data_io::MazeMatrixImporter importer;

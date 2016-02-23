@@ -67,7 +67,8 @@ void EpisodicHistogramFilterMazeLocalization::initialize(int argc, char* argv[])
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_localization_time_chart = new WindowChart("Current_maze", 256, 256, 0, 0);
+	w_localization_time_chart = new WindowFloatCollectorChart("Current_maze", 256, 256, 0, 0);
+	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );//new mic::data_io::DataCollector<std::string, float>() );
 }
 
 void EpisodicHistogramFilterMazeLocalization::initializePropertyDependentVariables() {
@@ -85,14 +86,16 @@ void EpisodicHistogramFilterMazeLocalization::initializePropertyDependentVariabl
 		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (importer.getData()[m]);
 	}//: for
 
-
+	// Set mazes.
 	hf.setMazes(importer.getData(), 10);
 
+	// Create  data containers and add them to chart window.
+	w_localization_time_chart->setDataCollectorPtr(collector_ptr);
 
-	// Add containers to chart.
-	w_localization_time_chart->createDataContainer("Iteration", mic::types::color_rgba(255, 0, 0, 180));
-	w_localization_time_chart->createDataContainer("Converged", mic::types::color_rgba(0, 255, 0, 180));
-	w_localization_time_chart->createDataContainer("Max(Pm)", mic::types::color_rgba(0, 0, 255, 180));
+	collector_ptr->createContainer("Iteration", mic::types::color_rgba(255, 0, 0, 180));
+	collector_ptr->createContainer("Converged", mic::types::color_rgba(0, 255, 0, 180));
+	collector_ptr->createContainer("Max(Pm)", mic::types::color_rgba(0, 0, 255, 180));
+	std::cout << "collector.getContainers().size() = " << collector_ptr->getContainers().size() << std::endl;
 
 }
 
@@ -100,7 +103,7 @@ void EpisodicHistogramFilterMazeLocalization::initializePropertyDependentVariabl
 void EpisodicHistogramFilterMazeLocalization::startNewEpisode() {
 	LOG(LWARNING) << "Start new episode";
 
-	// Assign initial probabilities to all variables (uniform distribution).s
+	// Assign initial probabilities to all variables (uniform distribution).
 	hf.assignInitialProbabilities();
 
 	// Set hidden state to "original one".
@@ -117,13 +120,13 @@ void EpisodicHistogramFilterMazeLocalization::startNewEpisode() {
 void EpisodicHistogramFilterMazeLocalization::finishCurrentEpisode() {
 	LOG(LWARNING) << "End current episode";
 
-	w_localization_time_chart->addDataToContainer("Iteration", (double)iteration/max_number_of_iterations);
-	w_localization_time_chart->addDataToContainer("Max(Pm)", max_pm);
+	collector_ptr->addDataToContainer("Iteration", (double)iteration/max_number_of_iterations);
+	collector_ptr->addDataToContainer("Max(Pm)", max_pm);
 
 	if (iteration >= max_number_of_iterations)
-		w_localization_time_chart->addDataToContainer("Converged", 0);
+		collector_ptr->addDataToContainer("Converged", 0);
 	else
-		w_localization_time_chart->addDataToContainer("Converged", 1);
+		collector_ptr->addDataToContainer("Converged", 1);
 
 }
 
@@ -164,7 +167,6 @@ bool EpisodicHistogramFilterMazeLocalization::performSingleStep() {
 
 	// Update state.
 	hf.updateAggregatedProbabilities();
-
 
 	// Check terminal condition(s).
 

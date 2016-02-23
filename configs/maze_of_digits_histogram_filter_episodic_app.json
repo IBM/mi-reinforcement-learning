@@ -8,14 +8,14 @@
 		"hidden_x": "-1",
 		"hidden_y": "-1",
 		"epsilon": "0.0",
-		"action": "1",
+		"action": "-2",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
 		"exact_move_probability": "1.0",
 		"overshoot_move_probability": "0.0",
 		"undershoot_move_probability": "0.0",
 		"min_maze_confidence" : "0.9",
-		"max_number_of_iterations" : 10
+		"max_number_of_iterations" : 50
 	},
 	"maze_importer" : {
 		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/20mazes-28x28.csv"
