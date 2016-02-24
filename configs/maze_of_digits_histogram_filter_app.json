@@ -7,15 +7,16 @@
 		"hidden_maze": "-1",
 		"hidden_x": "-1",
 		"hidden_y": "-1",
-		"epsilon": "0.2",
-		"action": "1",
+		"epsilon": "0.0",
+		"action": "-3",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
 		"exact_move_probability": "1.0",
 		"overshoot_move_probability": "0.0",
-		"undershoot_move_probability": "0.0"
+		"undershoot_move_probability": "0.0",
+		"statistics_filename": "statistics-3mazes-3x3-actionR.csv"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/20mazes-28x28.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/3mazes-3x3.csv"
 	}
 }

@@ -7,6 +7,8 @@
 
 #include <algorithms/MazeHistogramFilter.hpp>
 
+#include <data_io/DataCollector.hpp>
+
 namespace mic {
 namespace algorithms {
 

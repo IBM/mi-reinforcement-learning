@@ -69,6 +69,12 @@ void EpisodicHistogramFilterMazeLocalization::initialize(int argc, char* argv[])
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_localization_time_chart = new WindowFloatCollectorChart("Current_maze", 256, 256, 0, 0);
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );//new mic::data_io::DataCollector<std::string, float>() );
+	w_localization_time_chart->setDataCollectorPtr(collector_ptr);
+
+	// Create  data containers and add them to chart window.
+	collector_ptr->createContainer("Iteration", mic::types::color_rgba(255, 0, 0, 180));
+	collector_ptr->createContainer("Converged", mic::types::color_rgba(0, 255, 0, 180));
+	collector_ptr->createContainer("Max(Pm)", mic::types::color_rgba(0, 0, 255, 180));
 }
 
 void EpisodicHistogramFilterMazeLocalization::initializePropertyDependentVariables() {
@@ -88,14 +94,6 @@ void EpisodicHistogramFilterMazeLocalization::initializePropertyDependentVariabl
 
 	// Set mazes.
 	hf.setMazes(importer.getData(), 10);
-
-	// Create  data containers and add them to chart window.
-	w_localization_time_chart->setDataCollectorPtr(collector_ptr);
-
-	collector_ptr->createContainer("Iteration", mic::types::color_rgba(255, 0, 0, 180));
-	collector_ptr->createContainer("Converged", mic::types::color_rgba(0, 255, 0, 180));
-	collector_ptr->createContainer("Max(Pm)", mic::types::color_rgba(0, 0, 255, 180));
-	std::cout << "collector.getContainers().size() = " << collector_ptr->getContainers().size() << std::endl;
 
 }
 
@@ -128,6 +126,8 @@ void EpisodicHistogramFilterMazeLocalization::finishCurrentEpisode() {
 	else
 		collector_ptr->addDataToContainer("Converged", 1);
 
+	// Export collected data.
+	collector_ptr->exportDataToCsv();
 }
 
 

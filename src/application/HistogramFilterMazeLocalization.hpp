@@ -18,6 +18,7 @@
 
 #include <opengl/application/OpenGLApplication.hpp>
 #include <opengl/visualization/WindowChart.hpp>
+#include <opengl/visualization/WindowFloatCollectorChart.hpp>
 using namespace mic::opengl::visualization;
 
 
@@ -82,8 +83,11 @@ private:
 	/// Window for displaying chart with statistics on current y coordinate.
 	WindowChart* w_current_coordinate_y;
 
+	/// Data collector with maximal maze/x/y/ probabilities.
+	mic::data_io::DataCollectorPtr<std::string, float> max_probabilities_collector_ptr;
+
 	/// Window for displaying chart with maximal maze/x/y/ probabilities.
-	WindowChart* w_current_max_probabilities;
+	WindowFloatCollectorChart * w_max_probabilities_chart;
 
 	/// Importer responsible for loading mazes from file.
 	mic::data_io::MazeMatrixImporter importer;
@@ -122,6 +126,8 @@ private:
 	/// Property: variable storing the probability that we made the "undershoot" move (d+dx-1).
 	mic::configuration::Property<double> undershoot_move_probability;
 
+	/// Property: name of the file to which the statistics will be exported.
+	mic::configuration::Property<std::string> statistics_filename;
 };
 
 } /* namespace application */

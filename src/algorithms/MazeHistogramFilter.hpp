@@ -102,21 +102,6 @@ private:
 	/// List of mazes.
 	std::vector<mic::types::MatrixXiPtr> mazes;
 
-	/// Variable storing the probability that we are in a given maze position.
-	std::vector<mic::types::MatrixXdPtr> maze_position_probabilities;
-
-	/// Variable storing the probability that we can find given patch in a given maze.
-	std::vector<double> maze_patch_probabilities;
-
-	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
-	int hidden_maze_number;
-
-	/// Property: variable denoting the x position are we right now (unknown, to be determined).
-	int hidden_x;
-
-	/// Property: variable denoting the y position are we right now (unknown, to be determined).
-	int hidden_y;
-
 	/// Problem dimensions - number of mazes.
 	unsigned int number_of_mazes;
 
@@ -134,6 +119,9 @@ private:
 
 public:
 
+	/// Variable storing the probability that we are in a given maze position.
+	std::vector<mic::types::MatrixXdPtr> maze_position_probabilities;
+
 	/// Variable storing the probability that we are currently moving in/observing a given maze.
 	std::vector<double> maze_probabilities;
 
@@ -142,6 +130,18 @@ public:
 
 	/// Variable storing the probability that we are currently in a given y coordinate.
 	std::vector<double> maze_y_coordinate_probilities;
+
+	/// Variable storing the probability that we can find given patch in a given maze.
+	std::vector<double> maze_patch_probabilities;
+
+	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
+	int hidden_maze_number;
+
+	/// Property: variable denoting the x position are we right now (unknown, to be determined).
+	int hidden_x;
+
+	/// Property: variable denoting the y position are we right now (unknown, to be determined).
+	int hidden_y;
 
 
 };

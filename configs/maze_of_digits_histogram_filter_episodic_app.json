@@ -8,7 +8,7 @@
 		"hidden_x": "-1",
 		"hidden_y": "-1",
 		"epsilon": "0.0",
-		"action": "-2",
+		"action": "0",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
 		"exact_move_probability": "1.0",
