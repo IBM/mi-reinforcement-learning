@@ -25,6 +25,10 @@ find_package(Boost 1.58 REQUIRED COMPONENTS system thread random)
 # Try to include Boost as system directory to suppress it's warnings
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
+# Find Eigen package
+find_package( Eigen3 REQUIRED )
+include_directories( ${EIGEN3_INCLUDE_DIR} )
+
 # Find MIC Toolchain
 find_package(MIToolchain REQUIRED)
 message("Found MI Toolchain libs: ${MIToolchain_LIBRARIES} ")

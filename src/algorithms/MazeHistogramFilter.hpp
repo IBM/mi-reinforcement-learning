@@ -98,6 +98,8 @@ public:
 	mic::types::Action2DInterface sumOfMostUniquePatchesActionSelection();
 
 
+	//void exportStatisticsToCsv()
+
 private:
 	/// List of mazes.
 	std::vector<mic::types::MatrixXiPtr> mazes;
