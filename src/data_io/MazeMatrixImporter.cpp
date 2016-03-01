@@ -71,8 +71,8 @@ bool MazeMatrixImporter::importData(){
 				unsigned row = i / maze_width;
 				unsigned col = i - ( row * maze_width);
 				// Set value
-				(*mat)(row, col) = value;
-				LOG(LDEBUG) << " " << i <<"("<< row<<","<< col <<")|" << value;
+				(*mat)(col, row) = value;
+				LOG(LDEBUG) << " " << i <<"("<< col<<","<< row <<")|" << value;
 				// Increment index.
 				i++;
 
