@@ -96,11 +96,26 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 
 	hf.setHiddenPose(hidden_maze_number, hidden_x, hidden_y);
 
-	// Assign initial probabilities to all variables (uniform distribution).s
+	// Assign initial probabilities to all variables (uniform distribution).
 	hf.assignInitialProbabilities();
 
 	// Export probabilities to file (truncate it).
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "observation distribution P(o)", hf.maze_patch_probabilities);
+
+	mic::data_io::DataCollector<std::string, int>::exportMatricesToCsv(statistics_filename, "mazes", importer.getData());
+
+	std::vector<std::string> maze_pose_labels;
+	for (size_t y=0; y < importer.getData()[0]->rows(); y++)
+		for (size_t x=0; x < importer.getData()[0]->cols(); x++) {
+			std::string label = "(" + std::to_string(y) + ";" + std::to_string(x) + ")";
+			maze_pose_labels.push_back(label);
+		}//: for
+	mic::data_io::DataCollector<std::string, std::string>::exportVectorToCsv(statistics_filename, "maze pose labels",maze_pose_labels, true);
+
+
+	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "observation distribution P(o)", hf.maze_patch_probabilities, true);
+	std::vector<int> obs_labels = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	mic::data_io::DataCollector<std::string, int>::exportVectorToCsv(statistics_filename, "observation labels",obs_labels, true);
+
 	mic::data_io::DataCollector<std::string, double>::exportMatricesToCsv(statistics_filename, "initial P(p)", hf.maze_position_probabilities, true);
 	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "initial P(m)", hf.maze_probabilities, true);
 	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "initial P(x)", hf.maze_x_coordinate_probilities, true);
@@ -118,6 +133,7 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 
 	// Get first observation.
 	hf.sense(hit_factor, miss_factor);
+	mic::data_io::DataCollector<std::string, short>::exportValueToCsv(statistics_filename, "First observation", hf.obs, true);
 
 	// Update aggregated probabilities.
 	hf.updateAggregatedProbabilities();
@@ -279,9 +295,11 @@ bool HistogramFilterMazeLocalization::performSingleStep() {
 	// Perform move.
 	hf.probabilisticMove(act, exact_move_probability, overshoot_move_probability, undershoot_move_probability);
 
-
 	// Get current observation.
 	hf.sense(hit_factor, miss_factor);
+
+	label = "Observation (after motion) at " + std::to_string(iteration);
+	mic::data_io::DataCollector<std::string, short>::exportValueToCsv(statistics_filename, label, hf.obs, true);
 
 	// Update state.
 	hf.updateAggregatedProbabilities();

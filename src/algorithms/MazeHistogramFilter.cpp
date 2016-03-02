@@ -130,7 +130,7 @@ void MazeHistogramFilter::assignInitialProbabilities() {
 void MazeHistogramFilter::sense (double hit_factor_, double miss_factor_) {
 
 	// Get observation.
-	short obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
+	obs =(*mazes[hidden_maze_number])(hidden_y, hidden_x);
 	LOG(LINFO) << "Current observation=" << obs;
 
 	// Compute posterior distribution given Z (observation) - total probability.

@@ -136,16 +136,17 @@ public:
 	/// Variable storing the probability that we can find given patch in a given maze.
 	std::vector<double> maze_patch_probabilities;
 
-	/// Property: variable denoting in which maze are we right now (unknown, to be determined).
+	/// shortariable denoting in which maze are we right now (unknown, to be determined).
 	int hidden_maze_number;
 
-	/// Property: variable denoting the x position are we right now (unknown, to be determined).
+	/// Variable denoting the x position are we right now (unknown, to be determined).
 	int hidden_x;
 
-	/// Property: variable denoting the y position are we right now (unknown, to be determined).
+	/// Variable denoting the y position are we right now (unknown, to be determined).
 	int hidden_y;
 
-
+	/// Current Observation.
+	short obs;
 };
 
 } /* namespace algorithms */

@@ -68,8 +68,8 @@ bool MazeMatrixImporter::importData(){
 			// Parse line and get consecutire values..
 			while (ss >> value) {
 				// Compute matrix index.
-				unsigned row = i / maze_width;
-				unsigned col = i - ( row * maze_width);
+				unsigned col = i / maze_width;
+				unsigned row = i - ( col * maze_width);
 				// Set value
 				(*mat)(col, row) = value;
 				LOG(LDEBUG) << " " << i <<"("<< col<<","<< row <<")|" << value;
