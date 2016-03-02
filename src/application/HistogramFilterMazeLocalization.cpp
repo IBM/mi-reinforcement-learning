@@ -61,8 +61,6 @@ HistogramFilterMazeLocalization::~HistogramFilterMazeLocalization() {
 
 
 void HistogramFilterMazeLocalization::initialize(int argc, char* argv[]) {
-	LOG(LSTATUS) << "In here you should initialize Glut and create all OpenGL windows";
-
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 

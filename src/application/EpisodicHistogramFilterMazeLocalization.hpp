@@ -124,6 +124,9 @@ private:
 
 	/// Maximum maze probability for given episode.
 	double max_pm;
+
+	/// Property: name of the file to which the statistics (convergence) will be exported.
+	mic::configuration::Property<std::string> statistics_filename;
 };
 
 

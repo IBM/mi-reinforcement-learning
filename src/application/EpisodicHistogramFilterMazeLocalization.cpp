@@ -32,7 +32,8 @@ EpisodicHistogramFilterMazeLocalization::EpisodicHistogramFilterMazeLocalization
 		overshoot_move_probability("overshoot_move_probability", 0.0),
 		undershoot_move_probability("undershoot_move_probability", 0.0),
 		max_number_of_iterations("max_number_of_iterations",100),
-		min_maze_confidence("min_maze_confidence",0.99)
+		min_maze_confidence("min_maze_confidence",0.99),
+		statistics_filename("statistics_filename","statistics_filename.csv")
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(hidden_maze_number);
@@ -51,6 +52,8 @@ EpisodicHistogramFilterMazeLocalization::EpisodicHistogramFilterMazeLocalization
 	registerProperty(max_number_of_iterations);
 	registerProperty(min_maze_confidence);
 
+	registerProperty(statistics_filename);
+
 	LOG(LINFO) << "Properties registered";
 }
 
@@ -61,8 +64,6 @@ EpisodicHistogramFilterMazeLocalization::~EpisodicHistogramFilterMazeLocalizatio
 
 
 void EpisodicHistogramFilterMazeLocalization::initialize(int argc, char* argv[]) {
-	LOG(LSTATUS) << "In here you should initialize Glut and create all OpenGL windows";
-
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
@@ -118,7 +119,7 @@ void EpisodicHistogramFilterMazeLocalization::startNewEpisode() {
 void EpisodicHistogramFilterMazeLocalization::finishCurrentEpisode() {
 	LOG(LWARNING) << "End current episode";
 
-	collector_ptr->addDataToContainer("Iteration", (double)iteration/max_number_of_iterations);
+	collector_ptr->addDataToContainer("Iteration", iteration);
 	collector_ptr->addDataToContainer("Max(Pm)", max_pm);
 
 	if (iteration >= max_number_of_iterations)
@@ -127,7 +128,12 @@ void EpisodicHistogramFilterMazeLocalization::finishCurrentEpisode() {
 		collector_ptr->addDataToContainer("Converged", 1);
 
 	// Export collected data.
-	collector_ptr->exportDataToCsv();
+	if ((long)number_of_episodes==0) {
+		// If number of episodes are not limited
+		collector_ptr->exportDataToCsv(statistics_filename);
+	} else if ( episode >= (long) number_of_episodes)
+		collector_ptr->exportDataToCsv(statistics_filename);
+
 }
 
 
