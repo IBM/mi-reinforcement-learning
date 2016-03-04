@@ -323,7 +323,7 @@ mic::types::Action2DInterface MazeHistogramFilter::mostUniquePatchActionSelectio
 					// Get patch probability.
 					double patch_prob = maze_patch_probabilities[patch];
 					// Check the action utility.
-					double action_utility = maze_probabilities[m] * maze_x_coordinate_probilities[x] * maze_y_coordinate_probilities[y] * (1- patch_prob);
+					double action_utility = (*maze_position_probabilities[m])(new_y, new_x) * (1- patch_prob);
 					LOG(LDEBUG) << "patch_prob= " << patch_prob << " action_utility=" << action_utility << std::endl;
 					if (action_utility > best_action_utility) {
 						best_action_utility = action_utility;
@@ -365,7 +365,7 @@ mic::types::Action2DInterface MazeHistogramFilter::sumOfMostUniquePatchesActionS
 					// Get patch probability.
 					double patch_prob = maze_patch_probabilities[patch];
 					// Check the action result.
-					double tmp_action_utility = maze_probabilities[m] * maze_x_coordinate_probilities[x] * maze_y_coordinate_probilities[y] * (1- patch_prob);
+					double tmp_action_utility = (*maze_position_probabilities[m])(new_y, new_x) * (1- patch_prob);
 					LOG(LDEBUG) << "patch_prob= " << patch_prob << " action_utility=" << tmp_action_utility << std::endl;
 
 					// Add action utility.

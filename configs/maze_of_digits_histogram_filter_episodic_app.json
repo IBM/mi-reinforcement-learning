@@ -8,7 +8,7 @@
 		"hidden_x": "-1",
 		"hidden_y": "-1",
 		"epsilon": "0.0",
-		"action": "2",
+		"action": "-1",
 		"hit_factor": "0.5",
 		"miss_factor": "0.1",
 		"exact_move_probability": "1.0",
@@ -17,9 +17,9 @@
 		"min_maze_confidence" : "0.9",
 		"max_number_of_iterations" : 50,
 		"number_of_episodes" : 20,
-		"statistics_filename": "convergence-10mazes-28x28-actionS-20iters.xls"
+		"statistics_filename": "convergence-1000mazes-28x28-action-unique-20iters.csv"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/10mazes-28x28.csv"
+		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/1000mazes-28x28.csv"
 	}
 }
