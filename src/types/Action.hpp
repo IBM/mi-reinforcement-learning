@@ -23,7 +23,8 @@ enum NESW_action_type_t
 	East, ///< Action east.
 	South, ///< Action south.
 	West, ///< Action west.
-	None ///< Empty action
+	None, ///< Empty action
+	Exit ///< Exit action
 };
 
 
@@ -156,6 +157,19 @@ private:
 
 
 /*!
+ * \brief Class representing an exit action.
+ * \author tkornuta
+ */
+class ExitAction : public mic::types::Action2DInterface {
+public:
+	/*!
+	 * Exit action constructor. Empty.
+	 */
+	ExitAction() : Action2DInterface() { };
+};
+
+
+/*!
  * \brief Macro returning NESWAction north.
  * \author tkornuta
  */
@@ -184,6 +198,13 @@ private:
  * \author tkornuta
  */
 #define A_RANDOM mic::types::RandomNESWAction()
+
+/*!
+ * \brief Macro returning RandomNESWAction .
+ * \author tkornuta
+ */
+#define A_EXIT mic::types::ExitAction()
+
 
 
 } /* namespace types */

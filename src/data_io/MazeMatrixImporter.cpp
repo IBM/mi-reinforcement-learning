@@ -65,7 +65,7 @@ bool MazeMatrixImporter::importData(){
 			int value;
 			size_t i = 0;
 			std::stringstream ss(line);
-			// Parse line and get consecutire values..
+			// Parse line and get consecutire values.
 			while (ss >> value) {
 				// Compute matrix index.
 				unsigned col = i / maze_width;
