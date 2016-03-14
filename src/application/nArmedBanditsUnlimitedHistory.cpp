@@ -5,9 +5,8 @@
  * \date Mar 14, 2016
  */
 
-#include <application/nBanditsApplication.hpp>
-
 #include  <data_utils/RandomGenerator.hpp>
+#include "nArmedBanditsUnlimitedHistory.hpp"
 
 namespace mic {
 namespace application {
@@ -17,13 +16,13 @@ namespace application {
  * \author tkornuta
  */
 void RegisterApplication (void) {
-	REGISTER_APPLICATION(mic::application::nBanditsApplication);
+	REGISTER_APPLICATION(mic::application::nArmedBanditsUnlimitedHistory);
 }
 
 
-nBanditsApplication::nBanditsApplication(std::string node_name_) : OpenGLApplication(node_name_),
+nArmedBanditsUnlimitedHistory::nArmedBanditsUnlimitedHistory(std::string node_name_) : OpenGLApplication(node_name_),
 		number_of_bandits("number_of_bandits", 10),
-		epsilon("epsilon", 0.0),
+		epsilon("epsilon", 0.1),
 		statistics_filename("statistics_filename","statistics_filename.csv")
 
 	{
@@ -36,12 +35,12 @@ nBanditsApplication::nBanditsApplication(std::string node_name_) : OpenGLApplica
 }
 
 
-nBanditsApplication::~nBanditsApplication() {
+nArmedBanditsUnlimitedHistory::~nArmedBanditsUnlimitedHistory() {
 
 }
 
 
-void nBanditsApplication::initialize(int argc, char* argv[]) {
+void nArmedBanditsUnlimitedHistory::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
@@ -56,7 +55,7 @@ void nBanditsApplication::initialize(int argc, char* argv[]) {
 
 }
 
-void nBanditsApplication::initializePropertyDependentVariables() {
+void nArmedBanditsUnlimitedHistory::initializePropertyDependentVariables() {
 	// Initialize random "arm" thresholds.
 	arms.resize(number_of_bandits);
 	for(int i=0; i<number_of_bandits; i++)
@@ -68,7 +67,7 @@ void nBanditsApplication::initializePropertyDependentVariables() {
 
 }
 
-short nBanditsApplication::calculateReward(float prob_) {
+short nArmedBanditsUnlimitedHistory::calculateReward(float prob_) {
     short reward = 0;
 	for(size_t i=0; i<number_of_bandits; i++) {
         if (RAN_GEN->uniRandReal() < prob_)
@@ -78,7 +77,7 @@ short nBanditsApplication::calculateReward(float prob_) {
 }
 
 
-short nBanditsApplication::selectBestArm() {
+short nArmedBanditsUnlimitedHistory::selectBestArm() {
 
 	// greedy method to select best arm based on memory array (historical results)
     short best_arm = 0;
@@ -108,7 +107,7 @@ short nBanditsApplication::selectBestArm() {
 }
 
 
-bool nBanditsApplication::performSingleStep() {
+bool nArmedBanditsUnlimitedHistory::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
 
 	short choice;

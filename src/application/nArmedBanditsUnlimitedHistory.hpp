@@ -5,8 +5,8 @@
  * \date Mar 14, 2016
  */
 
-#ifndef SRC_APPLICATION_NBANDITSAPPLICATION_HPP_
-#define SRC_APPLICATION_NBANDITSAPPLICATION_HPP_
+#ifndef SRC_APPLICATION_NARMEDBANDITSUNLIMITEDHISTORY_HPP_
+#define SRC_APPLICATION_NARMEDBANDITSUNLIMITEDHISTORY_HPP_
 
 #include <vector>
 
@@ -20,21 +20,21 @@ namespace mic {
 namespace application {
 
 /*!
- * \brief Class implementing a n-Armed Bandits problem.
+ * \brief Class implementing a n-Armed Bandits problem solving the n armed bandits problem based on unlimited history action selection (storing all action-value pairs).
  * \author tkornuta
  */
-class nBanditsApplication: public mic::opengl::application::OpenGLApplication {
+class nArmedBanditsUnlimitedHistory: public mic::opengl::application::OpenGLApplication {
 public:
 	/*!
 	 * Default Constructor. Sets the application/node name, default values of variables, initializes classifier etc.
 	 * @param node_name_ Name of the application/node (in configuration file).
 	 */
-	nBanditsApplication(std::string node_name_ = "application");
+	nArmedBanditsUnlimitedHistory(std::string node_name_ = "application");
 
 	/*!
 	 * Destructor.
 	 */
-	virtual ~nBanditsApplication();
+	virtual ~nArmedBanditsUnlimitedHistory();
 
 protected:
 	/*!
@@ -96,4 +96,4 @@ private:
 } /* namespace application */
 } /* namespace mic */
 
-#endif /* SRC_APPLICATION_NBANDITSAPPLICATION_HPP_ */
+#endif /* SRC_APPLICATION_NARMEDBANDITSUNLIMITEDHISTORY_HPP_ */

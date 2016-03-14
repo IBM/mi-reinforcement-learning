@@ -21,7 +21,7 @@ set(BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE ON CACHE BOOL "Build the ap
 
 set(BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC ON CACHE BOOL "Build the application for episodic testing of convergence of histogram filter based maze-of-digits localization.")
 
-set(BUILD_APP_N_ARMED_BANDITS ON CACHE BOOL "Build the application solving the n armed bandits problem.")
+set(BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY ON CACHE BOOL "Build the application solving the n armed bandits problem based on unlimited history action selection (storing all action-value pairs).")
 
 # =======================================================================
 # Build MI Reinforcement Learning Apps.
@@ -86,14 +86,14 @@ endif(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 
 
 
-if(${BUILD_APP_N_ARMED_BANDITS})
+if(${BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY})
 	# Create exeutable.
-	add_executable(narmed_bandits_app 
-		application/nBanditsApplication.cpp
+	add_executable(narmed_bandits_unlimited_history_app 
+		application/nArmedBanditsUnlimitedHistory.cpp
 		application/console_application_main.cpp
 		)
 	# Link it with shared libraries.
-	target_link_libraries(narmed_bandits_app 
+	target_link_libraries(narmed_bandits_unlimited_history_app 
 		logger
 		application
 		data_utils
@@ -104,7 +104,7 @@ if(${BUILD_APP_N_ARMED_BANDITS})
 		)
 
 	# install test to bin directory
-	install(TARGETS narmed_bandits_app RUNTIME DESTINATION bin)
+	install(TARGETS narmed_bandits_unlimited_history_app RUNTIME DESTINATION bin)
 	
-endif(${BUILD_APP_N_ARMED_BANDITS})
+endif(${BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY})
 
