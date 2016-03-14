@@ -8,6 +8,8 @@
 #ifndef SRC_APPLICATION_NBANDITSAPPLICATION_HPP_
 #define SRC_APPLICATION_NBANDITSAPPLICATION_HPP_
 
+#include <vector>
+
 #include <types/MatrixTypes.hpp>
 
 #include <opengl/application/OpenGLApplication.hpp>
@@ -63,6 +65,9 @@ private:
 	/// n Bandit arms.
 	mic::types::VectorXf arms;
 
+	/// Action values.
+	std::vector< std::pair<int, int> > action_values;
+
 	/// Property: number of bandits
 	mic::configuration::Property<short> number_of_bandits;
 
@@ -76,7 +81,14 @@ private:
 	 * Calculates the reward.
 	 * @param prob_  Probability.
 	 */
-	short reward(float prob_);
+	short calculateReward(float prob_);
+
+	//
+	/*!
+	 * Greedy method that selects best arm based on historical action-value pairs.
+	 */
+	short selectBestArm();
+
 
 };
 
