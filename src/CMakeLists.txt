@@ -25,6 +25,8 @@ set(BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY ON CACHE BOOL "Build the applica
 
 set(BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING ON CACHE BOOL "Build the application solving the n armed bandits problem using simple Q-learning rule.")
 
+set(BUILD_APP_N_ARMED_BANDITS_SOFTMAX ON CACHE BOOL "Build the application solving the n armed bandits problem using Softmax Action Selection.")
+
 # =======================================================================
 # Build MI Reinforcement Learning Apps.
 # =======================================================================
@@ -132,4 +134,28 @@ if(${BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING})
 	install(TARGETS narmed_bandits_simple_qlearning_app RUNTIME DESTINATION bin)
 	
 endif(${BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING})
+
+
+if(${BUILD_APP_N_ARMED_BANDITS_SOFTMAX})
+	# Create exeutable.
+	add_executable(narmed_bandits_softmax_app 
+		application/nArmedBanditsSofmax.cpp
+		application/console_application_main.cpp
+		)
+	# Link it with shared libraries.
+	target_link_libraries(narmed_bandits_softmax_app 
+		logger
+		application
+		data_utils
+		types
+		configuration
+		visualization_opengl
+		${Boost_LIBRARIES}  
+		)
+
+	# install test to bin directory
+	install(TARGETS narmed_bandits_softmax_app RUNTIME DESTINATION bin)
+	
+endif(${BUILD_APP_N_ARMED_BANDITS_SOFTMAX})
+
 

@@ -1,0 +1,12 @@
+{
+	"app_state": {
+		"application_sleep_interval": 1000,
+		"single_step_mode": 0
+	},
+	"narmed_bandits_softmax_app": {
+		"number_of_iterations" : 5000,
+		"number_of_bandits": 10,
+		"tau": 1.12,
+		"statistics_filename": "nbandits_softmax_convergence.csv"
+	}
+}
