@@ -1,0 +1,9 @@
+{
+	"app_state": {
+		"application_sleep_interval": "1000"
+	},
+	"narmed_bandits_app": {
+		"number_of_bandits": "10",
+		"epsilon": "0.1"
+	}
+}

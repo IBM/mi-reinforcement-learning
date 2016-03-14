@@ -60,6 +60,9 @@ private:
 	/// Reward collector.
 	mic::data_io::DataCollectorPtr<std::string, float> reward_collector_ptr;
 
+	/// n Bandit arms.
+	mic::types::VectorXf arms;
+
 	/// Property: number of bandits
 	mic::configuration::Property<short> number_of_bandits;
 
@@ -68,6 +71,13 @@ private:
 
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
+
+	/*!
+	 * Calculates the reward.
+	 * @param prob_  Probability.
+	 */
+	short reward(float prob_);
+
 };
 
 

@@ -54,10 +54,21 @@ void nBanditsApplication::initialize(int argc, char* argv[]) {
 }
 
 void nBanditsApplication::initializePropertyDependentVariables() {
-	// TODO
-
+	// Random "arm" thresholds.
+	arms.resize(number_of_bandits);
+	for(int i=0; i<number_of_bandits; i++)
+		arms[i] = RAN_GEN->uniRandReal();
+	std::cout << arms << std:: endl;
 }
 
+short nBanditsApplication::reward(float prob_) {
+    short reward = 0;
+	for(int i=0; i<number_of_bandits; i++) {
+        if (RAN_GEN->uniRandReal() < prob_)
+            reward += 1;
+	}//: for
+    return reward;
+}
 
 bool nBanditsApplication::performSingleStep() {
 	LOG(LINFO) << "Performing a single step (" << iteration << ")";
