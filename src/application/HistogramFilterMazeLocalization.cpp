@@ -6,7 +6,6 @@
  */
 
 #include <application/HistogramFilterMazeLocalization.hpp>
-#include <application/ApplicationFactory.hpp>
 
 #include <data_io/DataCollector.hpp>
 

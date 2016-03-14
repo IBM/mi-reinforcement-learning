@@ -5,7 +5,7 @@
  * \date Dec 30, 2015
  */
 
-#include <application/ApplicationFactory.hpp>
+#include <application/Application.hpp>
 
 #include <configuration/ParameterServer.hpp>
 

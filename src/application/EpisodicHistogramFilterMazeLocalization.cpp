@@ -6,7 +6,6 @@
  */
 
 #include <application/EpisodicHistogramFilterMazeLocalization.hpp>
-#include <application/ApplicationFactory.hpp>
 
 namespace mic {
 namespace application {
