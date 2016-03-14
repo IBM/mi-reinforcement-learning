@@ -23,6 +23,8 @@ set(BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC ON CACHE BOOL "Build the 
 
 set(BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY ON CACHE BOOL "Build the application solving the n armed bandits problem based on unlimited history action selection (storing all action-value pairs).")
 
+set(BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING ON CACHE BOOL "Build the application solving the n armed bandits problem using simple Q-learning rule.")
+
 # =======================================================================
 # Build MI Reinforcement Learning Apps.
 # =======================================================================
@@ -107,4 +109,27 @@ if(${BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY})
 	install(TARGETS narmed_bandits_unlimited_history_app RUNTIME DESTINATION bin)
 	
 endif(${BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY})
+
+
+if(${BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING})
+	# Create exeutable.
+	add_executable(narmed_bandits_simple_qlearning_app 
+		application/nArmedBanditsSimpleQlearning.cpp
+		application/console_application_main.cpp
+		)
+	# Link it with shared libraries.
+	target_link_libraries(narmed_bandits_simple_qlearning_app 
+		logger
+		application
+		data_utils
+		types
+		configuration
+		visualization_opengl
+		${Boost_LIBRARIES}  
+		)
+
+	# install test to bin directory
+	install(TARGETS narmed_bandits_simple_qlearning_app RUNTIME DESTINATION bin)
+	
+endif(${BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING})
 

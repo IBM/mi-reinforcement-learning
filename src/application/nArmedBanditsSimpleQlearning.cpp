@@ -1,12 +1,13 @@
 /*!
- * \file nBanditsApplication.cpp
+ * \file nArmedBanditsSimpleQlearning.cpp
  * \brief 
- * \author tkornuta
+ * \author tkornut
  * \date Mar 14, 2016
  */
 
+#include <application/nArmedBanditsSimpleQlearning.hpp>
+
 #include  <data_utils/RandomGenerator.hpp>
-#include <application/nArmedBanditsUnlimitedHistory.hpp>
 
 namespace mic {
 namespace application {
@@ -16,11 +17,11 @@ namespace application {
  * \author tkornuta
  */
 void RegisterApplication (void) {
-	REGISTER_APPLICATION(mic::application::nArmedBanditsUnlimitedHistory);
+	REGISTER_APPLICATION(mic::application::nArmedBanditsSimpleQlearning);
 }
 
 
-nArmedBanditsUnlimitedHistory::nArmedBanditsUnlimitedHistory(std::string node_name_) : OpenGLApplication(node_name_),
+nArmedBanditsSimpleQlearning::nArmedBanditsSimpleQlearning(std::string node_name_) : OpenGLApplication(node_name_),
 		number_of_bandits("number_of_bandits", 10),
 		epsilon("epsilon", 0.1),
 		statistics_filename("statistics_filename","statistics_filename.csv")
@@ -35,12 +36,12 @@ nArmedBanditsUnlimitedHistory::nArmedBanditsUnlimitedHistory(std::string node_na
 }
 
 
-nArmedBanditsUnlimitedHistory::~nArmedBanditsUnlimitedHistory() {
+nArmedBanditsSimpleQlearning::~nArmedBanditsSimpleQlearning() {
 
 }
 
 
-void nArmedBanditsUnlimitedHistory::initialize(int argc, char* argv[]) {
+void nArmedBanditsSimpleQlearning::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
@@ -55,19 +56,22 @@ void nArmedBanditsUnlimitedHistory::initialize(int argc, char* argv[]) {
 
 }
 
-void nArmedBanditsUnlimitedHistory::initializePropertyDependentVariables() {
+void nArmedBanditsSimpleQlearning::initializePropertyDependentVariables() {
 	// Initialize random "arm" thresholds.
 	arms.resize(number_of_bandits);
 	for(int i=0; i<number_of_bandits; i++)
 		arms[i] = RAN_GEN->uniRandReal();
 	//std::cout << arms << std:: endl;
 
-	// Initialize action value - add single row with random action index and value of 0.
-	action_values.push_back(std::make_pair(RAN_GEN->uniRandInt(0, number_of_bandits-1), 0));
+	// Initialize action values and counts.
+	action_values.resize(number_of_bandits);
+	action_counts.resize(number_of_bandits);
 
+	action_values.setOnes();
+	action_counts.setZero();
 }
 
-short nArmedBanditsUnlimitedHistory::calculateReward(float prob_) {
+short nArmedBanditsSimpleQlearning::calculateReward(float prob_) {
     short reward = 0;
 	for(size_t i=0; i<number_of_bandits; i++) {
         if (RAN_GEN->uniRandReal() < prob_)
@@ -77,56 +81,65 @@ short nArmedBanditsUnlimitedHistory::calculateReward(float prob_) {
 }
 
 
-short nArmedBanditsUnlimitedHistory::selectBestArm() {
-
-	// greedy method to select best arm based on memory array (historical results)
-    short best_arm = 0;
-    float best_mean = -1;
+short nArmedBanditsSimpleQlearning::selectBestArm() {
+	// Greedy methods - returns the index of element with greatest value.
+	short best_arm = 0;
+    float best_value = -1;
     // For all possible arms.
 	for(size_t i=0; i<number_of_bandits; i++) {
-		long sum = 0;
-		long no_actions=0;
-		for(auto av: action_values){
-			if (av.first == i) {
-				sum += av.second;
-				no_actions ++;
-			}
-		}//: for all action values
-		// Calculate mean reward for each action.
-		float mean_reward = (float) sum/no_actions;
-		//std::cout<< "mean_reward ["<< i <<"] = " << mean_reward <<std::endl;
 		// Check if this one is better than the others.
-		if (mean_reward > best_mean) {
-			best_mean = mean_reward;
+		if (action_values(i) > best_value) {
+			best_value = action_values(i);
 			best_arm = i;
-			//std::cout<< "found best reward = " << best_mean <<" for arm" << best_arm <<std::endl;
 		}//: if
 	}//: for
-	//std::cout<< "best arm = " << best_arm <<std::endl;
     return best_arm;
 }
 
 
-bool nArmedBanditsUnlimitedHistory::performSingleStep() {
+bool nArmedBanditsSimpleQlearning::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
+
+	std::cout<< "hidden state (arms)=";
+	for (size_t i=0; i<number_of_bandits; i++)
+		std::cout << arms[i] << ", ";
+	std::cout << std::endl;
+
+	std::cout << "action_counts=" ;
+	for (size_t i=0; i<number_of_bandits; i++)
+		std::cout << action_counts[i] << ", ";
+	std::cout << std::endl;
+
+	std::cout<< "action_values=";
+	for (size_t i=0; i<number_of_bandits; i++)
+		std::cout << action_values[i] << ", ";
+	std::cout << std::endl;
+
 
 	short choice;
 	// Epsilon-greedy action selection.
 	if (RAN_GEN->uniRandReal() > (double)epsilon){
 		// Select best action.
 		choice = selectBestArm();
+		std::cout<< "best choice=" << choice << std::endl;
 	} else {
 		//std::cout << "Random action!" << std::endl;
 		// Random arm selection.
         choice = RAN_GEN->uniRandInt(0, number_of_bandits-1);
+    	std::cout<< "random choice=" << choice << std::endl;
 	}//: if
 
-	// Calculate reward.
-	//std::cout << "choice = " << choice << " arms[choice]=" << arms[choice] << std::endl;
-	short reward = calculateReward(arms[choice]);
-	// Add results to the memory.
-	action_values.push_back(std::make_pair(choice, reward));
 
+	// Calculate reward.
+	float reward = calculateReward(arms[choice]);
+	std::cout<< "reward= " << reward << std::endl;
+
+	// Update running average for given action - Q learning;)
+	action_counts[choice] +=1;
+	std::cout<< "action_values[choice]"  << action_values[choice] << "  (1.0/action_counts[choice])=" << (1.0/action_counts[choice]) << " (reward - action_values[choice])=" <<  (reward - action_values[choice]) << std::endl;
+
+	action_values[choice] =  action_values[choice] + (1.0/action_counts[choice]) * (reward - action_values[choice]);
+	std::cout<< "action_values[choice] po = "  << action_values[choice] << std::endl;
 	// Calculate the percentage the correct arm is chosen.
 	short max_arm = -1;
 	float max_arm_prob = -1;
@@ -136,21 +149,15 @@ bool nArmedBanditsUnlimitedHistory::performSingleStep() {
 			max_arm = i;
 		}//: if
 	}//: for
-	long correct_arm =0;
-	for(auto av: action_values){
-		if (av.first == max_arm)
-			correct_arm++;
-	}//: for all action values
-	float correct_arms_percentage = 100.0*correct_arm/(action_values.size()-1);
+	float correct_arms_percentage = 100.0*(action_counts[max_arm])/((float)iteration);
+	std::cout<< "correct arm/choice=" << max_arm << std::endl;
 
 	// Calculate the mean reward.
 	float running_mean_reward = 0;
-	//std::cout << "action_values= \n";
-	for(auto av: action_values){
-		//std::cout << av.first << ", " << av.second << std::endl;
-		running_mean_reward += av.second;
+	for (size_t i=0; i<number_of_bandits; i++) {
+		running_mean_reward += (float)action_values[i] * (float)action_counts[i];
 	}//: for all action values
-	running_mean_reward /= (action_values.size()-1);
+	running_mean_reward /= (float)iteration;
 
 	// Add variables to container.
 	reward_collector_ptr->addDataToContainer("average_reward",running_mean_reward);
