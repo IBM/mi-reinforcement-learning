@@ -81,17 +81,25 @@ private:
 	mic::configuration::Property<std::string> statistics_filename;
 
 	/*!
+	 * The best arm (hidden state).
+	 */
+	short best_arm = -1;
+
+	/*!
+	 * The best arm probability/"reward" (hidden state).
+	 */
+	float best_arm_prob = -1;
+
+	/*!
 	 * Calculates the reward.
 	 * @param prob_  Probability.
 	 */
 	short calculateReward(float prob_);
 
-	//
 	/*!
 	 * Greedy method that selects best arm based on historical action-value pairs.
 	 */
 	short selectBestArm();
-
 
 };
 

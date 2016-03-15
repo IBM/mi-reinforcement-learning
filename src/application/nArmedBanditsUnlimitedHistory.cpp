@@ -48,6 +48,7 @@ void nArmedBanditsUnlimitedHistory::initialize(int argc, char* argv[]) {
 	// Add containers to collector.
 	reward_collector_ptr->createContainer("average_reward", 0, 10, mic::types::color_rgba(255, 0, 0, 180));
 	reward_collector_ptr->createContainer("correct_arms_percentage", 0, 100, mic::types::color_rgba(0, 255, 0, 180));
+	reward_collector_ptr->createContainer("best_possible_reward", 0, 10, mic::types::color_rgba(0, 0, 255, 180));
 
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_reward = new WindowFloatCollectorChart("nBandits", 256, 256, 0, 0);
@@ -61,6 +62,16 @@ void nArmedBanditsUnlimitedHistory::initializePropertyDependentVariables() {
 	for(int i=0; i<number_of_bandits; i++)
 		arms[i] = RAN_GEN->uniRandReal();
 	//std::cout << arms << std:: endl;
+
+	// Find the best arm.
+	best_arm = -1;
+	best_arm_prob = -1;
+	for (size_t i=0; i<number_of_bandits; i++) {
+		if (arms[i] > best_arm_prob){
+			best_arm_prob = arms[i];
+			best_arm = i;
+		}//: if
+	}//: for
 
 	// Initialize action value - add single row with random action index and value of 0.
 	action_values.push_back(std::make_pair(RAN_GEN->uniRandInt(0, number_of_bandits-1), 0));
@@ -128,17 +139,10 @@ bool nArmedBanditsUnlimitedHistory::performSingleStep() {
 	action_values.push_back(std::make_pair(choice, reward));
 
 	// Calculate the percentage the correct arm is chosen.
-	short max_arm = -1;
-	float max_arm_prob = -1;
-	for (size_t i=0; i<number_of_bandits; i++) {
-		if (arms[i] > max_arm_prob){
-			max_arm_prob = arms[i];
-			max_arm = i;
-		}//: if
-	}//: for
+//	std::cout<< "correct arm/choice=" << best_arm << std::endl;
 	long correct_arm =0;
 	for(auto av: action_values){
-		if (av.first == max_arm)
+		if (av.first == best_arm)
 			correct_arm++;
 	}//: for all action values
 	float correct_arms_percentage = 100.0*correct_arm/(action_values.size()-1);
@@ -155,6 +159,7 @@ bool nArmedBanditsUnlimitedHistory::performSingleStep() {
 	// Add variables to container.
 	reward_collector_ptr->addDataToContainer("average_reward",running_mean_reward);
 	reward_collector_ptr->addDataToContainer("correct_arms_percentage",correct_arms_percentage);
+	reward_collector_ptr->addDataToContainer("best_possible_reward",10.0*best_arm_prob);
 
 	// Export reward "convergence" diagram.
 	reward_collector_ptr->exportDataToCsv(statistics_filename);

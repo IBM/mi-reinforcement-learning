@@ -1,12 +1,12 @@
 {
 	"app_state": {
 		"application_sleep_interval": 1000,
-		"single_step_mode": 1
+		"single_step_mode": 0
 	},
 	"narmed_bandits_unlimited_history_app": {
 		"number_of_iterations" : 5000,
 		"number_of_bandits": 10,
-		"epsilon": 0.1,
+		"epsilon": 0.5,
 		"statistics_filename": "nbandits_unlimited_history_convergence.csv"
 	}
 }
