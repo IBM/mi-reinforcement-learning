@@ -1,6 +1,6 @@
 /*!
  * \file nBanditsApplication.hpp
- * \brief 
+ * \brief Contains declaration of a class implementing a n-Armed Bandits problem solving the n armed bandits problem based on unlimited history action selection (storing all action-value pairs).
  * \author tkornut
  * \date Mar 14, 2016
  */
