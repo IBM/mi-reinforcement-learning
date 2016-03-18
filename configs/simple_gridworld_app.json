@@ -1,9 +1,9 @@
 {
 	"app_state": {
 		"application_sleep_interval": "1",
-		"single_step_mode": 0
+		"single_step_mode": 1
 	},
 	"simple_gridworld_app": {
-		"init_type": "0"
+		"gridworld_type": 3
 	}
 }

@@ -22,16 +22,19 @@ void RegisterApplication (void) {
 
 
 SimpleGridworld::SimpleGridworld(std::string node_name_) : OpenGLApplication(node_name_),
-		init_type("init_type", 0),
+		gridworld_type("gridworld_type", 0),
 		width("width", 4),
 		height("height", 4),
+		step_reward("step_reward", 0.0),
+		discount_factor("discount_factor", 0.1),
 		statistics_filename("statistics_filename","statistics_filename.csv")
 
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
-	registerProperty(init_type);
+	registerProperty(gridworld_type);
 	registerProperty(width);
-	registerProperty(height);
+	registerProperty(step_reward);
+	registerProperty(discount_factor);
 	registerProperty(statistics_filename);
 
 	LOG(LINFO) << "Properties registered";
@@ -61,11 +64,28 @@ void SimpleGridworld::initialize(int argc, char* argv[]) {
 
 void SimpleGridworld::initializePropertyDependentVariables() {
 	// Initialize gridworld.
-	initClassicCliffGrid();
+	switch(gridworld_type) {
+		case 0 : initExemplaryGrid(); break;
+		case 1 : initClassicCliffGrid(); break;
+		case 2 : initDiscountGrid(); break;
+		case 3 : initBridgeGrid(); break;
+		case 4 : initBookGrid(); break;
+		case 5 : initMazeGrid(); break;
+		case -1:
+		default: initRandomGrid();
+	}//: switch
+
+	LOG(LSTATUS) << std::endl << streamGrid();
 }
 
 
 void SimpleGridworld::initExemplaryGrid() {
+	LOG(LINFO) << "Generating exemplary gridworld";
+	// [[' ',' ',' ',' '],
+	//  ['S',-10,' ',' '],
+	//  [' ','','#',' '],
+	//  [' ',' ',' ',10]]
+
 	// Set gridworld size.
 	gridworld.resize({width, height, 4});
 	gridworld.zeros();
@@ -85,6 +105,7 @@ void SimpleGridworld::initExemplaryGrid() {
 
 
 void SimpleGridworld::initClassicCliffGrid() {
+	LOG(LINFO) << "Generating classic cliff gridworld";
 	// [[' ',' ',' ',' ',' '],
 	//  ['S',' ',' ',' ',10],
 	//  [-100,-100, -100, -100, -100]]
@@ -108,40 +129,140 @@ void SimpleGridworld::initClassicCliffGrid() {
 	gridworld({4,1, (size_t)GridworldChannels::Goal}) = 10;
 }
 
-/*def getCliffGrid2():
-    grid = [[' ',' ',' ',' ',' '],
-            [8,'S',' ',' ',10],
-            [-100,-100, -100, -100, -100]]
-    return Gridworld(grid)
+void SimpleGridworld::initDiscountGrid() {
+	LOG(LINFO) << "Generating classic discount gridworld";
+	// [[' ',' ',' ',' ',' '],
+	//  [' ','#',' ',' ',' '],
+	//  [' ','#', 1,'#', 10],
+	//   ['S',' ',' ',' ',' '],
+	//   [-10,-10, -10, -10, -10]]
 
-def getDiscountGrid():
-    grid = [[' ',' ',' ',' ',' '],
-            [' ','#',' ',' ',' '],
-            [' ','#', 1,'#', 10],
-            ['S',' ',' ',' ',' '],
-            [-10,-10, -10, -10, -10]]
-    return Gridworld(grid)
+	// Overwrite dimensions.
+	width = 5;
+	height = 5;
 
-def getBridgeGrid():
-    grid = [[ '#',-100, -100, -100, -100, -100, '#'],
-            [   1, 'S',  ' ',  ' ',  ' ',  ' ',  10],
-            [ '#',-100, -100, -100, -100, -100, '#']]
-    return Gridworld(grid)
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
 
-def getBookGrid():
-    grid = [[' ',' ',' ',+1],
-            [' ','#',' ',-1],
-            ['S',' ',' ',' ']]
-    return Gridworld(grid)
+	// Place the player.
+	gridworld({0,3, (size_t)GridworldChannels::Player}) = 1;
 
-def getMazeGrid():
-    grid = [[' ',' ',' ',+1],
-            ['#','#',' ','#'],
-            [' ','#',' ',' '],
-            [' ','#','#',' '],
-            ['S',' ',' ',' ']]
-    return Gridworld(grid)*/
+	// Place pits.
+	for(size_t x=0; x<width; x++)
+		gridworld({x,4, (size_t)GridworldChannels::Pit}) = -10;
 
+	// Place wall(s).
+	gridworld({1,1, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({1,2, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({3,2, (size_t)GridworldChannels::Wall}) = 1;
+
+	// Place goal(s).
+	gridworld({2,2, (size_t)GridworldChannels::Goal}) = 1;
+	gridworld({4,2, (size_t)GridworldChannels::Goal}) = 10;
+}
+
+
+void SimpleGridworld::initBridgeGrid() {
+	LOG(LINFO) << "Generating classic bridge gridworld";
+	// [[ '#',-100, -100, -100, -100, -100, '#'],
+	//  [   1, 'S',  ' ',  ' ',  ' ',  ' ',  10],
+	//  [ '#',-100, -100, -100, -100, -100, '#']]
+
+	// Overwrite dimensions.
+	width = 7;
+	height = 3;
+
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
+
+	// Place the player.
+	gridworld({1,1, (size_t)GridworldChannels::Player}) = 1;
+
+	// Place pits.
+	for(size_t x=1; x<width-1; x++) {
+		gridworld({x,0, (size_t)GridworldChannels::Pit}) = -100;
+		gridworld({x,2, (size_t)GridworldChannels::Pit}) = -100;
+	}//: for
+
+	// Place wall(s).
+	gridworld({0,0, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({0,2, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({6,0, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({6,2, (size_t)GridworldChannels::Wall}) = 1;
+
+	// Place goal(s).
+	gridworld({0,1, (size_t)GridworldChannels::Goal}) = 1;
+	gridworld({6,1, (size_t)GridworldChannels::Goal}) = 10;
+}
+
+
+void SimpleGridworld::initBookGrid() {
+	LOG(LINFO) << "Generating classic book gridworld!!";
+	// [[' ',' ',' ',+1],
+	//  [' ','#',' ',-1],
+	//  ['S',' ',' ',' ']]
+
+	// Overwrite dimensions.
+	width = 4;
+	height = 3;
+
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
+
+	// Place the player.
+	gridworld({0,2, (size_t)GridworldChannels::Player}) = 1;
+
+	// Place wall(s).
+	gridworld({1,1, (size_t)GridworldChannels::Wall}) = 1;
+
+	// Place pit(s).
+	gridworld({3,1, (size_t)GridworldChannels::Pit}) = -1;
+
+	// Place goal(s).
+	gridworld({3,0, (size_t)GridworldChannels::Goal}) = 1;
+}
+
+
+void SimpleGridworld::initMazeGrid() {
+	LOG(LINFO) << "Generating classic maze gridworld";
+	// [[' ',' ',' ',+1],
+	//  ['#','#',' ','#'],
+	//  [' ','#',' ',' '],
+	//  [' ','#','#',' '],
+	//  ['S',' ',' ',' ']]
+
+	// Overwrite dimensions.
+	width = 4;
+	height = 5;
+
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
+
+	// Place the player.
+	gridworld({0,4, (size_t)GridworldChannels::Player}) = 1;
+
+	// Place wall(s).
+	gridworld({0,1, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({1,1, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({1,2, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({1,3, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({2,3, (size_t)GridworldChannels::Wall}) = 1;
+	gridworld({3,1, (size_t)GridworldChannels::Wall}) = 1;
+
+	// Place goal(s).
+	gridworld({3,0, (size_t)GridworldChannels::Goal}) = 1;
+}
+
+
+void SimpleGridworld::initRandomGrid() {
+	// TODO!
+	LOG(LFATAL) << "initRandomGrid() not implemented!";
+	exit(1);
+}
 
 mic::types::Tensor<char> SimpleGridworld::flattenGrid() {
 	mic::types::Tensor<char> grid;
@@ -202,12 +323,12 @@ short SimpleGridworld::calculateReward() {
 	mic::types::Position2D player_position = getPlayerPosition();
     if (gridworld({(size_t)player_position.x, (size_t)player_position.y, (size_t)GridworldChannels::Pit}) != 0)
     	// Pit.
-        return -10;
+        return gridworld({(size_t)player_position.x, (size_t)player_position.y, (size_t)GridworldChannels::Pit});
     else if (gridworld({(size_t)player_position.x, (size_t)player_position.y, (size_t)GridworldChannels::Goal}) != 0)
     	// Goal.
-        return 10;
+        return gridworld({(size_t)player_position.x, (size_t)player_position.y, (size_t)GridworldChannels::Goal});
     else
-        return -1;
+        return step_reward;
 }
 
 bool SimpleGridworld::isPositionAllowed(long x, long y) {

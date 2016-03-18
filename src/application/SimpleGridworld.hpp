@@ -81,11 +81,15 @@ private:
 	/// Tensor storing the 3D Gridworld (x + y + each "depth" channel representing the
 	mic::types::TensorXf gridworld;
 
-	/// Property: type of initialization:
-	/// 0: stationary grid and all items (wall, goal and pit, player) placed deterministically
-	/// 1: stationary grid, all items placed (wall, goal and pit) deterministically except player (placed randomly)
-	/// 2: stationary grid, all items (wall, goal and pit, player) placed randomly
-	mic::configuration::Property<short> init_type;
+	/// Property: type of mgridworld:
+	/// 0: the exemplary grid 4x3.
+	/// 1: the classic cliff grid 5x3.
+	/// 2: the classic discount grid 5x5.
+	/// 3: the classic bridge grid 7x3.
+	/// 4: the classic book grid 4x4.
+	/// 5: the classic maze grid 4x4.
+	/// -1 (or else): random grid - all items (wall, goal and pit, player) placed randomly
+	mic::configuration::Property<short> gridworld_type;
 
 	/// Property: width of gridworld.
 	mic::configuration::Property<size_t> width;
@@ -94,20 +98,82 @@ private:
 	mic::configuration::Property<size_t> height;
 
 
+	/*!
+	 * Property: step rewared, i.e. reward received by performing each step (typically negative).
+	 */
+	mic::configuration::Property<float> step_reward;
+
+	/*!
+	 * Property: discount factor (should be in range 0.0-1.0).
+	 */
+	mic::configuration::Property<float> discount_factor;
+
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
 
-	/// Method initializes the stationary grid, i.e. all items are placed deterministically.
+	/*!
+	 * 	Method initializes the exemplary grid.
+	 *
+	 * [[' ',' ',' ',' '],
+	 *  ['S',-10,' ',' '],
+	 *  [' ','','#',' '],
+	 *  [' ',' ',' ',10]]
+	 */
 	void initExemplaryGrid();
 
 	/*!
 	 * Initializes the classic cliff gridworld.
+	 *
 	 * [[' ',' ',' ',' ',' '],
 	 *  ['S',' ',' ',' ',10],
 	 *  [-100,-100, -100, -100, -100]]
 	 */
 	void initClassicCliffGrid();
 
+	/*!
+	 * Initializes the classic discount gridworld.
+	 *
+	 * [[' ',' ',' ',' ',' '],
+	 *  [' ','#',' ',' ',' '],
+	 *  [' ','#', 1,'#', 10],
+	 *   ['S',' ',' ',' ',' '],
+	 *   [-10,-10, -10, -10, -10]]
+	 */
+	void initDiscountGrid();
+
+	/*!
+	 * Initializes the classic discount gridworld.
+	 *
+	 * [[ '#',-100, -100, -100, -100, -100, '#'],
+	 *  [   1, 'S',  ' ',  ' ',  ' ',  ' ',  10],
+	 *  [ '#',-100, -100, -100, -100, -100, '#']]
+	 */
+	void initBridgeGrid();
+
+	/*!
+	 * Initializes the classic Book gridworld - example from Sutton&Barto book on RL.
+	 *
+	 * [[' ',' ',' ',+1],
+	 *  [' ','#',' ',-1],
+	 *  ['S',' ',' ',' ']]
+	 */
+	void initBookGrid();
+
+	/*!
+	 * Initializes the classic maze gridworld.
+	 *
+	 * [[' ',' ',' ',+1],
+	 *  ['#','#',' ','#'],
+	 *  [' ','#',' ',' '],
+	 *  [' ','#','#',' '],
+	 *  ['S',' ',' ',' ']]
+	 */
+	void initMazeGrid();
+
+	/*!
+	 * Generates a random grid of size (width x height).
+	 */
+	void initRandomGrid();
 
 	/*!
 	 * Returns the (flattened, i.e. 2D) grid of characters.
