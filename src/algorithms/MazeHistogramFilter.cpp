@@ -177,7 +177,7 @@ void MazeHistogramFilter::sense (double hit_factor_, double miss_factor_) {
 }
 
 void MazeHistogramFilter::move (mic::types::Action2DInterface ac_) {
-	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
+	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy << "," <<ac_.dx<< ")";
 
 	// For all mazes.
 	for (size_t m=0; m<number_of_mazes; m++) {
@@ -192,7 +192,7 @@ void MazeHistogramFilter::move (mic::types::Action2DInterface ac_) {
 		for (size_t y=0; y<maze_height; y++) {
 			for (size_t x=0; x<maze_width; x++) {
 				//std::cout << "i=" << i << " j=" << j << " dx=" << dx_ << " dy=" << dy_ << " (i - dx_) % 3 = " << (i +3 - dx_) % 3 << " (j - dy_) % 3=" << (j + 3 - dy_) % 3 << std::endl;
-				(*pos_probs)((y + maze_height +  ac_.dy()) %maze_height, (x +maze_width +  ac_.dx()) % maze_width) = old_pose_probs(y, x);
+				(*pos_probs)((y + maze_height +  ac_.dy) %maze_height, (x +maze_width +  ac_.dx) % maze_width) = old_pose_probs(y, x);
 
 			}//: for j
 		}//: for i
@@ -203,8 +203,8 @@ void MazeHistogramFilter::move (mic::types::Action2DInterface ac_) {
 	}//: for m
 
 	// Perform the REAL move.
-	hidden_y = (hidden_y + maze_height +  ac_.dy()) % maze_height;
-	hidden_x = (hidden_x + maze_width +  ac_.dx()) % maze_width;
+	hidden_y = (hidden_y + maze_height +  ac_.dy) % maze_height;
+	hidden_x = (hidden_x + maze_width +  ac_.dx) % maze_width;
 
 	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
 
@@ -212,7 +212,7 @@ void MazeHistogramFilter::move (mic::types::Action2DInterface ac_) {
 
 void MazeHistogramFilter::probabilisticMove (mic::types::Action2DInterface ac_, double exact_move_probability_, double overshoot_move_probability_, double undershoot_move_probability_) {
 
-	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy() << "," <<ac_.dx()<< ")";
+	LOG(LINFO) << "Current move dy,dx= ( " << ac_.dy << "," <<ac_.dx<< ")";
 
 	// For all mazes.
 	for (size_t m=0; m<number_of_mazes; m++) {
@@ -225,13 +225,13 @@ void MazeHistogramFilter::probabilisticMove (mic::types::Action2DInterface ac_, 
 		// Iterate through position probabilities and update them.
 		for (size_t y=0; y<maze_height; y++) {
 			for (size_t x=0; x<maze_width; x++) {
-				size_t exact_y = (y + maze_height +  ac_.dy()) %maze_height;
-				size_t overshoot_y = (y + maze_height +  ac_.dy() + 1) %maze_height;
-				size_t undershoot_y = (y + maze_height +  ac_.dy() - 1) %maze_height;
+				size_t exact_y = (y + maze_height +  ac_.dy) %maze_height;
+				size_t overshoot_y = (y + maze_height +  ac_.dy + 1) %maze_height;
+				size_t undershoot_y = (y + maze_height +  ac_.dy - 1) %maze_height;
 
-				size_t exact_x = (x + maze_width +  ac_.dx()) %maze_width;
-				size_t overshoot_x = (x + maze_width +  ac_.dx() + 1) %maze_width;
-				size_t undershoot_x = (x + maze_width +  ac_.dx() - 1) %maze_width;
+				size_t exact_x = (x + maze_width +  ac_.dx) %maze_width;
+				size_t overshoot_x = (x + maze_width +  ac_.dx + 1) %maze_width;
+				size_t undershoot_x = (x + maze_width +  ac_.dx - 1) %maze_width;
 
 				(*pos_probs)(exact_y, exact_x) += exact_move_probability_  * old_pose_probs(y, x);
 				(*pos_probs)(overshoot_y, overshoot_x) += overshoot_move_probability_  * old_pose_probs(y, x);
@@ -246,8 +246,8 @@ void MazeHistogramFilter::probabilisticMove (mic::types::Action2DInterface ac_, 
 	}//: for m
 
 	// Perform the REAL move.
-	hidden_y = (hidden_y + maze_height +  ac_.dy()) % maze_height;
-	hidden_x = (hidden_x + maze_width +  ac_.dx()) % maze_width;
+	hidden_y = (hidden_y + maze_height +  ac_.dy) % maze_height;
+	hidden_x = (hidden_x + maze_width +  ac_.dx) % maze_width;
 
 	LOG(LWARNING) << "Hidden position in maze " << hidden_maze_number << "= (" << hidden_y << "," << hidden_x << ")";
 }
@@ -306,7 +306,7 @@ mic::types::Action2DInterface MazeHistogramFilter::mostUniquePatchActionSelectio
 
 	// Calculate probabilities of all actions.
 	for (size_t act_t=0; act_t < 4; act_t++) {
-		mic::types::NESWAction ac((types::NESW_action_type_t)act_t);
+		mic::types::NESWAction ac((types::NESW)act_t);
 
 		// Check the score of a given action.
 		for (size_t m=0; m<number_of_mazes; m++) {
@@ -315,8 +315,8 @@ mic::types::Action2DInterface MazeHistogramFilter::mostUniquePatchActionSelectio
 				for (size_t x=0; x<maze_width; x++) {
 					// Check result of the next motion.
 					// Compute resulting coordinates.
-					size_t new_y = (y + maze_height + ac.dy()) % maze_height;
-					size_t new_x = (x + maze_width + ac.dx()) % maze_width;
+					size_t new_y = (y + maze_height + ac.dy) % maze_height;
+					size_t new_x = (x + maze_width + ac.dx) % maze_width;
 					// Get image patch.
 					short patch = (*mazes[m])(new_y, new_x);
 					LOG(LDEBUG) << "maze [" << m << "] (y=" << y <<",x="<< x <<") move="<< act_t << "=> (y+dy=" << new_y << ",x+dx=" << new_x <<") patch=" << patch << std::endl;
@@ -336,7 +336,7 @@ mic::types::Action2DInterface MazeHistogramFilter::mostUniquePatchActionSelectio
 		}//: for each maze
 	}//: for each action type
 
-	mic::types::NESWAction a((types::NESW_action_type_t) best_action);
+	mic::types::NESWAction a((types::NESW) best_action);
 	return a;
 }
 
@@ -348,7 +348,7 @@ mic::types::Action2DInterface MazeHistogramFilter::sumOfMostUniquePatchesActionS
 
 	// Calculate probabilities of all actions.
 	for (size_t act_t=0; act_t < 4; act_t++) {
-		mic::types::NESWAction ac((types::NESW_action_type_t)act_t);
+		mic::types::NESWAction ac((types::NESW)act_t);
 
 		// Check the score of a given action.
 		for (size_t m=0; m<number_of_mazes; m++) {
@@ -357,8 +357,8 @@ mic::types::Action2DInterface MazeHistogramFilter::sumOfMostUniquePatchesActionS
 				for (size_t x=0; x<maze_width; x++) {
 					// Check result of the next motion.
 					// Compute resulting coordinates.
-					size_t new_y = (y + maze_height + ac.dy()) % maze_height;
-					size_t new_x = (x + maze_width + ac.dx()) % maze_width;
+					size_t new_y = (y + maze_height + ac.dy) % maze_height;
+					size_t new_x = (x + maze_width + ac.dx) % maze_width;
 					// Get image patch.
 					short patch = (*mazes[m])(new_y, new_x);
 					LOG(LDEBUG) << "maze [" << m << "] (y=" << y <<",x="<< x <<") move="<< act_t << "=> (y+dy=" << new_y << ",x+dx=" << new_x <<") patch=" << patch << std::endl;
@@ -389,7 +389,7 @@ mic::types::Action2DInterface MazeHistogramFilter::sumOfMostUniquePatchesActionS
 	}//: for each action type
 
 
-	mic::types::NESWAction a((types::NESW_action_type_t) best_action);
+	mic::types::NESWAction a((types::NESW) best_action);
 	return a;
 }
 

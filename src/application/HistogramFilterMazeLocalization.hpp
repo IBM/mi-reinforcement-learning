@@ -12,13 +12,13 @@
 
 #include <data_io/MazeMatrixImporter.hpp>
 
-#include <types/Action.hpp>
-
 #include <algorithms/MazeHistogramFilter.hpp>
 
 #include <opengl/application/OpenGLApplication.hpp>
 #include <opengl/visualization/WindowChart.hpp>
 #include <opengl/visualization/WindowFloatCollectorChart.hpp>
+
+#include "../types/Action2D.hpp"
 using namespace mic::opengl::visualization;
 
 

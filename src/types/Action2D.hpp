@@ -9,56 +9,58 @@
 #define SRC_TYPES_Action_HPP_
 
 #include <random>
+#include <iostream>
 
 namespace mic {
 namespace types {
 
 /*!
- * \brief Types of actions.
+ * \brief Enumeration of possible types of actions in 2D.
  * \author tkornuta
  */
-enum NESW_action_type_t
+enum class NESW : short
 {
 	North = 0, ///< Action north.
 	East, ///< Action east.
 	South, ///< Action south.
 	West, ///< Action west.
 	None, ///< Empty action
+	Random, ///< Random action
 	Exit ///< Exit action
 };
 
 
 /*!
- * \brief Abstract interface class representing an action in 2-D space.
+ * \brief Interface class representing an action in 2-D space.
  * \author tkornuta
  */
 class Action2DInterface {
 public:
 
-	/*!
-	 * Returns increment along x axis.
-	 * @return Increment along x.
-	 */
-	int dx() { return d_x; };
+	/// Increment according to x axis.
+	int dx;
 
-	/*!
-	 * Returns increment along y axis.
-	 * @return Increment along y.
-	 */
-	int dy() { return d_y; };
+	/// Increment according to y axis.
+	int dy;
 
 	/*!
 	 * Default constructor. (Re)sets increments. Protected - to be used by derived classes.
 	 */
-	Action2DInterface() : d_x(0), d_y(0) { };
+	Action2DInterface() : dx(0), dy(0) { };
+
+	/*!
+	 * Returns ostream containing description of given position.
+	 * @param os_ Ostream.
+	 * @param pos_ Position.
+	 * @return Returned ostream object.
+	 */
+	friend std::ostream& operator<<(std::ostream& os_, const Action2DInterface& ac_)
+	{
+	    os_ << "[dx,dy]: [" << ac_.dx << ',' << ac_.dy << "]";
+	    return os_;
+	}
 
 protected:
-	/// Increment according to x axis.
-	int d_x;
-
-	/// Increment according to y axis.
-	int d_y;
-
 };
 
 
@@ -67,7 +69,7 @@ protected:
  * \tparam actionType Template parameter defining action type.
  * \author tkornuta
  */
-template <typename actionType>
+template <typename ActionType>
 class Action2D : public mic::types::Action2DInterface {
 public:
 	/*!
@@ -79,9 +81,14 @@ public:
 	 * Abstract method - its implementations should set the increments according to action type.
 	 * @param ActionType Type of action.
 	 */
-	virtual void setAction(actionType type_) = 0;
+	virtual void setAction(ActionType type_) = 0;
 
 protected:
+	/*!
+	 * Type of the performed action.
+	 */
+	ActionType type;
+
 	/*!
 	 * Default constructor. Calls default constructor of parent Action2DInterface class. Protected - to be used by derived classes.
 	 */
@@ -93,25 +100,27 @@ protected:
  * \brief Class representing an N/E/S/W action.
  * \author tkornuta
  */
-class NESWAction : public mic::types::Action2D<NESW_action_type_t> {
+class NESWAction : public mic::types::Action2D<NESW> {
 public:
 	/*!
 	 * Default NESW action constructor. Sets increments according to action type.
 	 */
-	NESWAction(NESW_action_type_t type_) : Action2D() { setAction(type_); };
+	NESWAction(NESW type_) : Action2D() { setAction(type_); };
 
 	/*!
 	 * Sets increments according to action value.
 	 * @param ActionType Type of action.
 	 */
-	void setAction(NESW_action_type_t type_) {
+	void setAction(NESW type_) {
+		type = type_;
 		switch (type_) {
-		case North:	d_y =-1; d_x =0; break;
-		case East:	d_y =0; d_x =1; break;
-		case South:	d_y =1; d_x =0; break;
-		case West:	d_y =0; d_x =-1; break;
-		case None:
-		default:	d_y =0; d_x =0;
+		case NESW::North:	dy =-1; dx =0; break;
+		case NESW::East:	dy =0; dx =1; break;
+		case NESW::South:	dy =1; dx =0; break;
+		case NESW::West:	dy =0; dx =-1; break;
+		case NESW::None:
+		case NESW::Exit:
+		default:	dy =0; dx =0;
 		}//: switch
 	}
 
@@ -119,7 +128,7 @@ protected:
 	/*!
 	 * NESW action constructor. Empty. Protected - to be used by derived classes.
 	 */
-	NESWAction() : Action2D() { };
+	NESWAction() : Action2D()  { type = NESW::None; };
 
 };
 
@@ -136,11 +145,13 @@ public:
 	RandomNESWAction() : NESWAction(),
 		rng_mt19937_64(rd())
 	{
+		type = NESW::Random;
+
 		// Initialize uniform integer distribution.
-		std::uniform_int_distribution<> index_dist(North, West);
+		std::uniform_int_distribution<> index_dist((int)NESW::North, (int)NESW::West);
 
 		// Select a random action.
-		setAction((NESW_action_type_t) index_dist(rng_mt19937_64));
+		setAction((NESW) index_dist(rng_mt19937_64));
 	};
 private:
 	/*!
@@ -160,12 +171,12 @@ private:
  * \brief Class representing an exit action.
  * \author tkornuta
  */
-class ExitAction : public mic::types::Action2DInterface {
+class ExitAction : public mic::types::NESWAction {
 public:
 	/*!
 	 * Exit action constructor. Empty.
 	 */
-	ExitAction() : Action2DInterface() { };
+	ExitAction() : NESWAction() { type = NESW::Exit; };
 };
 
 
@@ -173,25 +184,25 @@ public:
  * \brief Macro returning NESWAction north.
  * \author tkornuta
  */
-#define A_NORTH mic::types::NESWAction(mic::types::North)
+#define A_NORTH mic::types::NESWAction(mic::types::NESW::North)
 
 /*!
  * \brief Macro returning NESWAction east.
  * \author tkornuta
  */
-#define A_EAST mic::types::NESWAction(mic::types::East)
+#define A_EAST mic::types::NESWAction(mic::types::NESW::East)
 
 /*!
  * \brief Macro returning NESWAction south.
  * \author tkornuta
  */
-#define A_SOUTH mic::types::NESWAction(mic::types::South)
+#define A_SOUTH mic::types::NESWAction(mic::types::NESW::South)
 
 /*!
  * \brief Macro returning NESWAction west.
  * \author tkornuta
  */
-#define A_WEST mic::types::NESWAction(mic::types::West)
+#define A_WEST mic::types::NESWAction(mic::types::NESW::West)
 
 /*!
  * \brief Macro returning RandomNESWAction .

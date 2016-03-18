@@ -9,6 +9,7 @@
 #define SRC_APPLICATION_SIMPLEGRIDWORLD_HPP_
 
 #include <vector>
+#include <string>
 
 #include <types/TensorTypes.hpp>
 
@@ -16,14 +17,26 @@
 #include <opengl/visualization/WindowFloatCollectorChart.hpp>
 using namespace mic::opengl::visualization;
 
-#include <types/Action.hpp>
+#include <types/Position2D.hpp>
 
 namespace mic {
 namespace application {
 
+/*!
+ * \brief Gridworld channels
+ * \author tkornuta
+ */
+enum class GridworldChannels : std::size_t
+{
+	Goal = 0, ///< Channel storing the goal(s)
+	Pit = 1, ///< Channel storing the pits(s)
+	Wall = 2, ///< Channel storing the walls(s)
+	Player = 3 ///< Channel storing the player pose
+};
+
 
 /*!
- * \brief Class implementing a simple gridworld application with reinforcement learning used for solveing the task.
+ * \brief Class implementing a simple gridworld application with reinforcement learning used for solving the task.
  * \author tkornuta
  */
 class SimpleGridworld: public mic::opengl::application::OpenGLApplication {
@@ -65,7 +78,7 @@ private:
 	/// Data collector.
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
-	/// n Bandit arms.
+	/// Tensor storing the 3D Gridworld (x + y + each "depth" channel representing the
 	mic::types::TensorXf gridworld;
 
 	/// Property: type of initialization:
@@ -85,16 +98,34 @@ private:
 	mic::configuration::Property<std::string> statistics_filename;
 
 	/// Method initializes the stationary grid, i.e. all items are placed deterministically.
-	void initGrid();
+	void initExemplaryGrid();
 
-	/// Displays grid in terminal.
-	void displayGrid();
+	/*!
+	 * Initializes the classic cliff gridworld.
+	 * [[' ',' ',' ',' ',' '],
+	 *  ['S',' ',' ',' ',10],
+	 *  [-100,-100, -100, -100, -100]]
+	 */
+	void initClassicCliffGrid();
+
+
+	/*!
+	 * Returns the (flattened, i.e. 2D) grid of characters.
+	 * @return Flattened grid of chars.
+	 */
+	mic::types::Tensor<char> flattenGrid();
+
+	/*!
+	 * Steams the current state of the gridworld.
+	 * @return Ostream.
+	 */
+	std::string streamGrid();
 
 	/*!
 	 * Calculates the player position.
 	 * @return Player position.
 	 */
-	std::pair<size_t, size_t> getPlayerPosition();
+	mic::types::Position2D getPlayerPosition();
 
 	/*!
 	 * Calculates the reward for being in given state.
@@ -104,9 +135,18 @@ private:
 
 	/*!
 	 * Performs "deterministic" move. It is assumed that the move is truncated by the gridworld boundaries (no circular world assumption).
-	 * @param ac_ Performed action.
+	 * @param ac_ The action to be performed.
+	 * @return True if move was performed, false if it was not possible.
 	 */
-	void move (mic::types::Action2DInterface ac_);
+	bool move (mic::types::Action2DInterface ac_);
+
+	/*!
+	 * Checks if position is allowed, i.e. within the gridworld boundaries and there is no wall at that place.
+	 * @param x The x coordinate.
+	 * @param y The y coordinate.
+	 * @return True if the possition is allowed, false othervise.
+	 */
+	bool isPositionAllowed(long x, long y);
 
 };
 

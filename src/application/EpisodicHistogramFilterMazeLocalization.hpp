@@ -16,7 +16,7 @@ using namespace mic::opengl::visualization;
 
 #include <data_io/MazeMatrixImporter.hpp>
 
-#include <types/Action.hpp>
+#include "../types/Action2D.hpp"
 
 #include <algorithms/MazeHistogramFilter.hpp>
 

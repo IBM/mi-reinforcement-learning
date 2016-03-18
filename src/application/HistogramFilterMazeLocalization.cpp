@@ -281,13 +281,13 @@ bool HistogramFilterMazeLocalization::performSingleStep() {
 	case (short)-1:
 			act = hf.mostUniquePatchActionSelection(); break;
 	default:
-		act = mic::types::NESWAction((mic::types::NESW_action_type_t) (short)tmp_action);
+		act = mic::types::NESWAction((mic::types::NESW) (short)tmp_action);
 	}//: switch action
 
 	std:: string label = "Action d_x at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, int>::exportValueToCsv(statistics_filename, label, act.dx(), true);
+	mic::data_io::DataCollector<std::string, int>::exportValueToCsv(statistics_filename, label, act.dx, true);
 	label = "Action d_y at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, int>::exportValueToCsv(statistics_filename, label, act.dy(), true);
+	mic::data_io::DataCollector<std::string, int>::exportValueToCsv(statistics_filename, label, act.dy, true);
 
 	// Perform move.
 	hf.probabilisticMove(act, exact_move_probability, overshoot_move_probability, undershoot_move_probability);

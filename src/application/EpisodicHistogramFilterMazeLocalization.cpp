@@ -160,7 +160,7 @@ bool EpisodicHistogramFilterMazeLocalization::performSingleStep() {
 			LOG(LINFO) << "Most Unique Patch action selection";
 			act = hf.mostUniquePatchActionSelection(); break;
 	default:
-		act = mic::types::NESWAction((mic::types::NESW_action_type_t) (short)tmp_action);
+		act = mic::types::NESWAction((mic::types::NESW) (short)tmp_action);
 	}//: switch action
 
 	// Perform move.
