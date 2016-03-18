@@ -16,6 +16,8 @@
 #include <opengl/visualization/WindowFloatCollectorChart.hpp>
 using namespace mic::opengl::visualization;
 
+#include <types/Action.hpp>
+
 namespace mic {
 namespace application {
 
@@ -72,12 +74,39 @@ private:
 	/// 2: stationary grid, all items (wall, goal and pit, player) placed randomly
 	mic::configuration::Property<short> init_type;
 
+	/// Property: width of gridworld.
+	mic::configuration::Property<size_t> width;
+
+	/// Property: height of gridworld.
+	mic::configuration::Property<size_t> height;
+
 
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
 
 	/// Method initializes the stationary grid, i.e. all items are placed deterministically.
 	void initGrid();
+
+	/// Displays grid in terminal.
+	void displayGrid();
+
+	/*!
+	 * Calculates the player position.
+	 * @return Player position.
+	 */
+	std::pair<size_t, size_t> getPlayerPosition();
+
+	/*!
+	 * Calculates the reward for being in given state.
+	 * @return Reward for being in given state (r).
+	 */
+	short calculateReward();
+
+	/*!
+	 * Performs "deterministic" move. It is assumed that the move is truncated by the gridworld boundaries (no circular world assumption).
+	 * @param ac_ Performed action.
+	 */
+	void move (mic::types::Action2DInterface ac_);
 
 };
 
