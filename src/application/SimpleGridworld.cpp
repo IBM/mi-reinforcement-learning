@@ -56,12 +56,35 @@ void SimpleGridworld::initialize(int argc, char* argv[]) {
 }
 
 void SimpleGridworld::initializePropertyDependentVariables() {
+	// Initialize gridworld.
+	gridworld.resize({4, 4, 4});
+	gridworld.zeros();
 
-
-
+	initGrid();
 }
 
 
+// Initializes stationary grid, all items are placed deterministically
+void SimpleGridworld::initGrid() {
+	// place player
+	//state[0,1] = np.array([0,0,0,1])
+	gridworld({0,1,3}) = 1;
+
+	// place wall
+	//state[2,2] = np.array([0,0,1,0])
+	gridworld({2,2,2}) = 1;
+
+	// place pit
+	//state[1,1] = np.array([0,1,0,0])
+	gridworld({1,1,1}) = 1;
+
+	// place goal
+	//state[3,3] = np.array([1,0,0,0])
+	gridworld({3,3,0}) = 1;
+
+	std::cout<< gridworld << std::endl;
+
+}
 
 bool SimpleGridworld::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";

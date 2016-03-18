@@ -60,7 +60,7 @@ private:
 	/// Window for displaying ???.
 	WindowFloatCollectorChart* w_chart;
 
-	/// ???? collector.
+	/// Data collector.
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
 	/// n Bandit arms.
@@ -75,6 +75,10 @@ private:
 
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
+
+	/// Method initializes the stationary grid, i.e. all items are placed deterministically.
+	void initGrid();
+
 };
 
 
