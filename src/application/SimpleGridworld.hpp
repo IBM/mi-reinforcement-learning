@@ -97,6 +97,9 @@ private:
 	/// Property: height of gridworld.
 	mic::configuration::Property<size_t> height;
 
+	/// Property: height of gridworld.
+	mic::types::Position2D initial_position;
+
 
 	/*!
 	 * Property: step rewared, i.e. reward received by performing each step (typically negative).
@@ -194,6 +197,13 @@ private:
 	mic::types::Position2D getPlayerPosition();
 
 	/*!
+	 * Move player to the position.
+	 * @param pos_ The position to be set.
+	 */
+	void movePlayerToPosition(mic::types::Position2D pos_);
+
+
+	/*!
 	 * Calculates the reward for being in given state.
 	 * @return Reward for being in given state (r).
 	 */
@@ -208,11 +218,17 @@ private:
 
 	/*!
 	 * Checks if position is allowed, i.e. within the gridworld boundaries and there is no wall at that place.
-	 * @param x The x coordinate.
-	 * @param y The y coordinate.
-	 * @return True if the possition is allowed, false othervise.
+	 * @param pos_ Position to be checked.
+	 * @return True if the position is allowed, false otherwise.
 	 */
-	bool isPositionAllowed(long x, long y);
+	bool isPositionAllowed(mic::types::Position2D pos_);
+
+	/*!
+	 * Checks if position is final, i.e. player is standing in a pit or reached the goal. Returns reward associated with given state.
+	 * @param pos_ Position to be checked.
+	 * @return The reward associated with "final" action (might be positive or negative), equal to zero means that the position is not final.
+	 */
+	short isFinalPosition(mic::types::Position2D pos_);
 
 };
 

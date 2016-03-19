@@ -4,6 +4,6 @@
 		"single_step_mode": 1
 	},
 	"simple_gridworld_app": {
-		"gridworld_type": 3
+		"gridworld_type": 4
 	}
 }

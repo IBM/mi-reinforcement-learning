@@ -37,6 +37,29 @@ public:
 	Position2D(long x_, long y_) : x(x_), y(y_) { };
 
 	/*!
+	 * Sets position coodrinates.
+	 * @param x_ The x coordinate.
+	 * @param y_ The y coordinate.
+	 */
+	void set(long x_, long y_) {
+		x = x_;
+		y = y_;
+	}
+
+	/*!
+	 * Operator returning new position being the result of the taken action from given position.
+	 * @param ac_ The action to be performed.
+	 * @return New, resulting position.
+	 */
+	mic::types::Position2D operator+(Action2DInterface ac_) {
+		mic::types::Position2D new_pos;
+		new_pos.x = this->x + ac_.dx;
+		new_pos.y = this->y + ac_.dy;
+		return new_pos;
+	}
+
+
+	/*!
 	 * Performs "deterministic" move in 2D.
 	 * @param ac_ The action to be performed.
 	 * @return True if move was performed, false if it was not possible.
