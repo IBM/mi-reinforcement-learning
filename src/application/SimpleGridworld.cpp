@@ -9,6 +9,8 @@
 
 #include  <data_utils/RandomGenerator.hpp>
 
+#include <limits>
+
 namespace mic {
 namespace application {
 
@@ -26,7 +28,8 @@ SimpleGridworld::SimpleGridworld(std::string node_name_) : OpenGLApplication(nod
 		width("width", 4),
 		height("height", 4),
 		step_reward("step_reward", 0.0),
-		discount_factor("discount_factor", 0.1),
+		discount_factor("discount_factor", 0.9),
+		move_noise("move_noise",0.2),
 		statistics_filename("statistics_filename","statistics_filename.csv")
 
 	{
@@ -35,6 +38,7 @@ SimpleGridworld::SimpleGridworld(std::string node_name_) : OpenGLApplication(nod
 	registerProperty(width);
 	registerProperty(step_reward);
 	registerProperty(discount_factor);
+	registerProperty(move_noise);
 	registerProperty(statistics_filename);
 
 	LOG(LINFO) << "Properties registered";
@@ -76,6 +80,13 @@ void SimpleGridworld::initializePropertyDependentVariables() {
 	}//: switch
 
 	LOG(LSTATUS) << std::endl << streamGrid();
+
+	// Resize and reset the action-value table.
+	state_value_table.resize({width,height});
+	//state_value_table.zeros();
+	state_value_table.setValue( -std::numeric_limits<float>::infinity() );
+
+	LOG(LSTATUS) << std::endl << streamStateActionTable();
 }
 
 
@@ -309,6 +320,25 @@ std::string SimpleGridworld::streamGrid() {
 
 }
 
+std::string SimpleGridworld::streamStateActionTable() {
+	std::ostringstream os;
+	for (size_t y=0; y<height; y++){
+		os << "| ";
+		for (size_t x=0; x<width; x++) {
+/*			os << state_action_table({x,y,0}) << " , ";
+			os << state_action_table({x,y,1}) << " , ";
+			os << state_action_table({x,y,2}) << " , ";
+			os << state_action_table({x,y,2}) << " | ";*/
+			if ( state_value_table({x,y}) == -std::numeric_limits<float>::infinity())
+				os << "-INF | ";
+			else
+				os << state_value_table({x,y}) << " | ";
+		}//: for x
+		os << std::endl;
+	}//: for y
+	return os.str();
+
+}
 
 
 mic::types::Position2D SimpleGridworld::getPlayerPosition() {
@@ -335,35 +365,7 @@ void SimpleGridworld::movePlayerToPosition(mic::types::Position2D pos_) {
 }
 
 
-short SimpleGridworld::calculateReward() {
-	mic::types::Position2D player_position = getPlayerPosition();
-    if (gridworld({(size_t)player_position.x, (size_t)player_position.y, (size_t)GridworldChannels::Pit}) != 0)
-    	// Pit.
-        return gridworld({(size_t)player_position.x, (size_t)player_position.y, (size_t)GridworldChannels::Pit});
-    else if (gridworld({(size_t)player_position.x, (size_t)player_position.y, (size_t)GridworldChannels::Goal}) != 0)
-    	// Goal.
-        return gridworld({(size_t)player_position.x, (size_t)player_position.y, (size_t)GridworldChannels::Goal});
-    else
-        return step_reward;
-}
-
-
-bool SimpleGridworld::isPositionAllowed(mic::types::Position2D pos_) {
-        if ((pos_.x < 0) || (pos_.x >= width))
-    		return false;
-
-        if ((pos_.y < 0) || (pos_.y >= height))
-        		return false;
-
-        // Check walls!
-    	if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Wall}) != 0)
-    		return false;
-
-        return true;
-}
-
-
-short SimpleGridworld::isFinalPosition(mic::types::Position2D pos_) {
+float SimpleGridworld::getStateReward(mic::types::Position2D pos_) {
     if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pit}) != 0)
     	// Pit.
         return gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pit});
@@ -372,7 +374,33 @@ short SimpleGridworld::isFinalPosition(mic::types::Position2D pos_) {
         return gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Goal});
     else
         return 0;
+}
 
+
+bool SimpleGridworld::isStateAllowed(mic::types::Position2D pos_) {
+	if ((pos_.x < 0) || (pos_.x >= width))
+		return false;
+
+	if ((pos_.y < 0) || (pos_.y >= height))
+			return false;
+
+	// Check walls!
+	if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Wall}) != 0)
+		return false;
+
+	return true;
+}
+
+
+bool SimpleGridworld::isStateTerminal(mic::types::Position2D pos_) {
+    if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pit}) != 0)
+    	// Pit.
+        return true;
+    else if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Goal}) != 0)
+    	// Goal.
+        return true;
+    else
+        return false;
 }
 
 
@@ -383,8 +411,11 @@ bool SimpleGridworld::move (mic::types::Action2DInterface ac_) {
 	mic::types::Position2D new_pos = old_pos + ac_;
 
 	// Check whether the "destination" (new position) is valid.
-	if (!isPositionAllowed(new_pos))
+	if (!isStateAllowed(new_pos))
 		return false;
+
+	// Update the "state-action" table.
+
 
 	// "Reset" previous player position and set the new one.
 	gridworld({(size_t)old_pos.x, (size_t)old_pos.y, (size_t)GridworldChannels::Player}) = 0;
@@ -393,19 +424,104 @@ bool SimpleGridworld::move (mic::types::Action2DInterface ac_) {
 }
 
 
+bool SimpleGridworld::isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_) {
+	// Compute the "destination" coordinates.
+    mic::types::Position2D new_pos = pos_ + ac_;
+    return isStateAllowed(new_pos);
+}
+
+float SimpleGridworld::computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_){
+	//  Compute the Q-value of action in state from the value function stored table.
+	mic::types::Position2D new_pos = pos_ + ac_;
+	float q_value = (1-move_noise)*(step_reward + discount_factor * state_value_table({(size_t)new_pos.x, (size_t)new_pos.y}));
+	float probs_normalizer = (1-move_noise);
+
+	// Consider also east and west actions as possible actions - due to move_noise.
+	if ((ac_.getType() == NESW::North) || (ac_.getType() == NESW::South)) {
+		if (isActionAllowed(pos_, A_EAST)) {
+			mic::types::Position2D east_pos = pos_ + A_EAST;
+			if (state_value_table({(size_t)east_pos.x, (size_t)east_pos.y}) != -std::numeric_limits<float>::infinity()) {
+				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table({(size_t)east_pos.x, (size_t)east_pos.y}));
+				probs_normalizer += (move_noise/2);
+			}//:if != -INF
+		}//: if
+		if (isActionAllowed(pos_, A_WEST)) {
+			mic::types::Position2D west_pos = pos_ + A_WEST;
+			if (state_value_table({(size_t)west_pos.x, (size_t)west_pos.y}) != -std::numeric_limits<float>::infinity()) {
+				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table({(size_t)west_pos.x, (size_t)west_pos.y}));
+				probs_normalizer += (move_noise/2);
+			}//:if != -INF
+		}//: if
+	}//: if
+
+	// Consider also north and south actions as possible actions - due to move_noise.
+	if ((ac_.getType() == NESW::East) || (ac_.getType() == NESW::West)) {
+		if (isActionAllowed(pos_, A_NORTH)) {
+			mic::types::Position2D north_pos = pos_ + A_NORTH;
+			if (state_value_table({(size_t)north_pos.x, (size_t)north_pos.y}) != -std::numeric_limits<float>::infinity()) {
+				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table({(size_t)north_pos.x, (size_t)north_pos.y}));
+				probs_normalizer += (move_noise/2);
+			}//:if != -INF
+		}//: if
+		if (isActionAllowed(pos_, A_SOUTH)) {
+			mic::types::Position2D south_pos = pos_ + A_SOUTH;
+			if (state_value_table({(size_t)south_pos.x, (size_t)south_pos.y}) != -std::numeric_limits<float>::infinity()) {
+				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table({(size_t)south_pos.x, (size_t)south_pos.y}));
+				probs_normalizer += (move_noise/2);
+			}//:if != -INF
+		}//: if
+	}//: if
+
+	// Normalize the probabilities.
+	q_value /= probs_normalizer;
+
+	return q_value;
+}
+
+float SimpleGridworld::computeBestValue(mic::types::Position2D pos_){
+	float best_value = -std::numeric_limits<float>::infinity();
+	// Check the north action.
+	if(isActionAllowed(pos_, A_NORTH)) {
+		float value = computeQValueFromValues(pos_, A_NORTH);
+		if (value > best_value)
+			best_value = value;
+	}//: if
+	// Check the east action.
+	if(isActionAllowed(pos_, A_EAST)) {
+		float value = computeQValueFromValues(pos_, A_EAST);
+		if (value > best_value)
+			best_value = value;
+	}//: if
+	// Check the north action.
+	if(isActionAllowed(pos_, A_SOUTH)) {
+		float value = computeQValueFromValues(pos_, A_SOUTH);
+		if (value > best_value)
+			best_value = value;
+	}//: if
+	// Check the north action.
+	if(isActionAllowed(pos_, A_WEST)) {
+		float value = computeQValueFromValues(pos_, A_WEST);
+		if (value > best_value)
+			best_value = value;
+	}//: if
+	return best_value;
+}
+
+
 bool SimpleGridworld::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
 
-	LOG(LSTATUS) << std::endl << streamGrid();
 
-	mic::types::Position2D player_position = getPlayerPosition();
+/*	mic::types::Position2D player_position = getPlayerPosition();
 //	LOG(LINFO) << "Player pose = " << player_position;
 	LOG(LINFO) << "Reward: " << calculateReward();
 
 	// Check episode state.
-	if(isFinalPosition(player_position)) {
-		// Do recalculate action-value table.
-		// ...
+	short final_reward = isFinalPosition(player_position);
+	if(final_reward != 0) {
+		// Do recalculate state-value table.
+		// In the terminal state all actions have the same "terminal" value.
+		state_value_table({ (size_t)player_position.x, (size_t)player_position.y }) = final_reward;
 
 		// Start new episode.
 		LOG(LWARNING)<< "Starting new episode";
@@ -414,9 +530,30 @@ bool SimpleGridworld::performSingleStep() {
 
 	// Move randomly - repeat until an allowed move is made.
 	while (!move(A_RANDOM))
-		;
+		;*/
 
+	// Perform the iterative policy iteration.
+	mic::types::TensorXf new_state_value_table({width, height});
+	new_state_value_table.setValue( -std::numeric_limits<float>::infinity() );
 
+	for (size_t y=0; y<height; y++){
+		for (size_t x=0; x<width; x++) {
+			mic::types::Position2D pos(x,y);
+			if (isStateTerminal(pos) ) {
+				float final_reward = getStateReward(pos);
+				new_state_value_table({ (size_t)pos.x, (size_t)pos.y }) = final_reward;
+				continue;
+			}//: if
+			// Else - find th best value.
+			if (isStateAllowed(pos) )
+				new_state_value_table({ (size_t)pos.x, (size_t)pos.y }) = computeBestValue(pos);
+		}//: for x
+	}//: for y
+	// Update state.
+	state_value_table = new_state_value_table;
+
+	LOG(LSTATUS) << std::endl << streamGrid();
+	LOG(LSTATUS) << std::endl << streamStateActionTable();
 
 
 /*	short choice;

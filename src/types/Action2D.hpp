@@ -83,6 +83,12 @@ public:
 	 */
 	virtual void setAction(ActionType type_) = 0;
 
+	/*!
+	 * Returns the action type.
+	 * @return Action type.
+	 */
+	ActionType getType() { return type;}
+
 protected:
 	/*!
 	 * Type of the performed action.

@@ -78,8 +78,11 @@ private:
 	/// Data collector.
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
-	/// Tensor storing the 3D Gridworld (x + y + each "depth" channel representing the
+	/// Tensor storing the 3D Gridworld (x + y + 4 "depth" channels representing: 0 - goals, 1 - pits, 2 - walls, 3 - player).
 	mic::types::TensorXf gridworld;
+
+	/// Tensor storing values for all states (gridworld w * h).
+	mic::types::TensorXf state_value_table;
 
 	/// Property: type of mgridworld:
 	/// 0: the exemplary grid 4x3.
@@ -107,9 +110,14 @@ private:
 	mic::configuration::Property<float> step_reward;
 
 	/*!
-	 * Property: discount factor (should be in range 0.0-1.0).
+	 * Property: future discount factor (should be in range 0.0-1.0).
 	 */
 	mic::configuration::Property<float> discount_factor;
+
+	/*!
+	 * Property: move noise, determining gow often action results in unintended direction.
+	 */
+	mic::configuration::Property<float> move_noise;
 
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
@@ -186,9 +194,17 @@ private:
 
 	/*!
 	 * Steams the current state of the gridworld.
-	 * @return Ostream.
+	 * @return Ostream with description of the gridworld.
 	 */
 	std::string streamGrid();
+
+
+	/*!
+	 * Steams the current state of the state-action values.
+	 * @return Ostream with description of the state-action table.
+	 */
+	std::string streamStateActionTable();
+
 
 	/*!
 	 * Calculates the player position.
@@ -198,16 +214,32 @@ private:
 
 	/*!
 	 * Move player to the position.
+	 * @param pos_ Position to be checked.
 	 * @param pos_ The position to be set.
 	 */
 	void movePlayerToPosition(mic::types::Position2D pos_);
 
 
 	/*!
-	 * Calculates the reward for being in given state.
+	 * Returns the reward associated with the given state.
+	 * @param pos_ Position (state).
 	 * @return Reward for being in given state (r).
 	 */
-	short calculateReward();
+	float getStateReward(mic::types::Position2D pos_);
+
+	/*!
+	 * Checks if position is allowed, i.e. within the gridworld boundaries and there is no wall at that place.
+	 * @param pos_ Position to be checked.
+	 * @return True if the position is allowed, false otherwise.
+	 */
+	bool isStateAllowed(mic::types::Position2D pos_);
+
+	/*!
+	 * Checks if position is terminal, i.e. player is standing in a pit or reached the goal. Returns reward associated with given state.
+	 * @param pos_ Position (state) to be checked.
+	 * @return The reward associated with "final" action (might be positive or negative), equal to zero means that the position is not final.
+	 */
+	bool isStateTerminal(mic::types::Position2D pos_);
 
 	/*!
 	 * Performs "deterministic" move. It is assumed that the move is truncated by the gridworld boundaries (no circular world assumption).
@@ -217,18 +249,28 @@ private:
 	bool move (mic::types::Action2DInterface ac_);
 
 	/*!
-	 * Checks if position is allowed, i.e. within the gridworld boundaries and there is no wall at that place.
-	 * @param pos_ Position to be checked.
-	 * @return True if the position is allowed, false otherwise.
+	 * Calculates the Q-value, taking into consideration probabilistic transition between states (i.e. that north action can end up going east or west)
+	 * @param pos_ Starting state (position).
+	 * @param ac_ Action to be performed.
+	 * @return Value ofr the function
 	 */
-	bool isPositionAllowed(mic::types::Position2D pos_);
+	float computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_);
 
 	/*!
-	 * Checks if position is final, i.e. player is standing in a pit or reached the goal. Returns reward associated with given state.
-	 * @param pos_ Position to be checked.
-	 * @return The reward associated with "final" action (might be positive or negative), equal to zero means that the position is not final.
+	 * Checks whether performing given action starting in given state is allowed.
+	 * @param pos_ Starting state (position).
+	 * @param ac_ Action to be performed.
+	 * @return True if action is allowed, false otherwise.
 	 */
-	short isFinalPosition(mic::types::Position2D pos_);
+	bool isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_);
+
+	/*!
+	 * Calculates the best value for given state - by finding the action having the maximal expected value.
+	 * @param pos_ Starting state (position).
+	 * @return Value for given state.
+	 */
+	float computeBestValue(mic::types::Position2D pos_);
+
 
 };
 
