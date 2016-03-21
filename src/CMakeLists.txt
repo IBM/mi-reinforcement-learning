@@ -159,17 +159,17 @@ endif(${BUILD_APP_N_ARMED_BANDITS_SOFTMAX})
 # Build gridworld related apps.
 # =======================================================================
 
-set(BUILD_APP_SIMPLE_GRIDWORLD ON CACHE BOOL "Build the application solving the Gridworld problem with reinforcement learning.")
+set(BUILD_APP_GRIDWORLD_VALUE_ITERATION ON CACHE BOOL "Build the application solving the gridworld problem by applying the reinforcement learning value iteration method.")
 
-if(${BUILD_APP_SIMPLE_GRIDWORLD})
+if(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 	# Create exeutable.
-	add_executable(simple_gridworld_app 
-		application/SimpleGridworld.cpp
+	add_executable(gridworld_value_iteration_app 
+		application/GridworldValueIteration.cpp
 		types/Gridworld.cpp
 		application/console_application_main.cpp
 		)
 	# Link it with shared libraries.
-	target_link_libraries(simple_gridworld_app 
+	target_link_libraries(gridworld_value_iteration_app 
 		logger
 		configuration
 		application
@@ -180,9 +180,9 @@ if(${BUILD_APP_SIMPLE_GRIDWORLD})
 		)
 
 	# install test to bin directory
-	install(TARGETS simple_gridworld_app RUNTIME DESTINATION bin)
+	install(TARGETS gridworld_value_iteration_app RUNTIME DESTINATION bin)
 	
-endif(${BUILD_APP_SIMPLE_GRIDWORLD})
+endif(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 
 
 

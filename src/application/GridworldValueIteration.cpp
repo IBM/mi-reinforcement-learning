@@ -5,11 +5,10 @@
  * \date Mar 17, 2016
  */
 
-#include <application/SimpleGridworld.hpp>
-
-#include  <data_utils/RandomGenerator.hpp>
 
 #include <limits>
+#include <data_utils/RandomGenerator.hpp>
+#include <application/GridworldValueIteration.hpp>
 
 namespace mic {
 namespace application {
@@ -19,11 +18,11 @@ namespace application {
  * \author tkornuta
  */
 void RegisterApplication (void) {
-	REGISTER_APPLICATION(mic::application::SimpleGridworld);
+	REGISTER_APPLICATION(mic::application::GridworldValueIteration);
 }
 
 
-SimpleGridworld::SimpleGridworld(std::string node_name_) : OpenGLApplication(node_name_),
+GridworldValueIteration::GridworldValueIteration(std::string node_name_) : OpenGLApplication(node_name_),
 		gridworld_type("gridworld_type", 0),
 		width("width", 4),
 		height("height", 4),
@@ -45,12 +44,12 @@ SimpleGridworld::SimpleGridworld(std::string node_name_) : OpenGLApplication(nod
 }
 
 
-SimpleGridworld::~SimpleGridworld() {
+GridworldValueIteration::~GridworldValueIteration() {
 
 }
 
 
-void SimpleGridworld::initialize(int argc, char* argv[]) {
+void GridworldValueIteration::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
@@ -66,7 +65,7 @@ void SimpleGridworld::initialize(int argc, char* argv[]) {
 
 }
 
-void SimpleGridworld::initializePropertyDependentVariables() {
+void GridworldValueIteration::initializePropertyDependentVariables() {
 	// Initialize gridworld.
 	switch(gridworld_type) {
 		case 0 : gridworld.initExemplaryGrid(); break;
@@ -85,9 +84,10 @@ void SimpleGridworld::initializePropertyDependentVariables() {
 	height = gridworld.getHeight();
 
 	// Resize and reset the action-value table.
-	state_value_table.resize({width,height});
+	state_value_table.resize(height,width);
 	//state_value_table.zeros();
 	state_value_table.setValue( -std::numeric_limits<float>::infinity() );
+	running_delta = -std::numeric_limits<float>::infinity();
 
 	LOG(LSTATUS) << std::endl << streamStateActionTable();
 }
@@ -95,7 +95,7 @@ void SimpleGridworld::initializePropertyDependentVariables() {
 
 
 
-std::string SimpleGridworld::streamStateActionTable() {
+std::string GridworldValueIteration::streamStateActionTable() {
 	std::ostringstream os;
 	for (size_t y=0; y<height; y++){
 		os << "| ";
@@ -104,10 +104,10 @@ std::string SimpleGridworld::streamStateActionTable() {
 			os << state_action_table({x,y,1}) << " , ";
 			os << state_action_table({x,y,2}) << " , ";
 			os << state_action_table({x,y,2}) << " | ";*/
-			if ( state_value_table({x,y}) == -std::numeric_limits<float>::infinity())
+			if ( state_value_table(y,x) == -std::numeric_limits<float>::infinity())
 				os << "-INF | ";
 			else
-				os << state_value_table({x,y}) << " | ";
+				os << state_value_table(y,x) << " | ";
 		}//: for x
 		os << std::endl;
 	}//: for y
@@ -118,7 +118,7 @@ std::string SimpleGridworld::streamStateActionTable() {
 
 
 
-bool SimpleGridworld::move (mic::types::Action2DInterface ac_) {
+bool GridworldValueIteration::move (mic::types::Action2DInterface ac_) {
 //	LOG(LINFO) << "Current move = " << ac_;
 	// Compute destination.
     mic::types::Position2D new_pos = gridworld.getPlayerPosition() + ac_;
@@ -136,31 +136,31 @@ bool SimpleGridworld::move (mic::types::Action2DInterface ac_) {
 }
 
 
-bool SimpleGridworld::isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_) {
+bool GridworldValueIteration::isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_) {
 	// Compute the "destination" coordinates.
     mic::types::Position2D new_pos = pos_ + ac_;
     return gridworld.isStateAllowed(new_pos);
 }
 
-float SimpleGridworld::computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_){
+float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_){
 	//  Compute the Q-value of action in state from the value function stored table.
 	mic::types::Position2D new_pos = pos_ + ac_;
-	float q_value = (1-move_noise)*(step_reward + discount_factor * state_value_table({(size_t)new_pos.x, (size_t)new_pos.y}));
+	float q_value = (1-move_noise)*(step_reward + discount_factor * state_value_table((size_t)new_pos.y, (size_t)new_pos.x));
 	float probs_normalizer = (1-move_noise);
 
 	// Consider also east and west actions as possible actions - due to move_noise.
 	if ((ac_.getType() == NESW::North) || (ac_.getType() == NESW::South)) {
 		if (isActionAllowed(pos_, A_EAST)) {
 			mic::types::Position2D east_pos = pos_ + A_EAST;
-			if (state_value_table({(size_t)east_pos.x, (size_t)east_pos.y}) != -std::numeric_limits<float>::infinity()) {
-				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table({(size_t)east_pos.x, (size_t)east_pos.y}));
+			if (state_value_table((size_t)east_pos.y, (size_t)east_pos.x) != -std::numeric_limits<float>::infinity()) {
+				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table( (size_t)east_pos.y, (size_t)east_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
 		if (isActionAllowed(pos_, A_WEST)) {
 			mic::types::Position2D west_pos = pos_ + A_WEST;
-			if (state_value_table({(size_t)west_pos.x, (size_t)west_pos.y}) != -std::numeric_limits<float>::infinity()) {
-				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table({(size_t)west_pos.x, (size_t)west_pos.y}));
+			if (state_value_table((size_t)west_pos.y, (size_t)west_pos.x) != -std::numeric_limits<float>::infinity()) {
+				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)west_pos.y, (size_t)west_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
@@ -170,15 +170,15 @@ float SimpleGridworld::computeQValueFromValues(mic::types::Position2D pos_, mic:
 	if ((ac_.getType() == NESW::East) || (ac_.getType() == NESW::West)) {
 		if (isActionAllowed(pos_, A_NORTH)) {
 			mic::types::Position2D north_pos = pos_ + A_NORTH;
-			if (state_value_table({(size_t)north_pos.x, (size_t)north_pos.y}) != -std::numeric_limits<float>::infinity()) {
-				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table({(size_t)north_pos.x, (size_t)north_pos.y}));
+			if (state_value_table((size_t)north_pos.y, (size_t)north_pos.x) != -std::numeric_limits<float>::infinity()) {
+				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)north_pos.y, (size_t)north_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
 		if (isActionAllowed(pos_, A_SOUTH)) {
 			mic::types::Position2D south_pos = pos_ + A_SOUTH;
-			if (state_value_table({(size_t)south_pos.x, (size_t)south_pos.y}) != -std::numeric_limits<float>::infinity()) {
-				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table({(size_t)south_pos.x, (size_t)south_pos.y}));
+			if (state_value_table((size_t)south_pos.y, (size_t)south_pos.x) != -std::numeric_limits<float>::infinity()) {
+				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)south_pos.y, (size_t)south_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
@@ -190,8 +190,11 @@ float SimpleGridworld::computeQValueFromValues(mic::types::Position2D pos_, mic:
 	return q_value;
 }
 
-float SimpleGridworld::computeBestValue(mic::types::Position2D pos_){
+float GridworldValueIteration::computeBestValue(mic::types::Position2D pos_){
 	float best_value = -std::numeric_limits<float>::infinity();
+	// Check if the state is allowed.
+	if (!gridworld.isStateAllowed(pos_))
+		return best_value;
 	// Check the north action.
 	if(isActionAllowed(pos_, A_NORTH)) {
 		float value = computeQValueFromValues(pos_, A_NORTH);
@@ -220,7 +223,7 @@ float SimpleGridworld::computeBestValue(mic::types::Position2D pos_){
 }
 
 
-bool SimpleGridworld::performSingleStep() {
+bool GridworldValueIteration::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
 
 
@@ -245,7 +248,7 @@ bool SimpleGridworld::performSingleStep() {
 		;*/
 
 	// Perform the iterative policy iteration.
-	mic::types::TensorXf new_state_value_table({width, height});
+	mic::types::MatrixXf new_state_value_table(height, width);
 	new_state_value_table.setValue( -std::numeric_limits<float>::infinity() );
 
 	for (size_t y=0; y<height; y++){
@@ -253,19 +256,34 @@ bool SimpleGridworld::performSingleStep() {
 			mic::types::Position2D pos(x,y);
 			if (gridworld.isStateTerminal(pos) ) {
 				// Set the state rewared.
-				new_state_value_table({ (size_t)pos.x, (size_t)pos.y }) = gridworld.getStateReward(pos);
+				new_state_value_table((size_t)pos.y, (size_t)pos.x) = gridworld.getStateReward(pos);
 				continue;
 			}//: if
 			// Else - compute the best value.
 			if (gridworld.isStateAllowed(pos) )
-				new_state_value_table({ (size_t)pos.x, (size_t)pos.y }) = computeBestValue(pos);
+				new_state_value_table((size_t)pos.y, (size_t)pos.x) = computeBestValue(pos);
 		}//: for x
 	}//: for y
+
+	// Compute delta.
+	mic::types::MatrixXf delta_value;
+	float curr_delta = 0;
+	for (size_t i =0; i < (size_t) width*height; i++){
+		float tmp_delta = 0;
+		if (std::isfinite(new_state_value_table(i)))
+			tmp_delta += new_state_value_table(i);
+		if (std::isfinite(state_value_table(i)))
+			tmp_delta -= state_value_table(i);
+		curr_delta += std::abs(tmp_delta);
+	}//: for
+	running_delta = curr_delta;
+
 	// Update state.
 	state_value_table = new_state_value_table;
 
 	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
 	LOG(LSTATUS) << std::endl << streamStateActionTable();
+	LOG(LSTATUS) << "Delta Value = " << running_delta;
 
 
 /*	short choice;

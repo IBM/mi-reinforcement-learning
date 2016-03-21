@@ -5,8 +5,8 @@
  * \date Mar 17, 2016
  */
 
-#ifndef SRC_APPLICATION_SIMPLEGRIDWORLD_HPP_
-#define SRC_APPLICATION_SIMPLEGRIDWORLD_HPP_
+#ifndef SRC_APPLICATION_GRIDWORLDVALUEITERATION_HPP_
+#define SRC_APPLICATION_GRIDWORLDVALUEITERATION_HPP_
 
 #include <vector>
 #include <string>
@@ -23,21 +23,21 @@ namespace application {
 
 
 /*!
- * \brief Class implementing a simple gridworld application with reinforcement learning used for solving the task.
+ * \brief Class responsible for solving the gridworld problem by applying the reinforcement learning value iteration method.
  * \author tkornuta
  */
-class SimpleGridworld: public mic::opengl::application::OpenGLApplication {
+class GridworldValueIteration: public mic::opengl::application::OpenGLApplication {
 public:
 	/*!
 	 * Default Constructor. Sets the application/node name, default values of variables, initializes classifier etc.
 	 * @param node_name_ Name of the application/node (in configuration file).
 	 */
-	SimpleGridworld(std::string node_name_ = "application");
+	GridworldValueIteration(std::string node_name_ = "application");
 
 	/*!
 	 * Destructor.
 	 */
-	virtual ~SimpleGridworld();
+	virtual ~GridworldValueIteration();
 
 protected:
 	/*!
@@ -69,7 +69,7 @@ private:
 	mic::types::Gridworld gridworld;
 
 	/// Tensor storing values for all states (gridworld w * h).
-	mic::types::TensorXf state_value_table;
+	mic::types::MatrixXf state_value_table;
 
 	/// Property: type of mgridworld:
 	/// 0: the exemplary grid 4x3.
@@ -104,6 +104,11 @@ private:
 
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
+
+	/*!
+	 * Running delta being the sum of increments of the value table.
+	 */
+	float running_delta;
 
 	/*!
 	 * Steams the current state of the state-action values.
@@ -149,4 +154,4 @@ private:
 } /* namespace application */
 } /* namespace mic */
 
-#endif /* SRC_APPLICATION_SIMPLEGRIDWORLD_HPP_ */
+#endif /* SRC_APPLICATION_GRIDWORLDVALUEITERATION_HPP_ */
