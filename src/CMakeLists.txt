@@ -165,6 +165,7 @@ if(${BUILD_APP_SIMPLE_GRIDWORLD})
 	# Create exeutable.
 	add_executable(simple_gridworld_app 
 		application/SimpleGridworld.cpp
+		types/Gridworld.cpp
 		application/console_application_main.cpp
 		)
 	# Link it with shared libraries.

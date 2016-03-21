@@ -69,17 +69,20 @@ void SimpleGridworld::initialize(int argc, char* argv[]) {
 void SimpleGridworld::initializePropertyDependentVariables() {
 	// Initialize gridworld.
 	switch(gridworld_type) {
-		case 0 : initExemplaryGrid(); break;
-		case 1 : initClassicCliffGrid(); break;
-		case 2 : initDiscountGrid(); break;
-		case 3 : initBridgeGrid(); break;
-		case 4 : initBookGrid(); break;
-		case 5 : initMazeGrid(); break;
+		case 0 : gridworld.initExemplaryGrid(); break;
+		case 1 : gridworld.initClassicCliffGrid(); break;
+		case 2 : gridworld.initDiscountGrid(); break;
+		case 3 : gridworld.initBridgeGrid(); break;
+		case 4 : gridworld.initBookGrid(); break;
+		case 5 : gridworld.initMazeGrid(); break;
 		case -1:
-		default: initRandomGrid();
+		default: gridworld.initRandomGrid(width, height);
 	}//: switch
 
-	LOG(LSTATUS) << std::endl << streamGrid();
+	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
+	// Get width and height.
+	width = gridworld.getWidth();
+	height = gridworld.getHeight();
 
 	// Resize and reset the action-value table.
 	state_value_table.resize({width,height});
@@ -90,235 +93,7 @@ void SimpleGridworld::initializePropertyDependentVariables() {
 }
 
 
-void SimpleGridworld::initExemplaryGrid() {
-	LOG(LINFO) << "Generating exemplary gridworld";
-	// [[' ',' ',' ',' '],
-	//  ['S',-10,' ',' '],
-	//  [' ','','#',' '],
-	//  [' ',' ',' ',10]]
 
-	// Set gridworld size.
-	gridworld.resize({width, height, 4});
-	gridworld.zeros();
-
-	// Place the player.
-	initial_position.set(0,1);
-	movePlayerToPosition(initial_position);
-
-	// Place wall(s).
-	gridworld({2,2, (size_t)GridworldChannels::Wall}) = 1;
-
-	// Place pit(s).
-	gridworld({1,1, (size_t)GridworldChannels::Pit}) = -10;
-
-	// Place goal(s).
-	gridworld({3,3, (size_t)GridworldChannels::Goal}) = 10;
-}
-
-
-void SimpleGridworld::initClassicCliffGrid() {
-	LOG(LINFO) << "Generating classic cliff gridworld";
-	// [[' ',' ',' ',' ',' '],
-	//  ['S',' ',' ',' ',10],
-	//  [-100,-100, -100, -100, -100]]
-
-	// Overwrite dimensions.
-	width = 5;
-	height = 3;
-
-	// Set gridworld size.
-	gridworld.resize({width, height, 4});
-	gridworld.zeros();
-
-	// Place the player.
-	initial_position.set(0,1);
-	movePlayerToPosition(initial_position);
-
-	// Place pit(s).
-	for(size_t x=0; x<width; x++)
-		gridworld({x,2, (size_t)GridworldChannels::Pit}) = -100;
-
-	// Place goal(s).
-	gridworld({4,1, (size_t)GridworldChannels::Goal}) = 10;
-}
-
-void SimpleGridworld::initDiscountGrid() {
-	LOG(LINFO) << "Generating classic discount gridworld";
-	// [[' ',' ',' ',' ',' '],
-	//  [' ','#',' ',' ',' '],
-	//  [' ','#', 1,'#', 10],
-	//   ['S',' ',' ',' ',' '],
-	//   [-10,-10, -10, -10, -10]]
-
-	// Overwrite dimensions.
-	width = 5;
-	height = 5;
-
-	// Set gridworld size.
-	gridworld.resize({width, height, 4});
-	gridworld.zeros();
-
-	// Place the player.
-	initial_position.set(0,3);
-	movePlayerToPosition(initial_position);
-
-	// Place pits.
-	for(size_t x=0; x<width; x++)
-		gridworld({x,4, (size_t)GridworldChannels::Pit}) = -10;
-
-	// Place wall(s).
-	gridworld({1,1, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({1,2, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({3,2, (size_t)GridworldChannels::Wall}) = 1;
-
-	// Place goal(s).
-	gridworld({2,2, (size_t)GridworldChannels::Goal}) = 1;
-	gridworld({4,2, (size_t)GridworldChannels::Goal}) = 10;
-}
-
-
-void SimpleGridworld::initBridgeGrid() {
-	LOG(LINFO) << "Generating classic bridge gridworld";
-	// [[ '#',-100, -100, -100, -100, -100, '#'],
-	//  [   1, 'S',  ' ',  ' ',  ' ',  ' ',  10],
-	//  [ '#',-100, -100, -100, -100, -100, '#']]
-
-	// Overwrite dimensions.
-	width = 7;
-	height = 3;
-
-	// Set gridworld size.
-	gridworld.resize({width, height, 4});
-	gridworld.zeros();
-
-	// Place the player.
-	initial_position.set(1,1);
-	movePlayerToPosition(initial_position);
-
-	// Place pits.
-	for(size_t x=1; x<width-1; x++) {
-		gridworld({x,0, (size_t)GridworldChannels::Pit}) = -100;
-		gridworld({x,2, (size_t)GridworldChannels::Pit}) = -100;
-	}//: for
-
-	// Place wall(s).
-	gridworld({0,0, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({0,2, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({6,0, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({6,2, (size_t)GridworldChannels::Wall}) = 1;
-
-	// Place goal(s).
-	gridworld({0,1, (size_t)GridworldChannels::Goal}) = 1;
-	gridworld({6,1, (size_t)GridworldChannels::Goal}) = 10;
-}
-
-
-void SimpleGridworld::initBookGrid() {
-	LOG(LINFO) << "Generating classic book gridworld!!";
-	// [[' ',' ',' ',+1],
-	//  [' ','#',' ',-1],
-	//  ['S',' ',' ',' ']]
-
-	// Overwrite dimensions.
-	width = 4;
-	height = 3;
-
-	// Set gridworld size.
-	gridworld.resize({width, height, 4});
-	gridworld.zeros();
-
-	// Place the player.
-	initial_position.set(0,2);
-	movePlayerToPosition(initial_position);
-
-	// Place wall(s).
-	gridworld({1,1, (size_t)GridworldChannels::Wall}) = 1;
-
-	// Place pit(s).
-	gridworld({3,1, (size_t)GridworldChannels::Pit}) = -1;
-
-	// Place goal(s).
-	gridworld({3,0, (size_t)GridworldChannels::Goal}) = 1;
-}
-
-
-void SimpleGridworld::initMazeGrid() {
-	LOG(LINFO) << "Generating classic maze gridworld";
-	// [[' ',' ',' ',+1],
-	//  ['#','#',' ','#'],
-	//  [' ','#',' ',' '],
-	//  [' ','#','#',' '],
-	//  ['S',' ',' ',' ']]
-
-	// Overwrite dimensions.
-	width = 4;
-	height = 5;
-
-	// Set gridworld size.
-	gridworld.resize({width, height, 4});
-	gridworld.zeros();
-
-	// Place the player.
-	initial_position.set(0,4);
-	movePlayerToPosition(initial_position);
-
-	// Place wall(s).
-	gridworld({0,1, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({1,1, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({1,2, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({1,3, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({2,3, (size_t)GridworldChannels::Wall}) = 1;
-	gridworld({3,1, (size_t)GridworldChannels::Wall}) = 1;
-
-	// Place goal(s).
-	gridworld({3,0, (size_t)GridworldChannels::Goal}) = 1;
-}
-
-
-void SimpleGridworld::initRandomGrid() {
-	// TODO!
-	LOG(LFATAL) << "initRandomGrid() not implemented!";
-	exit(1);
-}
-
-mic::types::Tensor<char> SimpleGridworld::flattenGrid() {
-	mic::types::Tensor<char> grid;
-	grid.resize({width, height});
-	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
-			// Check object occupancy.
-			if (gridworld({x,y, (size_t)GridworldChannels::Player}) != 0) {
-				// Display player.
-				grid({x,y}) = 'P';
-			} else if (gridworld({x,y, (size_t)GridworldChannels::Wall}) != 0) {
-				// Display wall.
-				grid({x,y}) = '#';
-			} else if (gridworld({x,y, (size_t)GridworldChannels::Pit}) != 0) {
-				// Display pit.
-				grid({x,y}) = '-';
-			} else if (gridworld({x,y, (size_t)GridworldChannels::Goal}) != 0) {
-				// Display goal.
-				grid({x,y}) = '+';
-			} else
-				grid({x,y}) = ' ';
-		}//: for x
-	}//: for y
-	return grid;
-}
-
-
-std::string SimpleGridworld::streamGrid() {
-	mic::types::Tensor<char> grid = flattenGrid();
-	std::ostringstream os;
-	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
-			os << grid({x,y}) << " , ";
-		}//: for x
-		os << std::endl;
-	}//: for y
-	return os.str();
-
-}
 
 std::string SimpleGridworld::streamStateActionTable() {
 	std::ostringstream os;
@@ -341,85 +116,22 @@ std::string SimpleGridworld::streamStateActionTable() {
 }
 
 
-mic::types::Position2D SimpleGridworld::getPlayerPosition() {
-	mic::types::Position2D position;
-	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
-			if (gridworld({x,y, (size_t)GridworldChannels::Player}) == 1) {
-				position.x = x;
-				position.y = y;
-				return position;
-			}// if
-		}//: for x
-	}//: for y
-	// Remove warnings...
-	return position;
-}
-
-void SimpleGridworld::movePlayerToPosition(mic::types::Position2D pos_) {
-	// Clear old.
-	mic::types::Position2D old = getPlayerPosition();
-	gridworld({(size_t)old.x, (size_t)old.y, (size_t)GridworldChannels::Player}) = 0;
-	// Set new.
-	gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Player}) = 1;
-}
-
-
-float SimpleGridworld::getStateReward(mic::types::Position2D pos_) {
-    if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pit}) != 0)
-    	// Pit.
-        return gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pit});
-    else if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Goal}) != 0)
-    	// Goal.
-        return gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Goal});
-    else
-        return 0;
-}
-
-
-bool SimpleGridworld::isStateAllowed(mic::types::Position2D pos_) {
-	if ((pos_.x < 0) || (pos_.x >= width))
-		return false;
-
-	if ((pos_.y < 0) || (pos_.y >= height))
-			return false;
-
-	// Check walls!
-	if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Wall}) != 0)
-		return false;
-
-	return true;
-}
-
-
-bool SimpleGridworld::isStateTerminal(mic::types::Position2D pos_) {
-    if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pit}) != 0)
-    	// Pit.
-        return true;
-    else if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Goal}) != 0)
-    	// Goal.
-        return true;
-    else
-        return false;
-}
 
 
 bool SimpleGridworld::move (mic::types::Action2DInterface ac_) {
 //	LOG(LINFO) << "Current move = " << ac_;
-	// Get player position.
-	mic::types::Position2D old_pos = getPlayerPosition();
-	mic::types::Position2D new_pos = old_pos + ac_;
+	// Compute destination.
+    mic::types::Position2D new_pos = gridworld.getPlayerPosition() + ac_;
 
-	// Check whether the "destination" (new position) is valid.
-	if (!isStateAllowed(new_pos))
+	// Check whether the state is allowed.
+	if (!gridworld.isStateAllowed(new_pos))
 		return false;
 
 	// Update the "state-action" table.
+	// ...
 
-
-	// "Reset" previous player position and set the new one.
-	gridworld({(size_t)old_pos.x, (size_t)old_pos.y, (size_t)GridworldChannels::Player}) = 0;
-	gridworld({(size_t)new_pos.x, (size_t)new_pos.y, (size_t)GridworldChannels::Player}) = 1;
+	// Move player.
+	gridworld.movePlayerToPosition(new_pos);
 	return true;
 }
 
@@ -427,7 +139,7 @@ bool SimpleGridworld::move (mic::types::Action2DInterface ac_) {
 bool SimpleGridworld::isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_) {
 	// Compute the "destination" coordinates.
     mic::types::Position2D new_pos = pos_ + ac_;
-    return isStateAllowed(new_pos);
+    return gridworld.isStateAllowed(new_pos);
 }
 
 float SimpleGridworld::computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_){
@@ -539,20 +251,20 @@ bool SimpleGridworld::performSingleStep() {
 	for (size_t y=0; y<height; y++){
 		for (size_t x=0; x<width; x++) {
 			mic::types::Position2D pos(x,y);
-			if (isStateTerminal(pos) ) {
-				float final_reward = getStateReward(pos);
-				new_state_value_table({ (size_t)pos.x, (size_t)pos.y }) = final_reward;
+			if (gridworld.isStateTerminal(pos) ) {
+				// Set the state rewared.
+				new_state_value_table({ (size_t)pos.x, (size_t)pos.y }) = gridworld.getStateReward(pos);
 				continue;
 			}//: if
-			// Else - find th best value.
-			if (isStateAllowed(pos) )
+			// Else - compute the best value.
+			if (gridworld.isStateAllowed(pos) )
 				new_state_value_table({ (size_t)pos.x, (size_t)pos.y }) = computeBestValue(pos);
 		}//: for x
 	}//: for y
 	// Update state.
 	state_value_table = new_state_value_table;
 
-	LOG(LSTATUS) << std::endl << streamGrid();
+	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
 	LOG(LSTATUS) << std::endl << streamStateActionTable();
 
 
