@@ -318,5 +318,11 @@ bool Gridworld::isStateTerminal(mic::types::Position2D pos_) {
 }
 
 
+bool Gridworld::isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_) {
+	// Compute the "destination" coordinates.
+    mic::types::Position2D new_pos = pos_ + ac_;
+    return isStateAllowed(new_pos);
+}
+
 } /* namespace types */
 } /* namespace mic */

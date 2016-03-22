@@ -1,7 +1,7 @@
 /*!
- * \file SimpleGridworld.hpp
- * \brief 
- * \author tkornut
+ * \file GridworldValueIteration.hpp
+ * \brief Declaration of the application class responsible for solving the gridworld problem with value iteration.
+ * \author tkornuta
  * \date Mar 17, 2016
  */
 
@@ -11,11 +11,12 @@
 #include <vector>
 #include <string>
 
-#include <opengl/application/OpenGLApplication.hpp>
-#include <opengl/visualization/WindowFloatCollectorChart.hpp>
-using namespace mic::opengl::visualization;
+#include <application/Application.hpp>
 
 #include <types/Gridworld.hpp>
+#include <types/MatrixTypes.hpp>
+#include <types/Action2D.hpp>
+#include <types/Position2D.hpp>
 
 namespace mic {
 namespace application {
@@ -26,7 +27,7 @@ namespace application {
  * \brief Class responsible for solving the gridworld problem by applying the reinforcement learning value iteration method.
  * \author tkornuta
  */
-class GridworldValueIteration: public mic::opengl::application::OpenGLApplication {
+class GridworldValueIteration: public mic::application::Application {
 public:
 	/*!
 	 * Default Constructor. Sets the application/node name, default values of variables, initializes classifier etc.
@@ -58,12 +59,6 @@ protected:
 	virtual bool performSingleStep();
 
 private:
-
-	/// Window for displaying ???.
-	WindowFloatCollectorChart* w_chart;
-
-	/// Data collector.
-	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
 	/// The gridworld object.
 	mic::types::Gridworld gridworld;
@@ -131,14 +126,6 @@ private:
 	 * @return Value ofr the function
 	 */
 	float computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_);
-
-	/*!
-	 * Checks whether performing given action starting in given state is allowed.
-	 * @param pos_ Starting state (position).
-	 * @param ac_ Action to be performed.
-	 * @return True if action is allowed, false otherwise.
-	 */
-	bool isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_);
 
 	/*!
 	 * Calculates the best value for given state - by finding the action having the maximal expected value.

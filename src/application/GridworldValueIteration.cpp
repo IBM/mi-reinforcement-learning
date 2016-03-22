@@ -1,7 +1,7 @@
 /*!
- * \file SimpleGridworld.cpp
- * \brief 
- * \author tkornut
+ * \file GridworldValueIteration
+ * \brief Definitions of the methods of class responsible for solving the gridworld problem with value iteration.
+ * \author tkornuta
  * \date Mar 17, 2016
  */
 
@@ -22,7 +22,7 @@ void RegisterApplication (void) {
 }
 
 
-GridworldValueIteration::GridworldValueIteration(std::string node_name_) : OpenGLApplication(node_name_),
+GridworldValueIteration::GridworldValueIteration(std::string node_name_) : Application(node_name_),
 		gridworld_type("gridworld_type", 0),
 		width("width", 4),
 		height("height", 4),
@@ -50,18 +50,6 @@ GridworldValueIteration::~GridworldValueIteration() {
 
 
 void GridworldValueIteration::initialize(int argc, char* argv[]) {
-	// Initialize GLUT! :]
-	VGL_MANAGER->initializeGLUT(argc, argv);
-
-	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
-	// Add containers to collector.
-/*	collector_ptr->createContainer("average_reward", 0, 10, mic::types::color_rgba(255, 0, 0, 180));
-	collector_ptr->createContainer("correct_arms_percentage", 0, 100, mic::types::color_rgba(0, 255, 0, 180));
-	collector_ptr->createContainer("best_possible_reward", 0, 10, mic::types::color_rgba(0, 0, 255, 180));*/
-
-	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("nBandits", 256, 256, 0, 0);
-	w_chart->setDataCollectorPtr(collector_ptr);
 
 }
 
@@ -94,16 +82,11 @@ void GridworldValueIteration::initializePropertyDependentVariables() {
 
 
 
-
 std::string GridworldValueIteration::streamStateActionTable() {
 	std::ostringstream os;
 	for (size_t y=0; y<height; y++){
 		os << "| ";
 		for (size_t x=0; x<width; x++) {
-/*			os << state_action_table({x,y,0}) << " , ";
-			os << state_action_table({x,y,1}) << " , ";
-			os << state_action_table({x,y,2}) << " , ";
-			os << state_action_table({x,y,2}) << " | ";*/
 			if ( state_value_table(y,x) == -std::numeric_limits<float>::infinity())
 				os << "-INF | ";
 			else
@@ -116,8 +99,6 @@ std::string GridworldValueIteration::streamStateActionTable() {
 }
 
 
-
-
 bool GridworldValueIteration::move (mic::types::Action2DInterface ac_) {
 //	LOG(LINFO) << "Current move = " << ac_;
 	// Compute destination.
@@ -127,20 +108,11 @@ bool GridworldValueIteration::move (mic::types::Action2DInterface ac_) {
 	if (!gridworld.isStateAllowed(new_pos))
 		return false;
 
-	// Update the "state-action" table.
-	// ...
-
 	// Move player.
 	gridworld.movePlayerToPosition(new_pos);
 	return true;
 }
 
-
-bool GridworldValueIteration::isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_) {
-	// Compute the "destination" coordinates.
-    mic::types::Position2D new_pos = pos_ + ac_;
-    return gridworld.isStateAllowed(new_pos);
-}
 
 float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_){
 	//  Compute the Q-value of action in state from the value function stored table.
@@ -149,15 +121,15 @@ float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D po
 	float probs_normalizer = (1-move_noise);
 
 	// Consider also east and west actions as possible actions - due to move_noise.
-	if ((ac_.getType() == NESW::North) || (ac_.getType() == NESW::South)) {
-		if (isActionAllowed(pos_, A_EAST)) {
+	if ((ac_.getType() == types::NESW::North) || (ac_.getType() == types::NESW::South)) {
+		if (gridworld.isActionAllowed(pos_, A_EAST)) {
 			mic::types::Position2D east_pos = pos_ + A_EAST;
 			if (state_value_table((size_t)east_pos.y, (size_t)east_pos.x) != -std::numeric_limits<float>::infinity()) {
 				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table( (size_t)east_pos.y, (size_t)east_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
-		if (isActionAllowed(pos_, A_WEST)) {
+		if (gridworld.isActionAllowed(pos_, A_WEST)) {
 			mic::types::Position2D west_pos = pos_ + A_WEST;
 			if (state_value_table((size_t)west_pos.y, (size_t)west_pos.x) != -std::numeric_limits<float>::infinity()) {
 				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)west_pos.y, (size_t)west_pos.x));
@@ -167,15 +139,15 @@ float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D po
 	}//: if
 
 	// Consider also north and south actions as possible actions - due to move_noise.
-	if ((ac_.getType() == NESW::East) || (ac_.getType() == NESW::West)) {
-		if (isActionAllowed(pos_, A_NORTH)) {
+	if ((ac_.getType() == types::NESW::East) || (ac_.getType() == types::NESW::West)) {
+		if (gridworld.isActionAllowed(pos_, A_NORTH)) {
 			mic::types::Position2D north_pos = pos_ + A_NORTH;
 			if (state_value_table((size_t)north_pos.y, (size_t)north_pos.x) != -std::numeric_limits<float>::infinity()) {
 				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)north_pos.y, (size_t)north_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
-		if (isActionAllowed(pos_, A_SOUTH)) {
+		if (gridworld.isActionAllowed(pos_, A_SOUTH)) {
 			mic::types::Position2D south_pos = pos_ + A_SOUTH;
 			if (state_value_table((size_t)south_pos.y, (size_t)south_pos.x) != -std::numeric_limits<float>::infinity()) {
 				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)south_pos.y, (size_t)south_pos.x));
@@ -195,57 +167,29 @@ float GridworldValueIteration::computeBestValue(mic::types::Position2D pos_){
 	// Check if the state is allowed.
 	if (!gridworld.isStateAllowed(pos_))
 		return best_value;
-	// Check the north action.
-	if(isActionAllowed(pos_, A_NORTH)) {
-		float value = computeQValueFromValues(pos_, A_NORTH);
-		if (value > best_value)
-			best_value = value;
-	}//: if
-	// Check the east action.
-	if(isActionAllowed(pos_, A_EAST)) {
-		float value = computeQValueFromValues(pos_, A_EAST);
-		if (value > best_value)
-			best_value = value;
-	}//: if
-	// Check the north action.
-	if(isActionAllowed(pos_, A_SOUTH)) {
-		float value = computeQValueFromValues(pos_, A_SOUTH);
-		if (value > best_value)
-			best_value = value;
-	}//: if
-	// Check the north action.
-	if(isActionAllowed(pos_, A_WEST)) {
-		float value = computeQValueFromValues(pos_, A_WEST);
-		if (value > best_value)
-			best_value = value;
-	}//: if
+
+	// Create a list of possible actions.
+	std::vector<mic::types::NESWAction> actions;
+	actions.push_back(A_NORTH);
+	actions.push_back(A_EAST);
+	actions.push_back(A_SOUTH);
+	actions.push_back(A_WEST);
+
+	// Check the actions one by one.
+	for(mic::types::NESWAction action : actions) {
+		if(gridworld.isActionAllowed(pos_, action)) {
+			float value = computeQValueFromValues(pos_, action);
+			if (value > best_value)
+				best_value = value;
+		}//if is allowed
+	}//: for
+
 	return best_value;
 }
 
 
 bool GridworldValueIteration::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
-
-
-/*	mic::types::Position2D player_position = getPlayerPosition();
-//	LOG(LINFO) << "Player pose = " << player_position;
-	LOG(LINFO) << "Reward: " << calculateReward();
-
-	// Check episode state.
-	short final_reward = isFinalPosition(player_position);
-	if(final_reward != 0) {
-		// Do recalculate state-value table.
-		// In the terminal state all actions have the same "terminal" value.
-		state_value_table({ (size_t)player_position.x, (size_t)player_position.y }) = final_reward;
-
-		// Start new episode.
-		LOG(LWARNING)<< "Starting new episode";
-		movePlayerToPosition(initial_position);
-	}
-
-	// Move randomly - repeat until an allowed move is made.
-	while (!move(A_RANDOM))
-		;*/
 
 	// Perform the iterative policy iteration.
 	mic::types::MatrixXf new_state_value_table(height, width);
@@ -283,27 +227,10 @@ bool GridworldValueIteration::performSingleStep() {
 
 	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
 	LOG(LSTATUS) << std::endl << streamStateActionTable();
-	LOG(LSTATUS) << "Delta Value = " << running_delta;
+	LOG(LINFO) << "Delta Value = " << running_delta;
 
-
-/*	short choice;
-	// Epsilon-greedy action selection.
-	if (RAN_GEN->uniRandReal() > (double)epsilon){
-		// Select best action.
-		choice = selectBestArm();
-	} else {
-		//std::cout << "Random action!" << std::endl;
-		// Random arm selection.
-        choice = RAN_GEN->uniRandInt(0, number_of_bandits-1);
-	}//: if*/
-
-/*	// Add variables to container.
-	collector_ptr->addDataToContainer("average_reward",running_mean_reward);
-	collector_ptr->addDataToContainer("correct_arms_percentage",correct_arms_percentage);
-	collector_ptr->addDataToContainer("best_possible_reward",10.0*best_arm_prob);
-
-	// Export reward "convergence" diagram.
-	collector_ptr->exportDataToCsv(statistics_filename);*/
+	if (running_delta < 1e-05)
+		return false;
 
 	return true;
 }

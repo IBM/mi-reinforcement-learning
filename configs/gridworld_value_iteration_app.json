@@ -1,7 +1,7 @@
 {
 	"app_state": {
-		"application_sleep_interval": "1",
-		"single_step_mode": 1
+		"application_sleep_interval": "500000",
+		"single_step_mode": 0
 	},
 	"gridworld_value_iteration_app": {
 		"gridworld_type": 4,

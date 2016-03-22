@@ -155,6 +155,13 @@ public:
 	 */
 	bool isStateTerminal(mic::types::Position2D pos_);
 
+	/*!
+	 * Checks whether performing given action starting in given state is allowed.
+	 * @param pos_ Starting state (position).
+	 * @param ac_ Action to be performed.
+	 * @return True if action is allowed, false otherwise.
+	 */
+	bool isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_);
 
 	/*!
 	 * Returns current width of the gridworld.
