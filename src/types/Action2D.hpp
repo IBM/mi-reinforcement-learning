@@ -109,6 +109,11 @@ protected:
 class NESWAction : public mic::types::Action2D<NESW> {
 public:
 	/*!
+	 * NESW action constructor. Sets action to none.
+	 */
+	NESWAction() : Action2D()  { type = NESW::None; };
+
+	/*!
 	 * Default NESW action constructor. Sets increments according to action type.
 	 */
 	NESWAction(NESW type_) : Action2D() { setAction(type_); };
@@ -120,21 +125,38 @@ public:
 	void setAction(NESW type_) {
 		type = type_;
 		switch (type_) {
-		case NESW::North:	dy =-1; dx =0; break;
-		case NESW::East:	dy =0; dx =1; break;
-		case NESW::South:	dy =1; dx =0; break;
-		case NESW::West:	dy =0; dx =-1; break;
-		case NESW::None:
-		case NESW::Exit:
-		default:	dy =0; dx =0;
+			case NESW::North:	dy =-1; dx =0; break;
+			case NESW::East:	dy =0; dx =1; break;
+			case NESW::South:	dy =1; dx =0; break;
+			case NESW::West:	dy =0; dx =-1; break;
+			case NESW::None:
+			case NESW::Exit:
+			default:	dy =0; dx =0;
 		}//: switch
 	}
 
-protected:
 	/*!
-	 * NESW action constructor. Empty. Protected - to be used by derived classes.
+	 * Returns ostream containing description of given position.
+	 * @param os_ Ostream.
+	 * @param pos_ Position.
+	 * @return Returned ostream object.
 	 */
-	NESWAction() : Action2D()  { type = NESW::None; };
+	friend std::ostream& operator<<(std::ostream& os_, const NESWAction& ac_)
+	{
+	    os_ << "[dx,dy]: [" << ac_.dx << ',' << ac_.dy << "]";
+		switch (ac_.type) {
+		case NESW::North:	os_ << " (North)"; break;
+		case NESW::East:	os_ << " (East)"; break;
+		case NESW::South:	os_ << " (South)"; break;
+		case NESW::West:	os_ << " (West)"; break;
+		case NESW::None:	os_ << " (None)"; break;
+		case NESW::Random:	os_ << " (Random)"; break;
+		case NESW::Exit:	os_ << " (Exit)"; break;
+		default: break;
+		}//: switch
+
+	    return os_;
+	}
 
 };
 
@@ -159,6 +181,8 @@ public:
 		// Select a random action.
 		setAction((NESW) index_dist(rng_mt19937_64));
 	};
+
+
 private:
 	/*!
 	 * Random device used for generation of random numbers.
@@ -183,6 +207,7 @@ public:
 	 * Exit action constructor. Empty.
 	 */
 	ExitAction() : NESWAction() { type = NESW::Exit; };
+
 };
 
 
@@ -221,6 +246,12 @@ public:
  * \author tkornuta
  */
 #define A_EXIT mic::types::ExitAction()
+
+/*!
+ * \brief Macro returning NESWAction none (useful e.g. then no possible action can be found).
+ * \author tkornuta
+ */
+#define A_NONE mic::types::NESWAction(mic::types::NESW::None)
 
 
 

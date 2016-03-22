@@ -74,7 +74,7 @@ private:
 	/// Property: number of bandits
 	mic::configuration::Property<short> number_of_bandits;
 
-	/// Property: variable denoting epsilon in aciton selection (the probability "below" which a random action will be selected).
+	/// Property: variable denoting epsilon in action selection (the probability "below" which a random action will be selected).
 	mic::configuration::Property<double> epsilon;
 
 	/// Property: name of the file to which the statistics will be exported.

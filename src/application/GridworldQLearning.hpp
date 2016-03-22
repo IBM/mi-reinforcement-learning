@@ -80,8 +80,8 @@ private:
 	/// The gridworld object.
 	mic::types::Gridworld gridworld;
 
-	/// Tensor storing values for all states (gridworld w * h).
-	mic::types::MatrixXf state_value_table;
+	/// Tensor storing values for all states (gridworld w * h * 4 (number of actions)). COL MAJOR(!).
+	mic::types::TensorXf qstate_table;
 
 	/// Property: type of mgridworld:
 	/// 0: the exemplary grid 4x3.
@@ -105,28 +105,34 @@ private:
 	mic::configuration::Property<float> step_reward;
 
 	/*!
-	 * Property: future discount factor (should be in range 0.0-1.0).
+	 * Property: future discount (should be in range 0.0-1.0).
 	 */
-	mic::configuration::Property<float> discount_factor;
+	mic::configuration::Property<float> discount_rate;
+
+	/*!
+	 * Property: learning rate (should be in range 0.0-1.0).
+	 */
+	mic::configuration::Property<float> learning_rate;
 
 	/*!
 	 * Property: move noise, determining gow often action results in unintended direction.
 	 */
 	mic::configuration::Property<float> move_noise;
 
+	/*!
+	 * Property: variable denoting epsilon in action selection (the probability "below" which a random action will be selected).
+	 * if epsilon < 0 then if will be set to 1/episode, hence change dynamically depending on the episode number.
+	 */
+	mic::configuration::Property<double> epsilon;
+
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
-
-	/*!
-	 * Running delta being the sum of increments of the value table.
-	 */
-	float running_delta;
 
 	/*!
 	 * Steams the current state of the state-action values.
 	 * @return Ostream with description of the state-action table.
 	 */
-	std::string streamStateActionTable();
+	std::string streamQStateTable();
 
 
 	/*!
@@ -137,19 +143,18 @@ private:
 	bool move (mic::types::Action2DInterface ac_);
 
 	/*!
-	 * Calculates the Q-value, taking into consideration probabilistic transition between states (i.e. that north action can end up going east or west)
-	 * @param pos_ Starting state (position).
-	 * @param ac_ Action to be performed.
-	 * @return Value ofr the function
-	 */
-	float computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_);
-
-	/*!
 	 * Calculates the best value for given state - by finding the action having the maximal expected value.
 	 * @param pos_ Starting state (position).
 	 * @return Value for given state.
 	 */
 	float computeBestValue(mic::types::Position2D pos_);
+
+
+	/*!
+	 * Finds the best action.
+	 * @return The best action found.
+	 */
+	mic::types::NESWAction selectBestAction(mic::types::Position2D pos_);
 
 
 };

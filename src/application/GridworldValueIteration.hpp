@@ -63,7 +63,7 @@ private:
 	/// The gridworld object.
 	mic::types::Gridworld gridworld;
 
-	/// Tensor storing values for all states (gridworld w * h).
+	/// Matrix storing values for all states (gridworld w * h). ROW MAJOR(!).
 	mic::types::MatrixXf state_value_table;
 
 	/// Property: type of mgridworld:
