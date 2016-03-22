@@ -133,6 +133,12 @@ public:
 	 */
 	void movePlayerToPosition(mic::types::Position2D pos_);
 
+	/*!
+	 * Move player to the initial position.
+	 * @param pos_ Position to be checked.
+	 * @param pos_ The position to be set.
+	 */
+	void movePlayerToInitialPosition();
 
 	/*!
 	 * Returns the reward associated with the given state.

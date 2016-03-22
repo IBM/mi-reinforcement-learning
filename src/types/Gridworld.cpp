@@ -278,6 +278,10 @@ void Gridworld::movePlayerToPosition(mic::types::Position2D pos_) {
 	gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Player}) = 1;
 }
 
+void Gridworld::movePlayerToInitialPosition() {
+	movePlayerToPosition(initial_position);
+}
+
 
 float Gridworld::getStateReward(mic::types::Position2D pos_) {
     if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pit}) != 0)

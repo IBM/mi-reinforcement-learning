@@ -42,10 +42,6 @@ public:
 	virtual ~EpisodicHistogramFilterMazeLocalization();
 
 protected:
-	/*!
-	 * Initializes all variables that are property-dependent (input patches, SDRs etc.).
-	 */
-	virtual void initializePropertyDependentVariables();
 
 	/*!
 	 * Method initializes GLUT and OpenGL windows.
@@ -55,11 +51,14 @@ protected:
 	virtual void initialize(int argc, char* argv[]);
 
 	/*!
+	 * Initializes all variables that are property-dependent (input patches, SDRs etc.).
+	 */
+	virtual void initializePropertyDependentVariables();
+
+	/*!
 	 * Performs single step of computations.
 	 */
 	virtual bool performSingleStep();
-
-protected:
 
 	/*!
 	 * Method called at the beginning of new episode (goal: to reset the statistics etc.) - abstract, to be overridden.

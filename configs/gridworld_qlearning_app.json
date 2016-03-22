@@ -1,0 +1,12 @@
+{
+	"app_state": {
+		"application_sleep_interval": "1",
+		"single_step_mode": 1
+	},
+	"gridworld_qlearning_app": {
+		"gridworld_type": 4,
+		"step_reward": -0.5,
+		"discount_factor" : 0.9,
+		"move_noise": 0.2
+	}
+}

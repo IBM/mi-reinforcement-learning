@@ -1,22 +1,21 @@
 /*!
- * \file GridworldValueIteration.hpp
- * \brief Declaration of the application class responsible for solving the gridworld problem with value iteration.
- * \author tkornuta
- * \date Mar 17, 2016
+ * \file GridworldQLearning.hpp
+ * \brief 
+ * \author tkornut
+ * \date Mar 21, 2016
  */
 
-#ifndef SRC_APPLICATION_GRIDWORLDVALUEITERATION_HPP_
-#define SRC_APPLICATION_GRIDWORLDVALUEITERATION_HPP_
+#ifndef SRC_APPLICATION_GRIDWORLDQLEARNING_HPP_
+#define SRC_APPLICATION_GRIDWORLDQLEARNING_HPP_
 
 #include <vector>
 #include <string>
 
-#include <application/Application.hpp>
+#include <opengl/application/OpenGLEpisodicApplication.hpp>
+#include <opengl/visualization/WindowFloatCollectorChart.hpp>
+using namespace mic::opengl::visualization;
 
 #include <types/Gridworld.hpp>
-#include <types/MatrixTypes.hpp>
-#include <types/Action2D.hpp>
-#include <types/Position2D.hpp>
 
 namespace mic {
 namespace application {
@@ -24,27 +23,23 @@ namespace application {
 
 
 /*!
- * \brief Class responsible for solving the gridworld problem by applying the reinforcement learning value iteration method.
+ * \brief Class responsible for solving the gridworld problem with Q-learning.
  * \author tkornuta
  */
-class GridworldValueIteration: public mic::application::Application {
+class GridworldQLearning: public mic::opengl::application::OpenGLEpisodicApplication {
 public:
 	/*!
 	 * Default Constructor. Sets the application/node name, default values of variables, initializes classifier etc.
 	 * @param node_name_ Name of the application/node (in configuration file).
 	 */
-	GridworldValueIteration(std::string node_name_ = "application");
+	GridworldQLearning(std::string node_name_ = "application");
 
 	/*!
 	 * Destructor.
 	 */
-	virtual ~GridworldValueIteration();
+	virtual ~GridworldQLearning();
 
 protected:
-	/*!
-	 * Initializes all variables that are property-dependent.
-	 */
-	virtual void initializePropertyDependentVariables();
 
 	/*!
 	 * Method initializes GLUT and OpenGL windows.
@@ -54,11 +49,33 @@ protected:
 	virtual void initialize(int argc, char* argv[]);
 
 	/*!
+	 * Initializes all variables that are property-dependent.
+	 */
+	virtual void initializePropertyDependentVariables();
+
+	/*!
 	 * Performs single step of computations.
 	 */
 	virtual bool performSingleStep();
 
+	/*!
+	 * Method called at the beginning of new episode (goal: to reset the statistics etc.) - abstract, to be overridden.
+	 */
+	virtual void startNewEpisode();
+
+	/*!
+	 * Method called when given episode ends (goal: export collected statistics to file etc.) - abstract, to be overridden.
+	 */
+	virtual void finishCurrentEpisode();
+
+
 private:
+
+	/// Window for displaying ???.
+	WindowFloatCollectorChart* w_chart;
+
+	/// Data collector.
+	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
 	/// The gridworld object.
 	mic::types::Gridworld gridworld;
@@ -137,8 +154,7 @@ private:
 
 };
 
-
 } /* namespace application */
 } /* namespace mic */
 
-#endif /* SRC_APPLICATION_GRIDWORLDVALUEITERATION_HPP_ */
+#endif /* SRC_APPLICATION_GRIDWORLDQLEARNING_HPP_ */

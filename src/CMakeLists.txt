@@ -175,7 +175,6 @@ if(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 		application
 		types
 		data_utils
-		visualization_opengl
 		${Boost_LIBRARIES}  
 		)
 
@@ -185,5 +184,30 @@ if(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 endif(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 
 
+
+set(BUILD_APP_GRIDWORLD_QLEARNING ON CACHE BOOL "Build the application solving the gridworld problem with Q-learning.")
+
+if(${BUILD_APP_GRIDWORLD_QLEARNING})
+	# Create exeutable.
+	add_executable(gridworld_qlearning_app 
+		application/GridworldQLearning.cpp
+		types/Gridworld.cpp
+		application/console_application_main.cpp
+		)
+	# Link it with shared libraries.
+	target_link_libraries(gridworld_qlearning_app 
+		logger
+		configuration
+		application
+		types
+		data_utils
+		visualization_opengl
+		${Boost_LIBRARIES}  
+		)
+
+	# install test to bin directory
+	install(TARGETS gridworld_qlearning_app RUNTIME DESTINATION bin)
+	
+endif(${BUILD_APP_GRIDWORLD_QLEARNING})
 
 
