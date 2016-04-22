@@ -27,7 +27,7 @@ GridworldValueIteration::GridworldValueIteration(std::string node_name_) : Appli
 		width("width", 4),
 		height("height", 4),
 		step_reward("step_reward", 0.0),
-		discount_factor("discount_factor", 0.9),
+		discount_rate("discount_rate", 0.9),
 		move_noise("move_noise",0.2),
 		statistics_filename("statistics_filename","statistics_filename.csv")
 
@@ -36,7 +36,7 @@ GridworldValueIteration::GridworldValueIteration(std::string node_name_) : Appli
 	registerProperty(gridworld_type);
 	registerProperty(width);
 	registerProperty(step_reward);
-	registerProperty(discount_factor);
+	registerProperty(discount_rate);
 	registerProperty(move_noise);
 	registerProperty(statistics_filename);
 
@@ -117,7 +117,7 @@ bool GridworldValueIteration::move (mic::types::Action2DInterface ac_) {
 float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_){
 	//  Compute the Q-value of action in state from the value function stored table.
 	mic::types::Position2D new_pos = pos_ + ac_;
-	float q_value = (1-move_noise)*(step_reward + discount_factor * state_value_table((size_t)new_pos.y, (size_t)new_pos.x));
+	float q_value = (1-move_noise)*(step_reward + discount_rate * state_value_table((size_t)new_pos.y, (size_t)new_pos.x));
 	float probs_normalizer = (1-move_noise);
 
 	// Consider also east and west actions as possible actions - due to move_noise.
@@ -125,14 +125,14 @@ float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D po
 		if (gridworld.isActionAllowed(pos_, A_EAST)) {
 			mic::types::Position2D east_pos = pos_ + A_EAST;
 			if (state_value_table((size_t)east_pos.y, (size_t)east_pos.x) != -std::numeric_limits<float>::infinity()) {
-				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table( (size_t)east_pos.y, (size_t)east_pos.x));
+				q_value += (move_noise/2)*(step_reward + discount_rate * state_value_table( (size_t)east_pos.y, (size_t)east_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
 		if (gridworld.isActionAllowed(pos_, A_WEST)) {
 			mic::types::Position2D west_pos = pos_ + A_WEST;
 			if (state_value_table((size_t)west_pos.y, (size_t)west_pos.x) != -std::numeric_limits<float>::infinity()) {
-				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)west_pos.y, (size_t)west_pos.x));
+				q_value += (move_noise/2)*(step_reward + discount_rate * state_value_table((size_t)west_pos.y, (size_t)west_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
@@ -143,14 +143,14 @@ float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D po
 		if (gridworld.isActionAllowed(pos_, A_NORTH)) {
 			mic::types::Position2D north_pos = pos_ + A_NORTH;
 			if (state_value_table((size_t)north_pos.y, (size_t)north_pos.x) != -std::numeric_limits<float>::infinity()) {
-				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)north_pos.y, (size_t)north_pos.x));
+				q_value += (move_noise/2)*(step_reward + discount_rate * state_value_table((size_t)north_pos.y, (size_t)north_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
 		if (gridworld.isActionAllowed(pos_, A_SOUTH)) {
 			mic::types::Position2D south_pos = pos_ + A_SOUTH;
 			if (state_value_table((size_t)south_pos.y, (size_t)south_pos.x) != -std::numeric_limits<float>::infinity()) {
-				q_value += (move_noise/2)*(step_reward + discount_factor * state_value_table((size_t)south_pos.y, (size_t)south_pos.x));
+				q_value += (move_noise/2)*(step_reward + discount_rate * state_value_table((size_t)south_pos.y, (size_t)south_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if

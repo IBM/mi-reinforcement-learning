@@ -29,14 +29,12 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 	# Link it with shared libraries.
 	target_link_libraries(maze_of_digits_histogram_filter_app 
 		logger
+		configuration
 		application
 		types
 		data_utils
 		data_io
-		auto_encoders
-		classifiers
-		auto_encoders
-		configuration
+		encoders
 		visualization_opengl
 		${Boost_LIBRARIES}  
 		)
@@ -60,14 +58,12 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 	# Link it with shared libraries.
 	target_link_libraries(maze_of_digits_histogram_filter_episodic_app 
 		logger
+		configuration
 		application
 		types
 		data_utils
 		data_io
-		auto_encoders
-		classifiers
-		auto_encoders
-		configuration
+		encoders
 		visualization_opengl
 		${Boost_LIBRARIES}  
 		)
@@ -92,10 +88,10 @@ if(${BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY})
 	# Link it with shared libraries.
 	target_link_libraries(narmed_bandits_unlimited_history_app 
 		logger
+		configuration
 		application
 		data_utils
 		types
-		configuration
 		visualization_opengl
 		${Boost_LIBRARIES}  
 		)
@@ -117,10 +113,10 @@ if(${BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING})
 	# Link it with shared libraries.
 	target_link_libraries(narmed_bandits_simple_qlearning_app 
 		logger
+		configuration
 		application
 		data_utils
 		types
-		configuration
 		visualization_opengl
 		${Boost_LIBRARIES}  
 		)
@@ -142,10 +138,10 @@ if(${BUILD_APP_N_ARMED_BANDITS_SOFTMAX})
 	# Link it with shared libraries.
 	target_link_libraries(narmed_bandits_softmax_app 
 		logger
+		configuration
 		application
 		data_utils
 		types
-		configuration
 		visualization_opengl
 		${Boost_LIBRARIES}  
 		)
@@ -209,5 +205,32 @@ if(${BUILD_APP_GRIDWORLD_QLEARNING})
 	install(TARGETS gridworld_qlearning_app RUNTIME DESTINATION bin)
 	
 endif(${BUILD_APP_GRIDWORLD_QLEARNING})
+
+
+set(BUILD_APP_GRIDWORLD_DEEPQLEARNING ON CACHE BOOL "Build the application solving the gridworld problem with Q-learning and (not that) deep neural networks.")
+
+if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING})
+	# Create exeutable.
+	add_executable(gridworld_deepqlearning_app 
+		application/GridworldDeepQLearning.cpp
+		types/Gridworld.cpp
+		application/console_application_main.cpp
+		)
+	# Link it with shared libraries.
+	target_link_libraries(gridworld_deepqlearning_app 
+		logger
+		configuration
+		application
+		types
+		data_utils
+		mlnn
+		visualization_opengl
+		${Boost_LIBRARIES}  
+		)
+
+	# install test to bin directory
+	install(TARGETS gridworld_deepqlearning_app RUNTIME DESTINATION bin)
+	
+endif(${BUILD_APP_GRIDWORLD_DEEPQLEARNING})
 
 

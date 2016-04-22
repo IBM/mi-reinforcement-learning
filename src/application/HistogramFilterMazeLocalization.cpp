@@ -77,19 +77,19 @@ void HistogramFilterMazeLocalization::initialize(int argc, char* argv[]) {
 void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 
 	// Import mazes.
-	if ((!importer.importData()) || (importer.getData().size() == 0)){
+	if ((!importer.importData()) || (importer.size() == 0)){
 		LOG(LERROR) << "The dataset must consists of at least one maze!";
 		exit(0);
 	}//: if
 
 	// Show mazes.
 	LOG(LNOTICE) << "Loaded mazes";
-	for (size_t m=0; m<importer.getData().size(); m++) {
+	for (size_t m=0; m<importer.size(); m++) {
 		// Display results.
-		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (importer.getData()[m]);
+		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (importer.data()[m]);
 	}//: for
 
-	hf.setMazes(importer.getData(), 10);
+	hf.setMazes(importer.data(), 10);
 
 	hf.setHiddenPose(hidden_maze_number, hidden_x, hidden_y);
 
@@ -98,11 +98,11 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 
 	// Export probabilities to file (truncate it).
 
-	mic::data_io::DataCollector<std::string, int>::exportMatricesToCsv(statistics_filename, "mazes", importer.getData());
+	mic::data_io::DataCollector<std::string, int>::exportMatricesToCsv(statistics_filename, "mazes", importer.data());
 
 	std::vector<std::string> maze_pose_labels;
-	for (size_t y=0; y < importer.getData()[0]->rows(); y++)
-		for (size_t x=0; x < importer.getData()[0]->cols(); x++) {
+	for (size_t y=0; y < importer.data(0)->rows(); y++)
+		for (size_t x=0; x < importer.data(0)->cols(); x++) {
 			std::string label = "(" + std::to_string(y) + ";" + std::to_string(x) + ")";
 			maze_pose_labels.push_back(label);
 		}//: for
@@ -155,7 +155,7 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 	// Initialize uniform index distribution - integers.
 	std::uniform_int_distribution<> color_dist(50, 200);
 	// Create a single container for each maze.
-	for (size_t m=0; m<importer.getData().size(); m++) {
+	for (size_t m=0; m<importer.size(); m++) {
 		std::string label = "P(m" + std::to_string(m) +")";
 		int r= color_dist(rng_mt19937_64);
 		int g= color_dist(rng_mt19937_64);
@@ -209,7 +209,7 @@ void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool syn
 		APP_DATA_SYNCHRONIZATION_SCOPED_LOCK();
 
 		// Add data to chart windows.
-		for (size_t m=0; m<importer.getData().size(); m++) {
+		for (size_t m=0; m<importer.size(); m++) {
 			std::string label = "P(m" + std::to_string(m) +")";
 			w_current_maze_chart->addDataToContainer(label, hf.maze_probabilities[m]);
 			max_pm = ( hf.maze_probabilities[m] > max_pm ) ? hf.maze_probabilities[m] : max_pm;
@@ -234,7 +234,7 @@ void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool syn
 	}//: end of critical section.
 	else {
 		// Add data to chart windows.
-		for (size_t m=0; m<importer.getData().size(); m++) {
+		for (size_t m=0; m<importer.size(); m++) {
 			std::string label = "P(m" + std::to_string(m) +")";
 			w_current_maze_chart->addDataToContainer(label, hf.maze_probabilities[m]);
 			max_pm = ( hf.maze_probabilities[m] > max_pm ) ? hf.maze_probabilities[m] : max_pm;

@@ -90,7 +90,7 @@ private:
 	/*!
 	 * Property: future discount factor (should be in range 0.0-1.0).
 	 */
-	mic::configuration::Property<float> discount_factor;
+	mic::configuration::Property<float> discount_rate;
 
 	/*!
 	 * Property: move noise, determining gow often action results in unintended direction.

@@ -10,6 +10,7 @@
 
 #include <types/Position2D.hpp>
 #include <types/TensorTypes.hpp>
+#include <types/MatrixTypes.hpp>
 #include <logger/Log.hpp>
 
 namespace mic {
@@ -104,6 +105,17 @@ public:
 	void initMazeGrid();
 
 	/*!
+	 * 	Method initializes the grid from Deep Q-Learning example.
+	 *
+	 * [[' ',' ',' ',' '],
+	 *  [' ',' ',+10,' '],
+	 *  [' ','#',-10,' '],
+	 *  ['S',' ',' ',' ']]
+	 */
+	void initExemplaryDQLGrid();
+
+
+	/*!
 	 * Generates a random grid of size (width x height).
 	 */
 	void initRandomGrid(size_t width_, size_t height_);
@@ -119,6 +131,9 @@ public:
 	 * @return Ostream with description of the gridworld.
 	 */
 	std::string streamGrid();
+
+	/// Encode the current state of the grid as a matrix of size [1, width * height * 4]
+	mic::types::MatrixXfPtr encodeGrid();
 
 	/*!
 	 * Calculates the player position.
@@ -170,6 +185,13 @@ public:
 	bool isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_);
 
 	/*!
+	 * Checks whether performing given action from the current player state is allowed.
+	 * @param ac_ Action to be performed.
+	 * @return True if action is allowed, false otherwise.
+	 */
+	bool isActionAllowed(mic::types::Action2DInterface ac_);
+
+	/*!
 	 * Returns current width of the gridworld.
 	 * @return Width.
 	 */
@@ -180,6 +202,12 @@ public:
 	 * @return Height.
 	 */
 	size_t getHeight() { return height; }
+
+	/*!
+	 * Returns the grid tensor.
+	 * @return Grid.
+	 */
+	mic::types::TensorXf & getGrid() { return gridworld; }
 
 protected:
 

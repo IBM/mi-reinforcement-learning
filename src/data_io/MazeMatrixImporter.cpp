@@ -83,11 +83,18 @@ bool MazeMatrixImporter::importData(){
 
 			LOG(LDEBUG) << *mat;
 			// Add matrix do vector.
-			data.push_back(mat);
+			sample_data.push_back(mat);
 		}//: while line
 
 
-		LOG(LINFO) << "Imported " << data.size() << " mazes of size (h x w) = " << maze_height << " x " << maze_width;
+		LOG(LINFO) << "Imported " << sample_data.size() << " mazes of size (h x w) = " << maze_height << " x " << maze_width;
+
+		// Fill the labels and indices tables.
+		for (size_t i=0; i < sample_data.size(); i++ ){
+			sample_labels.push_back( std::make_shared <size_t> (i) );
+			sample_indices.push_back(i);
+		}
+
 		LOG(LINFO) << "Data import finished";
 		data_file.close();
 

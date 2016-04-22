@@ -80,20 +80,20 @@ void EpisodicHistogramFilterMazeLocalization::initialize(int argc, char* argv[])
 void EpisodicHistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 
 	// Import mazes.
-	if ((!importer.importData()) || (importer.getData().size() == 0)){
+	if ((!importer.importData()) || (importer.size() == 0)){
 		LOG(LERROR) << "The dataset must consists of at least one maze!";
 		exit(0);
 	}//: if
 
 	// Show mazes.
 	LOG(LNOTICE) << "Loaded mazes";
-	for (size_t m=0; m<importer.getData().size(); m++) {
+	for (size_t m=0; m<importer.size(); m++) {
 		// Display results.
-		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (importer.getData()[m]);
+		LOG(LNOTICE) << "maze(" <<m<<"):\n" << (importer.data()[m]);
 	}//: for
 
 	// Set mazes.
-	hf.setMazes(importer.getData(), 10);
+	hf.setMazes(importer.data(), 10);
 
 }
 
@@ -181,7 +181,7 @@ bool EpisodicHistogramFilterMazeLocalization::performSingleStep() {
 
 	// 2. Check max maze probability.
 	max_pm = 0;
-	for (size_t m=0; m<importer.getData().size(); m++) {
+	for (size_t m=0; m<importer.size(); m++) {
 		max_pm = ( hf.maze_probabilities[m] > max_pm ) ? hf.maze_probabilities[m] : max_pm;
 	}//: for
 	if (max_pm > min_maze_confidence)

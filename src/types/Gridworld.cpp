@@ -207,6 +207,39 @@ void Gridworld::initMazeGrid() {
 }
 
 
+void Gridworld::initExemplaryDQLGrid() {
+	LOG(LINFO) << "Generating gridworld from Deep Q-Learning example";
+	/*
+	 * [[' ',' ',' ',' '],
+	 *  [' ',' ',+10,' '],
+	 *  [' ','#',-10,' '],
+	 *  ['S',' ',' ',' ']]
+	 */
+
+	// Overwrite dimensions.
+	width = 4;
+	height = 4;
+
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
+
+	// Place the player.
+	initial_position.set(0,3);
+	movePlayerToPosition(initial_position);
+
+	// Place wall(s).
+	gridworld({1,2, (size_t)GridworldChannels::Wall}) = 1;
+
+	// Place pit(s).
+	gridworld({2,2, (size_t)GridworldChannels::Pit}) = -10;
+
+	// Place goal(s).
+	gridworld({2,1, (size_t)GridworldChannels::Goal}) = 10;
+}
+
+
+
 void Gridworld::initRandomGrid(size_t width_, size_t height_) {
 	// TODO!
 	width = width_;
@@ -254,6 +287,17 @@ std::string Gridworld::streamGrid() {
 
 }
 
+
+mic::types::MatrixXfPtr Gridworld::encodeGrid() {
+	// Temporarily reshape the gridworld.
+	gridworld.conservativeResize({1, width * height * 4});
+	// Create a matrix pointer and copy data from grid into the matrix.
+	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(gridworld));
+	// Back to the original shape.
+	gridworld.resize({width, height, 4});
+	// Return the matrix pointer.
+	return encoded_grid;
+}
 
 mic::types::Position2D Gridworld::getPlayerPosition() {
 	mic::types::Position2D position;
@@ -325,6 +369,14 @@ bool Gridworld::isStateTerminal(mic::types::Position2D pos_) {
 bool Gridworld::isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_) {
 	// Compute the "destination" coordinates.
     mic::types::Position2D new_pos = pos_ + ac_;
+    return isStateAllowed(new_pos);
+}
+
+bool Gridworld::isActionAllowed(mic::types::Action2DInterface ac_) {
+	// Get current player position.
+	mic::types::Position2D pos = getPlayerPosition();
+	// Compute the "destination" coordinates.
+    mic::types::Position2D new_pos = pos + ac_;
     return isStateAllowed(new_pos);
 }
 

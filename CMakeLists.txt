@@ -30,16 +30,13 @@ find_package( Eigen3 REQUIRED )
 include_directories( ${EIGEN3_INCLUDE_DIR} )
 
 # Find MIC Toolchain
-find_package(MIToolchain REQUIRED)
-message("Found MI Toolchain libs: ${MIToolchain_LIBRARIES} ")
+find_package(MIToolchain 1.0 REQUIRED)
 
 # Find MIC Algorithms
-find_package(MIAlgorithms REQUIRED)
-message("Found MI Algorithms libs: ${MIAlgorithms_LIBRARIES} ")
+find_package(MIAlgorithms 1.0 REQUIRED)
 
 # Find MIC Visualization
-find_package(MIVisualization REQUIRED)
-message("Found MI Visualization libs: ${MIVisualization_LIBRARIES} ")
+find_package(MIVisualization 1.0 REQUIRED)
 
 # =======================================================================
 # RPATH settings

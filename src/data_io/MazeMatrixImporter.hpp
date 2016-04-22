@@ -15,7 +15,7 @@
 namespace mic {
 namespace data_io {
 
-class MazeMatrixImporter : public mic::data_io::Importer< mic::types::MatrixXi , int> {
+class MazeMatrixImporter : public mic::data_io::Importer< mic::types::MatrixXi , size_t> {
 public:
 	/*!
 	 * Constructor. Sets MNIST image default properties. Registers properties.
@@ -45,7 +45,6 @@ public:
 	/// Height of a maze.
 	int maze_height;
 
-
 protected:
 	/*!
 	 * Property: directory/Name of file containing mazes.
@@ -56,5 +55,24 @@ protected:
 
 } /* namespace data_io */
 } /* namespace mic */
+
+namespace mic {
+namespace types {
+
+/*!
+ * \brief The <MatrixXi-size_t> sample type used by Maze Importer.
+ * \author tkornuta
+ */
+typedef mic::types::Sample<mic::types::MatrixXi, size_t> MazeSample;
+
+/*!
+ * \brief The <MatrixXi-size_t> batch type used by Maze Importer.
+ * \author tkornuta
+ */
+typedef mic::types::Batch<mic::types::MatrixXi, size_t> MazeBatch;
+
+}//: namespace types
+}//: namespace mic
+
 
 #endif /* SRC_DATA_IO_MAZEMATRIXIMPORTER_HPP_ */
