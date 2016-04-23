@@ -79,12 +79,12 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 
 	// Create a simple neural network.
 	// gridworld wxhx4 -> 256 -> 100 -> 4; batch size is set to one.
-	neural_net.addLayer(new Linear((size_t) width * height * 4, 4, 1));
+	neural_net.addLayer(new Linear((size_t) width * height * 4, 256, 1));
+	neural_net.addLayer(new ReLU(256, 256, 1));
+	neural_net.addLayer(new Linear(256, 100, 1));
+	neural_net.addLayer(new ReLU(100, 100, 1));
+	neural_net.addLayer(new Linear(100, 4, 1));
 	neural_net.addLayer(new Regression(4, 4, 1));
-//	neural_net.addLayer(new Linear(256, 100, 1));
-//	neural_net.addLayer(new ReLU(100, 100, 1));
-//	neural_net.addLayer(new Linear(100, 4, 1));
-//	neural_net.addLayer(new Softmax(4, 4, 1));
 }
 
 
@@ -266,7 +266,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 	LOG(LINFO) << "Player position at state t: " << player_pos_t;
 	LOG(LSTATUS) << "Predicted rewards for state t: " << predicted_rewards_t->transpose();
 
-	// Check whether state is terminal.
+/*	// Check whether state is terminal.
 	if(state.isStateTerminal(player_pos_t)) {
 		// In the terminal state we can select only one special action: "terminate".
 		// All "other" actions receive the same value related to the "reward".
@@ -289,7 +289,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 
 		// Finish the episode.
 		return false;
-	}//: if terminal
+	}//: if terminal*/
 
 
 	// Select the action.
@@ -330,7 +330,11 @@ bool GridworldDeepQLearning::performSingleStep() {
 	// If those values are finite.
 	if (std::isfinite(max_q_st_prim_at_prim)) {
 
-		(*predicted_rewards_t)((size_t)action.getType(), 0) = r + discount_rate*max_q_st_prim_at_prim;
+		// Check whether state t+1 is terminal.
+		if(state.isStateTerminal(player_pos_t_prim))
+			(*predicted_rewards_t)((size_t)action.getType(), 0) = 100 * state.getStateReward(player_pos_t_prim);
+		else
+			(*predicted_rewards_t)((size_t)action.getType(), 0) = r + discount_rate*max_q_st_prim_at_prim;
 
 
 		LOG(LERROR) << "Training with desired rewards: " << predicted_rewards_t->transpose();
@@ -346,6 +350,9 @@ bool GridworldDeepQLearning::performSingleStep() {
 	//LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
 	LOG(LSTATUS) << "The resulting state:" << std::endl << state.streamGrid();
 
+	// Check whether state t+1 is terminal - finish the episode.
+	if(state.isStateTerminal(player_pos_t_prim))
+		return false;
 
 	return true;
 }
