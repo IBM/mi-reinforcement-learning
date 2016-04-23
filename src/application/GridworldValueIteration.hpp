@@ -66,14 +66,7 @@ private:
 	/// Matrix storing values for all states (gridworld w * h). ROW MAJOR(!).
 	mic::types::MatrixXf state_value_table;
 
-	/// Property: type of mgridworld:
-	/// 0: the exemplary grid 4x3.
-	/// 1: the classic cliff grid 5x3.
-	/// 2: the classic discount grid 5x5.
-	/// 3: the classic bridge grid 7x3.
-	/// 4: the classic book grid 4x4.
-	/// 5: the classic maze grid 4x4.
-	/// -1 (or else): random grid - all items (wall, goal and pit, player) placed randomly
+	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
 	mic::configuration::Property<short> gridworld_type;
 
 	/// Property: width of gridworld.

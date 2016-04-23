@@ -46,6 +46,29 @@ public:
 	virtual ~Gridworld();
 
 	/*!
+	 * Assign operator. Copies the gridworld state along with its properties.
+	 */
+	mic::types::Gridworld & operator=(const mic::types::Gridworld & gw_);
+
+	/*!
+	 * Genrates the gridworld of a given, predefined type.
+	 * @param gridworld_type_ Type of the generated gridworld.
+	 * Currently available types:
+	 * 0: the exemplary grid 4x3.
+	 * 1: the classic cliff grid 5x3.
+	 * 2: the classic discount grid 5x5.
+	 * 3: the classic bridge grid 7x3.
+	 * 4: the classic book grid 4x4.
+	 * 5: the classic maze grid 4x4.
+	 * 6: gridworld from DQL example 4x4.
+	 * 7: debug grid 2x2.
+	 * -1 (or else): random grid - all items (wall, goal and pit, player) placed randomly
+	 * @param width_ Grid width (used in the case of random grid generation).
+	 * @param height_ Grid height (used in the case of random grid generation).
+	 */
+	void generateGridworld(int gridworld_type_, size_t width_, size_t height_);
+
+	/*!
 	 * 	Method initializes the exemplary grid.
 	 *
 	 * [[' ',' ',' ',' '],
@@ -113,6 +136,24 @@ public:
 	 *  ['S',' ',' ',' ']]
 	 */
 	void initExemplaryDQLGrid();
+
+
+	/*!
+	 * 	Method initializes the 2x2 grid useful during the debugging.
+	 *
+	 * [['S',-10],
+	 *  [+10,' ']]
+	 */
+	void initDebug2x2Grid();
+
+	/*!
+	 * 	Method initializes the 3x3 grid useful during the debugging.
+	 *
+	 * [[' ',-10,' '],
+	 *  [-10,'S',-10],
+	 *  [' ',+10,' ']]
+	 */
+	void initDebug3x3Grid();
 
 
 	/*!

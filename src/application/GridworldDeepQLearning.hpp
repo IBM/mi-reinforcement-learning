@@ -84,15 +84,7 @@ private:
 	/// The gridworld object - current state.
 	mic::types::Gridworld state;
 
-	/// Property: type of gridworld:
-	/// 0: the exemplary grid 4x3.
-	/// 1: the classic cliff grid 5x3.
-	/// 2: the classic discount grid 5x5.
-	/// 3: the classic bridge grid 7x3.
-	/// 4: the classic book grid 4x4.
-	/// 5: the classic maze grid 4x4.
-	/// 6: gridworld from DQL example 4x4.
-	/// -1 (or else): random grid - all items (wall, goal and pit, player) placed randomly
+	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
 	mic::configuration::Property<short> gridworld_type;
 
 	/// Property: width of gridworld.
@@ -134,11 +126,6 @@ private:
 	MultiLayerNeuralNetwork neural_net;
 
 	/*!
-	 * Matrix containing the encoded rewards at state t.
-	 */
-	MatrixXfPtr predicted_rewards_t;
-
-	/*!
 	 * Performs "deterministic" move. It is assumed that the move is truncated by the gridworld boundaries (no circular world assumption).
 	 * @param ac_ The action to be performed.
 	 * @return True if move was performed, false if it was not possible.
@@ -149,15 +136,27 @@ private:
 	 * Calculates the best value for the current state - by finding the action having the maximal expected value.
 	 * @return Value for given state.
 	 */
-	float computeBestValue();
+	float computeBestValueForCurrentState();
 
+	/*!
+	 * Returns the predicted rewards for given state.
+	 * @return Pointerr to predicted rewards (network output matrix).
+	 */
+	mic::types::MatrixXfPtr getPredictedRewardsForCurrentState();
 
 	/*!
 	 * Finds the best action for the current state.
 	 * @return The best action found.
 	 */
-	mic::types::NESWAction selectBestAction();
+	mic::types::NESWAction selectBestActionForCurrentState();
 
+	/*!
+	 * Steams the current network response - values of actions associates with consecutive agent poses.
+	 * @return Ostream with description of the state-action table.
+	 */
+	std::string streamNetworkResponseTable();
+
+	long long sum_of_iterations;
 };
 
 } /* namespace application */

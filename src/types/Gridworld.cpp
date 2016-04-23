@@ -18,6 +18,34 @@ Gridworld::~Gridworld() {
 	// TODO Auto-generated destructor stub
 }
 
+mic::types::Gridworld & Gridworld::operator= (const mic::types::Gridworld & gw_) {
+	width = gw_.width;
+	height = gw_.height;
+	initial_position = gw_.initial_position;
+	gridworld = gw_.gridworld;
+
+	return *this;
+}
+
+
+// Initialize gridworld.
+void Gridworld::generateGridworld(int gridworld_type_, size_t width_, size_t height_) {
+	switch(gridworld_type_) {
+		case 0 : initExemplaryGrid(); break;
+		case 1 : initClassicCliffGrid(); break;
+		case 2 : initDiscountGrid(); break;
+		case 3 : initBridgeGrid(); break;
+		case 4 : initBookGrid(); break;
+		case 5 : initMazeGrid(); break;
+		case 6 : initExemplaryDQLGrid(); break;
+		case 7 : initDebug2x2Grid(); break;
+		case 8 : initDebug3x3Grid(); break;
+		case -1:
+		default: initRandomGrid(width_, height_);
+	}//: switch
+}
+
+
 void Gridworld::initExemplaryGrid() {
 	LOG(LINFO) << "Generating exemplary gridworld";
 	// [[' ',' ',' ',' '],
@@ -237,6 +265,71 @@ void Gridworld::initExemplaryDQLGrid() {
 	// Place goal(s).
 	gridworld({2,1, (size_t)GridworldChannels::Goal}) = 10;
 }
+
+
+void Gridworld::initDebug2x2Grid() {
+	LOG(LINFO) << "Generating the 2x2 debug grid";
+	/*
+	 * [['S',-10],
+	 *  [+10,' ']]
+	 */
+
+	// Overwrite dimensions.
+	width = 2;
+	height = 2;
+
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
+
+	// Place the player.
+	initial_position.set(0,0);
+	movePlayerToPosition(initial_position);
+
+	// Place pit(s).
+	gridworld({1,0, (size_t)GridworldChannels::Pit}) = -10;
+
+	// Place goal(s).
+	gridworld({0,1, (size_t)GridworldChannels::Goal}) = 10;
+}
+
+
+/*!
+ * 	Method initializes the 3x3 grid useful during the debugging.
+ *
+ */
+void Gridworld::initDebug3x3Grid() {
+	LOG(LINFO) << "Generating the 3x3 debug grid";
+	/*
+	 * [[' ',-10,' '],
+	 *  [-10,'S',-10],
+	 *  [' ',+10,' ']]
+	 */
+
+	// Overwrite the dimensions.
+	width = 3;
+	height = 3;
+
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
+
+	// Place the player.
+	initial_position.set(1,1);
+	movePlayerToPosition(initial_position);
+
+	// Place pit(s).
+	gridworld({0,1, (size_t)GridworldChannels::Pit}) = -10;
+	gridworld({1,0, (size_t)GridworldChannels::Pit}) = -10;
+	gridworld({2,1, (size_t)GridworldChannels::Pit}) = -10;
+
+	// Place goal(s).
+	gridworld({1,2, (size_t)GridworldChannels::Goal}) = 10;
+}
+
+
+
+
 
 
 

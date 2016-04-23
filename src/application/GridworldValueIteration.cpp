@@ -54,19 +54,10 @@ void GridworldValueIteration::initialize(int argc, char* argv[]) {
 }
 
 void GridworldValueIteration::initializePropertyDependentVariables() {
-	// Initialize gridworld.
-	switch(gridworld_type) {
-		case 0 : gridworld.initExemplaryGrid(); break;
-		case 1 : gridworld.initClassicCliffGrid(); break;
-		case 2 : gridworld.initDiscountGrid(); break;
-		case 3 : gridworld.initBridgeGrid(); break;
-		case 4 : gridworld.initBookGrid(); break;
-		case 5 : gridworld.initMazeGrid(); break;
-		case -1:
-		default: gridworld.initRandomGrid(width, height);
-	}//: switch
-
+	// Generate the gridworld.
+	gridworld.generateGridworld(gridworld_type, width, height);
 	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
+
 	// Get width and height.
 	width = gridworld.getWidth();
 	height = gridworld.getHeight();
