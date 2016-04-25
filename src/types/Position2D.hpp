@@ -58,6 +58,18 @@ public:
 		return new_pos;
 	}
 
+	/*!
+	 * Comparison operator.
+	 * @param pos_ The compared position.
+	 * @return True if positions are "equal".
+	 */
+	bool operator==(mic::types::Position2D pos_) {
+		mic::types::Position2D new_pos;
+		if ((pos_.x == this->x) && (pos_.y == this->y))
+			return true;
+		else
+			return false;
+	}
 
 	/*!
 	 * Performs "deterministic" move in 2D.

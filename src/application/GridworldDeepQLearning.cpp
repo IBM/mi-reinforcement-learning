@@ -57,8 +57,8 @@ void GridworldDeepQLearning::initialize(int argc, char* argv[]) {
 
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
-	collector_ptr->createContainer("iteration_number",  mic::types::color_rgba(255, 0, 0, 180));
-	collector_ptr->createContainer("average_iteration_number", mic::types::color_rgba(0, 255, 0, 180));
+	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
+	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(0, 255, 0, 180));
 	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 0, 255, 180));
 
 	sum_of_iterations = 0;
@@ -78,13 +78,65 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 	height = state.getHeight();
 
 	// Create a simple neural network.
-	// gridworld wxhx4 -> 256 -> 100 -> 4; batch size is set to one.
-	neural_net.addLayer(new Linear((size_t) width * height * 4, 256, 1));
-	neural_net.addLayer(new ReLU(256, 256, 1));
-	neural_net.addLayer(new Linear(256, 100, 1));
+	// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
+	neural_net.addLayer(new Linear((size_t) width * height , 250, 1));
+	neural_net.addLayer(new ReLU(250, 250, 1));
+	neural_net.addLayer(new Linear(250, 100, 1));
 	neural_net.addLayer(new ReLU(100, 100, 1));
 	neural_net.addLayer(new Linear(100, 4, 1));
 	neural_net.addLayer(new Regression(4, 4, 1));
+
+	// first
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	// - goal
+
+	// second
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_WEST);
+	// - goal
+
+	// third
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_NORTH);
+	// - pit
+
+	// fourth
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_WEST);
+	// - pit
+
+	// fifth
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_SOUTH);
+	// - goal
+
+	// sixth
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_EAST);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_NORTH);
+	trajectory.push_back(A_WEST);
+	trajectory.push_back(A_SOUTH);
+	// - goal
+
+	step_number = 0;
 }
 
 
@@ -92,6 +144,7 @@ void GridworldDeepQLearning::startNewEpisode() {
 	LOG(LERROR) << "Start new episode";
 	// Move player to start position.
 	state.movePlayerToInitialPosition();
+
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
 	LOG(LSTATUS) << std::endl << state.streamGrid();
 
@@ -104,8 +157,8 @@ void GridworldDeepQLearning::finishCurrentEpisode() {
 	sum_of_iterations += iteration;
 
 	// Add variables to container.
-	collector_ptr->addDataToContainer("iteration_number",iteration);
-	collector_ptr->addDataToContainer("average_iteration_number",(float)sum_of_iterations/episode);
+	collector_ptr->addDataToContainer("number_of_steps",iteration);
+	collector_ptr->addDataToContainer("average_number_of_steps",(float)sum_of_iterations/episode);
 	collector_ptr->addDataToContainer("collected_reward",state.getStateReward(state.getPlayerPosition()));
 
 /*		// Export reward "convergence" diagram.
@@ -136,7 +189,7 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 	MatrixXf best_vals (height, width);
 	best_vals.setValue(-std::numeric_limits<float>::infinity());
 
-	os << "All rewards:";
+	os << "All rewards:\n";
 	// Generate all possible states and all possible rewards.
 	for (size_t y=0; y<height; y++){
 		os << "| ";
@@ -144,6 +197,7 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 			// Check network response for given state.
 			tmp_grid.movePlayerToPosition(Position2D(x,y));
 			mic::types::MatrixXfPtr tmp_state = tmp_grid.encodeGrid();
+			//std::cout<< "tmp_state = " << tmp_state->transpose() << std::endl;
 			// Pass the data and get predictions.
 			neural_net.forward(*tmp_state);
 			mic::types::MatrixXfPtr tmp_predicted_rewards = neural_net.getPredictions();
@@ -163,9 +217,9 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 		}//: for x
 		os << std::endl;
 	}//: for y
-	os << std::endl;
+/*	os << std::endl;
 
-	os << "Best rewards:";
+	os << "Best rewards:\n";
 	// Stream only the biggerst states.
 	for (size_t y=0; y<height; y++){
 		os << "| ";
@@ -173,7 +227,7 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 			os << best_vals(y,x) << " | ";
 		}//: for x
 		os << std::endl;
-	}//: for y
+	}//: for y*/
 
 	return os.str();
 }
@@ -250,7 +304,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 	LOG(LERROR) << "Performing a single step (" << iteration << ")";
 
 	// TMP!
-	double 	nn_learning_rate = 0.005;
+	double 	nn_learning_rate = 0.001;
 	double 	nn_weight_decay = 0;
 
 	// Get player pos at time t.
@@ -297,7 +351,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 	//action = A_NORTH;
 	double eps = (double)epsilon;
 	if ((double)epsilon < 0)
-		eps = 1.0/(1.0+episode);
+		eps = 1.0/(1.0+sqrt(episode));
 	LOG(LDEBUG) << "eps = " << eps;
 	// Epsilon-greedy action selection.
 	if (RAN_GEN->uniRandReal() > eps){
@@ -308,50 +362,81 @@ bool GridworldDeepQLearning::performSingleStep() {
 		action = A_RANDOM;
 	}//: if
 
+
+	/*	// Move along the two good trajectories only.
+		action = trajectory[step_number];
+		move(action);
+		// prepare next step.
+		step_number++;
+		if (step_number >= trajectory.size())
+				step_number= 0;*/
+
+
 	// Execute action - until success.
-	while (!move(action)) {
-		// If action could not be performed - random.
-		action = A_RANDOM;
-	}//: while
+	if (!move(action)) {
+		// The move was not possible! Learn that as well.
+		(*predicted_rewards_t)((size_t)action.getType(), 0) = 0;
 
-	// Get new state s(t+1).
-	mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
+	} else {
+		// Ok, move performed, get rewards.
 
-	LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << " action index=" << (size_t)action.getType();
+		// Get new state s(t+1).
+		mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
 
-	// Update running average for given action - Deep Q learning!
-	float r = step_reward;
-	// Get best value for the NEXT state (!)
-	float max_q_st_prim_at_prim = computeBestValueForCurrentState();
-
-	LOG(LWARNING) << "step_reward = " << step_reward;
-	LOG(LWARNING) << "max_q_st_prim_at_prim = " << max_q_st_prim_at_prim;
-
-	// If those values are finite.
-	if (std::isfinite(max_q_st_prim_at_prim)) {
+		LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << " action index=" << (size_t)action.getType();
 
 		// Check whether state t+1 is terminal.
 		if(state.isStateTerminal(player_pos_t_prim))
-			(*predicted_rewards_t)((size_t)action.getType(), 0) = 100 * state.getStateReward(player_pos_t_prim);
-		else
-			(*predicted_rewards_t)((size_t)action.getType(), 0) = r + discount_rate*max_q_st_prim_at_prim;
+			(*predicted_rewards_t)((size_t)action.getType(), 0) = state.getStateReward(player_pos_t_prim);
+		else {
+			// Update running average for given action - Deep Q learning!
+			float r = step_reward;
+			// Get best value for the NEXT state (!).
+			float max_q_st_prim_at_prim = computeBestValueForCurrentState();
+
+			LOG(LWARNING) << "step_reward = " << step_reward;
+			LOG(LWARNING) << "max_q_st_prim_at_prim = " << max_q_st_prim_at_prim;
+
+			// If next state best value is finite.
+			if (std::isfinite(max_q_st_prim_at_prim))
+				(*predicted_rewards_t)((size_t)action.getType(), 0) = r + discount_rate*max_q_st_prim_at_prim;
+			else
+				(*predicted_rewards_t)((size_t)action.getType(), 0) = r;
+
+			// Special case - punish going back!
+			if (player_pos_t_minus_prim == player_pos_t_prim)
+				(*predicted_rewards_t)((size_t)action.getType(), 0) = -1;
+
+		}//: else is terminal state
+	}//: else !move
 
 
-		LOG(LERROR) << "Training with desired rewards: " << predicted_rewards_t->transpose();
-		LOG(LSTATUS) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
+	// Deep Q learning - train network with the desired values.
+	LOG(LERROR) << "Training with state: " << encoded_state_t->transpose();
+	LOG(LERROR) << "Training with desired rewards: " << predicted_rewards_t->transpose();
+	LOG(LSTATUS) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
 
-		// Train network with rewards.
-		float loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
+	// Train network with rewards.
+	float loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
+	LOG(LSTATUS) << "Training loss:" << loss;
 
-		LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
+/*		if(state.isStateTerminal(player_pos_t_prim))
+		for(size_t i=0; i<1000; i++) {
+			loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
+			LOG(LSTATUS) << "Training loss:" << loss;
+		}*/
 
-	}//: if
+
+	LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
+
 
 	//LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
 	LOG(LSTATUS) << "The resulting state:" << std::endl << state.streamGrid();
 
+	// Remeber the previous position.
+	player_pos_t_minus_prim = player_pos_t;
 	// Check whether state t+1 is terminal - finish the episode.
-	if(state.isStateTerminal(player_pos_t_prim))
+	if(state.isStateTerminal(state.getPlayerPosition()))
 		return false;
 
 	return true;

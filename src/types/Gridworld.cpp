@@ -382,12 +382,33 @@ std::string Gridworld::streamGrid() {
 
 
 mic::types::MatrixXfPtr Gridworld::encodeGrid() {
-	// Temporarily reshape the gridworld.
+/*	// Temporarily reshape the gridworld.
 	gridworld.conservativeResize({1, width * height * 4});
 	// Create a matrix pointer and copy data from grid into the matrix.
 	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(gridworld));
 	// Back to the original shape.
-	gridworld.resize({width, height, 4});
+	gridworld.resize({width, height, 4});*/
+
+	// DEBUG - copy only player pose data, avoid goals etc.
+	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(height, width));
+	encoded_grid->setZero();
+
+	for (size_t y=0; y<height; y++){
+		for (size_t x=0; x<width; x++) {
+			// Check object occupancy.
+			if (gridworld({x,y, (size_t)GridworldChannels::Player}) != 0) {
+				// Set one.
+				(*encoded_grid)(y,x) = 1;
+				break;
+			}
+		}//: for x
+	}//: for y
+
+//	std::cout<< "tmp_state (y,x) = \n" << *encoded_grid << std::endl;
+	encoded_grid->resize(height*width, 1);
+//	std::cout<< "tmp_state (y*x,1) = " << encoded_grid->transpose() << std::endl;
+
+
 	// Return the matrix pointer.
 	return encoded_grid;
 }
