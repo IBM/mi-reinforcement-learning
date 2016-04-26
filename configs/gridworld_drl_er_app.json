@@ -3,7 +3,7 @@
 		"application_sleep_interval": "1",
 		"single_step_mode": 1
 	},
-	"gridworld_deepqlearning_app": {
+	"gridworld_drl_er_app": {
 		"gridworld_type": 6,
 		"step_reward": 0.0,
 		"discount_rate" : 0.9,

@@ -211,13 +211,13 @@ set(BUILD_APP_GRIDWORLD_DEEPQLEARNING ON CACHE BOOL "Build the application solvi
 
 if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING})
 	# Create exeutable.
-	add_executable(gridworld_deepqlearning_app 
+	add_executable(gridworld_drl_app 
 		application/GridworldDeepQLearning.cpp
 		types/Gridworld.cpp
 		application/console_application_main.cpp
 		)
 	# Link it with shared libraries.
-	target_link_libraries(gridworld_deepqlearning_app 
+	target_link_libraries(gridworld_drl_app 
 		logger
 		configuration
 		application
@@ -229,8 +229,35 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING})
 		)
 
 	# install test to bin directory
-	install(TARGETS gridworld_deepqlearning_app RUNTIME DESTINATION bin)
+	install(TARGETS gridworld_drl_app RUNTIME DESTINATION bin)
 	
 endif(${BUILD_APP_GRIDWORLD_DEEPQLEARNING})
+
+
+set(BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY ON CACHE BOOL "Build the application solving the gridworld problem with Q-learning, neural network used for approximation of the rewards and experience replay using for (batch) training of the neural network.")
+
+if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY})
+	# Create exeutable.
+	add_executable(gridworld_drl_er_app 
+		application/GridworldDRLExperienceReplay.cpp
+		types/Gridworld.cpp
+		application/console_application_main.cpp
+		)
+	# Link it with shared libraries.
+	target_link_libraries(gridworld_drl_er_app 
+		logger
+		configuration
+		application
+		types
+		data_utils
+		mlnn
+		visualization_opengl
+		${Boost_LIBRARIES}  
+		)
+
+	# install test to bin directory
+	install(TARGETS gridworld_drl_er_app RUNTIME DESTINATION bin)
+	
+endif(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY})
 
 
