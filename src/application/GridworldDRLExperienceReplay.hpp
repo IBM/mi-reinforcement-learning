@@ -21,6 +21,7 @@ using namespace mic::mlnn;
 using namespace mic::types;
 
 #include <types/Gridworld.hpp>
+#include <types/EperienceReplayBatch.hpp>
 
 namespace mic {
 namespace application {
@@ -93,6 +94,9 @@ private:
 	/// Property: height of gridworld.
 	mic::configuration::Property<size_t> height;
 
+	/// Property: size of the batch in experience replay.
+	mic::configuration::Property<size_t> batch_size;
+
 	/*!
 	 * Property: the "expected intermediate reward", i.e. reward received by performing each step (typically negative, but can be positive as all).
 	 */
@@ -162,15 +166,9 @@ private:
 	long long sum_of_iterations;
 
 	/*!
-	 * A desired motion trajectory.
+	 * Table of past experiences.
 	 */
-	std::vector<mic::types::NESWAction> trajectory;
-	size_t step_number;
-
-	/*!
-	 * Player position at time (t-1).
-	 */
-	mic::types::Position2D player_pos_t_minus_prim;
+	GridworldExperienceBatch experiences;
 };
 
 } /* namespace application */

@@ -25,12 +25,14 @@ GridworldDRLExperienceReplay::GridworldDRLExperienceReplay(std::string node_name
 		gridworld_type("gridworld_type", 0),
 		width("width", 4),
 		height("height", 4),
+		batch_size("batch_size",1),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.1),
 		move_noise("move_noise",0.2),
 		epsilon("epsilon", 0.1),
-		statistics_filename("statistics_filename","statistics_filename.csv")
+		statistics_filename("statistics_filename","statistics_filename.csv"),
+		experiences(100,1)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(gridworld_type);
@@ -79,64 +81,12 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 
 	// Create a simple neural network.
 	// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
-	neural_net.addLayer(new Linear((size_t) width * height , 250, 1));
-	neural_net.addLayer(new ReLU(250, 250, 1));
-	neural_net.addLayer(new Linear(250, 100, 1));
-	neural_net.addLayer(new ReLU(100, 100, 1));
-	neural_net.addLayer(new Linear(100, 4, 1));
-	neural_net.addLayer(new Regression(4, 4, 1));
-
-	// first
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	// - goal
-
-	// second
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_WEST);
-	// - goal
-
-	// third
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_NORTH);
-	// - pit
-
-	// fourth
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_WEST);
-	// - pit
-
-	// fifth
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_SOUTH);
-	// - goal
-
-	// sixth
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_WEST);
-	trajectory.push_back(A_SOUTH);
-	// - goal
-
-	step_number = 0;
+	neural_net.addLayer(new Linear((size_t) width * height , 250, batch_size));
+	neural_net.addLayer(new ReLU(250, 250, batch_size));
+	neural_net.addLayer(new Linear(250, 100, batch_size));
+	neural_net.addLayer(new ReLU(100, 100, batch_size));
+	neural_net.addLayer(new Linear(100, 4, batch_size));
+	neural_net.addLayer(new Regression(4, 4, batch_size));
 }
 
 
@@ -309,42 +259,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 	// Get player pos at time t.
 	mic::types::Position2D player_pos_t= state.getPlayerPosition();
-
-	// Encode the current state at time t.
-	mic::types::MatrixXfPtr encoded_state_t = state.encodeGrid();
-
-	// Get the prediced rewards at time t...
-	MatrixXfPtr tmp_rewards_t = getPredictedRewardsForCurrentState();
-	// ... but make a local copy!
-	MatrixXfPtr predicted_rewards_t (new MatrixXf(*tmp_rewards_t));
 	LOG(LINFO) << "Player position at state t: " << player_pos_t;
-	LOG(LSTATUS) << "Predicted rewards for state t: " << predicted_rewards_t->transpose();
-
-/*	// Check whether state is terminal.
-	if(state.isStateTerminal(player_pos_t)) {
-		// In the terminal state we can select only one special action: "terminate".
-		// All "other" actions receive the same value related to the "reward".
-		float final_reward = state.getStateReward(player_pos_t);
-		// Create a vector of rewards and train the network.
-		for (size_t a=0; a<4; a++)
-			(*predicted_rewards_t)(a, 0) = final_reward;
-
-		LOG(LINFO) << "Player position at t+1:" << player_pos_t<< " and the performed action = " << A_EXIT;
-		LOG(LSTATUS) << "The resulting state:" << std::endl << state.streamGrid();
-
-
-		LOG(LERROR) << "Training with desired rewards: " << predicted_rewards_t->transpose();
-		LOG(LSTATUS) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
-
-		// Train network with rewards.
-		float loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
-
-		LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
-
-		// Finish the episode.
-		return false;
-	}//: if terminal*/
-
 
 	// Select the action.
 	mic::types::NESWAction action;
@@ -365,79 +280,49 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 		action = A_RANDOM;
 	}//: if
 
+	// Execute action - do not monitor the success.
+	move(action);
 
-	/*	// Move along the two good trajectories only.
-		action = trajectory[step_number];
-		move(action);
-		// prepare next step.
-		step_number++;
-		if (step_number >= trajectory.size())
-				step_number= 0;*/
+	// Get new state s(t+1).
+	mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
+	LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << " action index=" << (size_t)action.getType();
 
-
-	// Execute action - until success.
-	if (!move(action)) {
-		// The move was not possible! Learn that as well.
-		(*predicted_rewards_t)((size_t)action.getType(), 0) = -0.1;
-
-	} else {
-		// Ok, move performed, get rewards.
-
-		// Get new state s(t+1).
-		mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
-
-		LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << " action index=" << (size_t)action.getType();
-
-		// Check whether state t+1 is terminal.
-		if(state.isStateTerminal(player_pos_t_prim))
-			(*predicted_rewards_t)((size_t)action.getType(), 0) = state.getStateReward(player_pos_t_prim);
-		else {
-			// Update running average for given action - Deep Q learning!
-			float r = step_reward;
-			// Get best value for the NEXT state (!).
-			float max_q_st_prim_at_prim = computeBestValueForCurrentState();
-
-			LOG(LWARNING) << "step_reward = " << step_reward;
-			LOG(LWARNING) << "max_q_st_prim_at_prim = " << max_q_st_prim_at_prim;
-
-			// If next state best value is finite.
-			if (std::isfinite(max_q_st_prim_at_prim))
-				(*predicted_rewards_t)((size_t)action.getType(), 0) = r + discount_rate*max_q_st_prim_at_prim;
-			else
-				(*predicted_rewards_t)((size_t)action.getType(), 0) = r;
-
-			// Special case - punish going back!
-			if (player_pos_t_minus_prim == player_pos_t_prim)
-				(*predicted_rewards_t)((size_t)action.getType(), 0) = -0.1;
-
-		}//: else is terminal state
-	}//: else !move
+	// Collect the experience.
+	GridworldExperiencePtr exp(new GridworldExperience(player_pos_t, action, player_pos_t_prim));
+	// Create an empty matrix for rewards - this will be recalculated each time the experience will be replayed anyway.
+	MatrixXfPtr rewards (new MatrixXf(width * height , batch_size));
+	// Add experience to experience table.
+	experiences.add(exp, rewards);
 
 
-	// Deep Q learning - train network with the desired values.
-	LOG(LERROR) << "Training with state: " << encoded_state_t->transpose();
-	LOG(LERROR) << "Training with desired rewards: " << predicted_rewards_t->transpose();
-	LOG(LSTATUS) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
+	// Deep Q learning - train network with random sample from the experience memory.
+	if (experiences.size() >= batch_size) {
+		GridworldExperienceSample ges = experiences.getRandomSample();
 
-	// Train network with rewards.
-	float loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
-	LOG(LSTATUS) << "Training loss:" << loss;
+		LOG(LERROR) << "Training with state t  : " << ges.data()->s_t;
+		LOG(LERROR) << "Training with action   : " << ges.data()->a_t;
+		LOG(LERROR) << "Training with state t+1: " << ges.data()->s_t_prim;
+//		LOG(LERROR) << "Training with desired rewards: " << predicted_rewards_t->transpose();
+/*		LOG(LSTATUS) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
 
-/*		if(state.isStateTerminal(player_pos_t_prim))
-		for(size_t i=0; i<1000; i++) {
-			loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
-			LOG(LSTATUS) << "Training loss:" << loss;
-		}*/
+		// Encode the current state at time t.
+		mic::types::MatrixXfPtr encoded_state_t = state.encodeGrid();
+
+		// Train network with rewards.
+		float loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
+		LOG(LSTATUS) << "Training loss:" << loss;
+
+		LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
 
 
-	LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
+		//LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
+		LOG(LSTATUS) << "The resulting state:" << std::endl << state.streamGrid();
+*/
+	}
 
+	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
+	LOG(LSTATUS) << std::endl << state.streamGrid();
 
-	//LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << "The resulting state:" << std::endl << state.streamGrid();
-
-	// Remeber the previous position.
-	player_pos_t_minus_prim = player_pos_t;
 	// Check whether state t+1 is terminal - finish the episode.
 	if(state.isStateTerminal(state.getPlayerPosition()))
 		return false;
