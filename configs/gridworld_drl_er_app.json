@@ -4,8 +4,9 @@
 		"single_step_mode": 1
 	},
 	"gridworld_drl_er_app": {
+		"batch_size": 10,
 		"gridworld_type": 6,
-		"step_reward": 0.0,
+		"step_reward": -0.2,
 		"discount_rate" : 0.9,
 		"move_noise": 0.2,
 		"epsilon": -0.1

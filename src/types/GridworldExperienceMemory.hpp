@@ -46,14 +46,26 @@ struct GridworldExperience {
  */
 typedef std::shared_ptr < mic::types::GridworldExperience> GridworldExperiencePtr;
 
+/*!
+ * \brief Gridworld experience replay sample.
+ * \author tkornuta
+ */
+typedef  mic::types::Sample<mic::types::GridworldExperience, mic::types::MatrixXf> GridworldExperienceSample;
 
 /*!
- * \brief Class for storing the experience replays.
+ * \brief Gridworld experience replay batch.
+ * \author tkornuta
+ */
+typedef  mic::types::Batch<mic::types::GridworldExperience, mic::types::MatrixXf> GridworldExperienceBatch;
+
+
+/*!
+ * \brief Class representing the experience replay memory.
  * Derived from the Batch class.
  * \author tkornuta
  *
  */
-class GridworldExperienceBatch : public mic::types::Batch<mic::types::GridworldExperience, mic::types::MatrixXf>{
+class GridworldExperienceMemory : public mic::types::GridworldExperienceBatch{
 public:
 
 	/*!
@@ -61,14 +73,14 @@ public:
 	 * @param number_of_experiences_ The size of the experience table.
 	 * @param batch_size_ The batch size.
 	 */
-	GridworldExperienceBatch(size_t number_of_experiences_, size_t batch_size_) : Batch(batch_size_), number_of_experiences(number_of_experiences_) {
+	GridworldExperienceMemory(size_t number_of_experiences_, size_t batch_size_) : Batch(batch_size_), number_of_experiences(number_of_experiences_) {
 
 	}
 
 	/*!
 	 * Virtual destructor. Empty.
 	 */
-	virtual ~GridworldExperienceBatch() { }
+	virtual ~GridworldExperienceMemory() { }
 
 	/*!
 	 * Adds sample to the batch.
@@ -102,13 +114,6 @@ protected:
 	/// Size of the experience table (maximum number of stored experiences).
 	size_t number_of_experiences;
 };
-
-
-/*!
- * \brief Gridworld experience replay sample.
- * \author tkornuta
- */
-typedef  mic::types::Sample<mic::types::GridworldExperience, mic::types::MatrixXf> GridworldExperienceSample;
 
 
 

@@ -21,7 +21,7 @@ using namespace mic::mlnn;
 using namespace mic::types;
 
 #include <types/Gridworld.hpp>
-#include <types/EperienceReplayBatch.hpp>
+#include <types/GridworldExperienceMemory.hpp>
 
 namespace mic {
 namespace application {
@@ -76,7 +76,7 @@ protected:
 
 private:
 
-	/// Window for displaying ???.
+	/// Window for displaying statistics.
 	WindowFloatCollectorChart* w_chart;
 
 	/// Data collector.
@@ -138,21 +138,24 @@ private:
 
 	/*!
 	 * Calculates the best value for the current state - by finding the action having the maximal expected value.
-	 * @return Value for given state.
+	 * @param player_position_ State (player position).
+	 * @return Value of the best possible action for given state.
 	 */
-	float computeBestValueForCurrentState();
+	float computeBestValueForGivenState(mic::types::Position2D player_position_);
 
 	/*!
 	 * Returns the predicted rewards for given state.
-	 * @return Pointerr to predicted rewards (network output matrix).
+	 * @param player_position_ State (player position).
+	 * @return Pointer to the predicted rewards (network output matrix).
 	 */
-	mic::types::MatrixXfPtr getPredictedRewardsForCurrentState();
+	mic::types::MatrixXfPtr getPredictedRewardsForGivenState(mic::types::Position2D player_position_);
 
 	/*!
 	 * Finds the best action for the current state.
+	 * @param player_position_ State (player position).
 	 * @return The best action found.
 	 */
-	mic::types::NESWAction selectBestActionForCurrentState();
+	mic::types::NESWAction selectBestActionForGivenState(mic::types::Position2D player_position_);
 
 	/*!
 	 * Steams the current network response - values of actions associates with consecutive agent poses.
@@ -168,7 +171,7 @@ private:
 	/*!
 	 * Table of past experiences.
 	 */
-	GridworldExperienceBatch experiences;
+	GridworldExperienceMemory experiences;
 };
 
 } /* namespace application */
