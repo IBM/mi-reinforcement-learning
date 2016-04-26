@@ -301,7 +301,7 @@ mic::types::NESWAction GridworldDeepQLearning::selectBestActionForCurrentState()
 }
 
 bool GridworldDeepQLearning::performSingleStep() {
-	LOG(LERROR) << "Performing a single step (" << iteration << ")";
+	LOG(LERROR) << "Episode "<< episode << ": step " << iteration << "";
 
 	// TMP!
 	double 	nn_learning_rate = 0.001;
@@ -352,6 +352,9 @@ bool GridworldDeepQLearning::performSingleStep() {
 	double eps = (double)epsilon;
 	if ((double)epsilon < 0)
 		eps = 1.0/(1.0+sqrt(episode));
+	if (eps < 0.1)
+		eps = 0.1;
+
 	LOG(LDEBUG) << "eps = " << eps;
 	// Epsilon-greedy action selection.
 	if (RAN_GEN->uniRandReal() > eps){
@@ -375,7 +378,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 	// Execute action - until success.
 	if (!move(action)) {
 		// The move was not possible! Learn that as well.
-		(*predicted_rewards_t)((size_t)action.getType(), 0) = 0;
+		(*predicted_rewards_t)((size_t)action.getType(), 0) = -0.1;
 
 	} else {
 		// Ok, move performed, get rewards.
@@ -405,7 +408,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 
 			// Special case - punish going back!
 			if (player_pos_t_minus_prim == player_pos_t_prim)
-				(*predicted_rewards_t)((size_t)action.getType(), 0) = -1;
+				(*predicted_rewards_t)((size_t)action.getType(), 0) = -0.1;
 
 		}//: else is terminal state
 	}//: else !move
