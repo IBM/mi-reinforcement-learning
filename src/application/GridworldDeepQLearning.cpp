@@ -28,7 +28,6 @@ GridworldDeepQLearning::GridworldDeepQLearning(std::string node_name_) : OpenGLE
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.1),
-		move_noise("move_noise",0.2),
 		epsilon("epsilon", 0.1),
 		statistics_filename("statistics_filename","statistics_filename.csv")
 	{
@@ -38,7 +37,6 @@ GridworldDeepQLearning::GridworldDeepQLearning(std::string node_name_) : OpenGLE
 	registerProperty(step_reward);
 	registerProperty(discount_rate);
 	registerProperty(learning_rate);
-	registerProperty(move_noise);
 	registerProperty(epsilon);
 	registerProperty(statistics_filename);
 
@@ -183,25 +181,18 @@ bool GridworldDeepQLearning::move (mic::types::Action2DInterface ac_) {
 
 
 std::string GridworldDeepQLearning::streamNetworkResponseTable() {
-	std::ostringstream os;
-	// Make a copy of current gridworld.
-	Gridworld tmp_grid = state;
-	MatrixXf best_vals (height, width);
-	best_vals.setValue(-std::numeric_limits<float>::infinity());
+	LOG(LTRACE) << "streamNetworkResponseTable()";
+	std::string rewards_table;
+	std::string actions_table;
 
-	os << "All rewards:\n";
+	// Remember the current state i.e. player position.
+	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
+
+/*	os << "All rewards:\n";
 	// Generate all possible states and all possible rewards.
 	for (size_t y=0; y<height; y++){
 		os << "| ";
 		for (size_t x=0; x<width; x++) {
-			// Check network response for given state.
-			tmp_grid.movePlayerToPosition(Position2D(x,y));
-			mic::types::MatrixXfPtr tmp_state = tmp_grid.encodeGrid();
-			//std::cout<< "tmp_state = " << tmp_state->transpose() << std::endl;
-			// Pass the data and get predictions.
-			neural_net.forward(*tmp_state);
-			mic::types::MatrixXfPtr tmp_predicted_rewards = neural_net.getPredictions();
-			float*  qstate = tmp_predicted_rewards->data();
 
 			for (size_t a=0; a<4; a++) {
 				os << qstate[a];
@@ -217,19 +208,60 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 		}//: for x
 		os << std::endl;
 	}//: for y
-/*	os << std::endl;
-
-	os << "Best rewards:\n";
-	// Stream only the biggerst states.
+*/
+	rewards_table += "Action values:\n";
+	actions_table += "Best actions:\n";
+	// Generate all possible states and all possible rewards.
 	for (size_t y=0; y<height; y++){
-		os << "| ";
+		rewards_table += "| ";
+		actions_table += "| ";
 		for (size_t x=0; x<width; x++) {
-			os << best_vals(y,x) << " | ";
-		}//: for x
-		os << std::endl;
-	}//: for y*/
+			float bestqval = -std::numeric_limits<float>::infinity();
+			size_t best_action = -1;
 
-	return os.str();
+			// Check network response for given state.
+			state.movePlayerToPosition(Position2D(x,y));
+			mic::types::MatrixXfPtr tmp_state = state.encodeGrid();
+			//std::cout<< "tmp_state = " << tmp_state->transpose() << std::endl;
+			// Pass the data and get predictions.
+			neural_net.forward(*tmp_state);
+			mic::types::MatrixXfPtr tmp_predicted_rewards = neural_net.getPredictions();
+			float*  qstate = tmp_predicted_rewards->data();
+
+			for (size_t a=0; a<4; a++) {
+				float qval = qstate[a];
+
+				rewards_table += std::to_string(qval);
+				if (a==3)
+					rewards_table += " | ";
+				else
+					rewards_table += " , ";
+
+				// Remember the best value.
+				if (qval > bestqval){
+					bestqval = qval;
+					best_action = a;
+				}//: if
+
+			}//: for a(ctions)
+			switch(best_action){
+				case 0 : actions_table += "N | "; break;
+				case 1 : actions_table += "E | "; break;
+				case 2 : actions_table += "S | "; break;
+				case 3 : actions_table += "W | "; break;
+				default: actions_table += "- | ";
+			}//: switch
+
+		}//: for x
+		rewards_table += "\n";
+		actions_table += "\n";
+	}//: for y
+
+
+	// Move player to previous position.
+	state.movePlayerToPosition(current_player_pos_t);
+
+	return rewards_table + actions_table;
 }
 
 
@@ -246,6 +278,22 @@ float GridworldDeepQLearning::computeBestValueForCurrentState(){
 	actions.push_back(A_WEST);
 
 	// Check the results of actions one by one... (there is no need to create a separate copy of predictions)
+	MatrixXfPtr predictions_sample = getPredictedRewardsForCurrentState();
+	//LOG(LERROR) << "Selecting action from predictions:\n" << predictions_sample->transpose();
+	float* pred = predictions_sample->data();
+
+	for(size_t a=0; a<4; a++) {
+		// Find the best action allowed.
+		if(state.isActionAllowed(mic::types::NESWAction((mic::types::NESW)a))) {
+			float qvalue = pred[a];
+			if (qvalue > best_qvalue){
+				best_qvalue = qvalue;
+			}
+		}//if is allowed
+	}//: for
+
+
+/*	// Check the results of actions one by one... (there is no need to create a separate copy of predictions)
 	float* pred = getPredictedRewardsForCurrentState()->data();
 
 	for(mic::types::NESWAction action : actions) {
@@ -255,7 +303,7 @@ float GridworldDeepQLearning::computeBestValueForCurrentState(){
 			if (qvalue > best_qvalue)
 				best_qvalue = qvalue;
 		}//if is allowed
-	}//: for
+	}//: for*/
 
 	return best_qvalue;
 }
@@ -269,12 +317,13 @@ mic::types::MatrixXfPtr GridworldDeepQLearning::getPredictedRewardsForCurrentSta
 	return neural_net.getPredictions();
 }
 
+
 mic::types::NESWAction GridworldDeepQLearning::selectBestActionForCurrentState(){
 	LOG(LTRACE) << "selectBestAction";
 
 	// Greedy methods - returns the index of element with greatest value.
 	mic::types::NESWAction best_action = A_RANDOM;
-    float best_qvalue = 0;
+    float best_qvalue = -std::numeric_limits<float>::infinity();
 
 	// Create a list of possible actions.
 	std::vector<mic::types::NESWAction> actions;
@@ -284,15 +333,17 @@ mic::types::NESWAction GridworldDeepQLearning::selectBestActionForCurrentState()
 	actions.push_back(A_WEST);
 
 	// Check the results of actions one by one... (there is no need to create a separate copy of predictions)
-	float* pred = getPredictedRewardsForCurrentState()->data();
+	MatrixXfPtr predictions_sample = getPredictedRewardsForCurrentState();
+	//LOG(LERROR) << "Selecting action from predictions:\n" << predictions_sample->transpose();
+	float* pred = predictions_sample->data();
 
-	for(mic::types::NESWAction action : actions) {
-		// ... and find the best allowed.
-		if(state.isActionAllowed(action)) {
-			float qvalue = pred[(size_t)action.getType()];
+	for(size_t a=0; a<4; a++) {
+		// Find the best action allowed.
+		if(state.isActionAllowed(mic::types::NESWAction((mic::types::NESW)a))) {
+			float qvalue = pred[a];
 			if (qvalue > best_qvalue){
 				best_qvalue = qvalue;
-				best_action = action;
+				best_action.setAction((mic::types::NESW)a);
 			}
 		}//if is allowed
 	}//: for
@@ -304,7 +355,6 @@ bool GridworldDeepQLearning::performSingleStep() {
 	LOG(LERROR) << "Episode "<< episode << ": step " << iteration << "";
 
 	// TMP!
-	double 	nn_learning_rate = 0.001;
 	double 	nn_weight_decay = 0;
 
 	// Get player pos at time t.
@@ -378,7 +428,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 	// Execute action - until success.
 	if (!move(action)) {
 		// The move was not possible! Learn that as well.
-		(*predicted_rewards_t)((size_t)action.getType(), 0) = -0.1;
+		(*predicted_rewards_t)((size_t)action.getType(), 0) = step_reward;
 
 	} else {
 		// Ok, move performed, get rewards.
@@ -408,7 +458,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 
 			// Special case - punish going back!
 			if (player_pos_t_minus_prim == player_pos_t_prim)
-				(*predicted_rewards_t)((size_t)action.getType(), 0) = -0.1;
+				(*predicted_rewards_t)((size_t)action.getType(), 0) = step_reward;
 
 		}//: else is terminal state
 	}//: else !move
@@ -420,23 +470,13 @@ bool GridworldDeepQLearning::performSingleStep() {
 	LOG(LSTATUS) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
 
 	// Train network with rewards.
-	float loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
+	float loss = neural_net.train (encoded_state_t, predicted_rewards_t, learning_rate, nn_weight_decay);
 	LOG(LSTATUS) << "Training loss:" << loss;
 
-/*		if(state.isStateTerminal(player_pos_t_prim))
-		for(size_t i=0; i<1000; i++) {
-			loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
-			LOG(LSTATUS) << "Training loss:" << loss;
-		}*/
-
-
 	LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
-
-
-	//LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
 	LOG(LSTATUS) << "The resulting state:" << std::endl << state.streamGrid();
 
-	// Remeber the previous position.
+	// Remember the previous position.
 	player_pos_t_minus_prim = player_pos_t;
 	// Check whether state t+1 is terminal - finish the episode.
 	if(state.isStateTerminal(state.getPlayerPosition()))

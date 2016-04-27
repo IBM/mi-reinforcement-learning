@@ -104,14 +104,9 @@ private:
 	mic::configuration::Property<float> discount_rate;
 
 	/*!
-	 * Property: learning rate (should be in range 0.0-1.0).
+	 * Property: neural network learning rate (should be in range 0.0-1.0).
 	 */
 	mic::configuration::Property<float> learning_rate;
-
-	/*!
-	 * Property: move noise, determining gow often action results in unintended direction.
-	 */
-	mic::configuration::Property<float> move_noise;
 
 	/*!
 	 * Property: variable denoting epsilon in action selection (the probability "below" which a random action will be selected).
