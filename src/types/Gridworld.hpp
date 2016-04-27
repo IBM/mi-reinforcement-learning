@@ -218,6 +218,15 @@ public:
 	 */
 	float getStateReward(mic::types::Position2D pos_);
 
+
+	/*!
+	 * Checks if position is allowed, i.e. within the gridworld boundaries and there is no wall at that place.
+	 * @param x_ X state coordinate
+	 * @param y_ Y state coordinate
+	 * @return True if the position is allowed, false otherwise.
+	 */
+	bool isStateAllowed(long x_, long y_);
+
 	/*!
 	 * Checks if position is allowed, i.e. within the gridworld boundaries and there is no wall at that place.
 	 * @param pos_ Position to be checked.
@@ -227,10 +236,29 @@ public:
 
 	/*!
 	 * Checks if position is terminal, i.e. player is standing in a pit or reached the goal. Returns reward associated with given state.
+	 * @param x_ X state coordinate
+	 * @param y_ Y state coordinate
+	 * @return The reward associated with "final" action (might be positive or negative), equal to zero means that the position is not final.
+	 */
+	bool isStateTerminal(long x_, long y_);
+
+
+	/*!
+	 * Checks if position is terminal, i.e. player is standing in a pit or reached the goal. Returns reward associated with given state.
 	 * @param pos_ Position (state) to be checked.
 	 * @return The reward associated with "final" action (might be positive or negative), equal to zero means that the position is not final.
 	 */
 	bool isStateTerminal(mic::types::Position2D pos_);
+
+
+	/*!
+	 * Checks whether performing given action starting in given state is allowed.
+	 * @param x_ X state coordinate
+	 * @param y_ Y state coordinate
+	 * @param action_ Action to be performed starting from given state.
+	 * @return True if action is allowed, false otherwise.
+	 */
+	bool isActionAllowed(long x_, long y_, size_t action_);
 
 	/*!
 	 * Checks whether performing given action starting in given state is allowed.

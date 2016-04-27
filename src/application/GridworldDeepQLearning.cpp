@@ -167,7 +167,7 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 					rewards_table += " , ";
 
 				// Remember the best value.
-				if (qval > bestqval){
+				if (state.isStateAllowed(x,y) && (!state.isStateTerminal(x,y)) && state.isActionAllowed(x,y,a) && (qval > bestqval)){
 					bestqval = qval;
 					best_action = a;
 				}//: if
@@ -211,10 +211,10 @@ float GridworldDeepQLearning::computeBestValueForCurrentState(){
 	//LOG(LERROR) << "Selecting action from predictions:\n" << predictions_sample->transpose();
 	float* pred = predictions_sample->data();
 
-	for(size_t a=0; a<4; a++) {
-		// Find the best action allowed.
-		if(state.isActionAllowed(mic::types::NESWAction((mic::types::NESW)a))) {
-			float qvalue = pred[a];
+	for(mic::types::NESWAction action : actions) {
+		// .. and find the value of teh best allowed action.
+		if(state.isActionAllowed(action)) {
+			float qvalue = pred[(size_t)action.getType()];
 			if (qvalue > best_qvalue){
 				best_qvalue = qvalue;
 			}

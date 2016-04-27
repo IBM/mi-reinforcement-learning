@@ -72,12 +72,12 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 
 void GridworldQLearning::initializePropertyDependentVariables() {
 	// Generate the gridworld.
-	gridworld.generateGridworld(gridworld_type, width, height);
-	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
+	state.generateGridworld(gridworld_type, width, height);
+	LOG(LSTATUS) << std::endl << state.streamGrid();
 
 	// Get width and height.
-	width = gridworld.getWidth();
-	height = gridworld.getHeight();
+	width = state.getWidth();
+	height = state.getHeight();
 
 	// Resize and reset the action-value table.
 	qstate_table.resize({width,height,4});
@@ -91,7 +91,7 @@ void GridworldQLearning::initializePropertyDependentVariables() {
 void GridworldQLearning::startNewEpisode() {
 	LOG(LTRACE) << "Start new episode";
 	// Move player to start position.
-	gridworld.movePlayerToInitialPosition();
+	state.movePlayerToInitialPosition();
 
 }
 
@@ -112,26 +112,50 @@ void GridworldQLearning::finishCurrentEpisode() {
 
 
 std::string GridworldQLearning::streamQStateTable() {
-	std::ostringstream os;
+	std::string rewards_table;
+	std::string actions_table;
+
+	rewards_table += "Action values:\n";
+	actions_table += "Best actions:\n";
 	for (size_t y=0; y<height; y++){
-		os << "| ";
+		rewards_table += "| ";
+		actions_table += "| ";
 		for (size_t x=0; x<width; x++) {
+			// Iterate through actions and find the best one.
+			float bestqval = -std::numeric_limits<float>::infinity();
+			size_t best_action = -1;
 			for (size_t a=0; a<4; a++) {
+				float qval = qstate_table({x,y,a});
 				if ( qstate_table({x,y,a}) == -std::numeric_limits<float>::infinity())
-					os << "-INF";
+					rewards_table += "-INF";
 				else
-					os << qstate_table({x,y,a});
+					rewards_table += std::to_string(qval);
 				if (a==3)
-					os << " | ";
+					rewards_table += " | ";
 				else
-					os << " , ";
+					rewards_table += " , ";
+
+				// Remember the best value.
+				if (state.isStateAllowed(x,y) && (!state.isStateTerminal(x,y)) && state.isActionAllowed(x,y,a) && (qval > bestqval)){
+					bestqval = qval;
+					best_action = a;
+				}//: if
 
 			}//: for a(ctions)
-		}//: for x
-		os << std::endl;
-	}//: for y
-	return os.str();
+			switch(best_action){
+				case 0 : actions_table += "N | "; break;
+				case 1 : actions_table += "E | "; break;
+				case 2 : actions_table += "S | "; break;
+				case 3 : actions_table += "W | "; break;
+				default: actions_table += "- | ";
+			}//: switch
 
+		}//: for x
+		rewards_table += "\n";
+		actions_table += "\n";
+	}//: for y
+
+	return rewards_table + actions_table;
 }
 
 
@@ -140,14 +164,14 @@ std::string GridworldQLearning::streamQStateTable() {
 bool GridworldQLearning::move (mic::types::Action2DInterface ac_) {
 //	LOG(LINFO) << "Current move = " << ac_;
 	// Compute destination.
-    mic::types::Position2D new_pos = gridworld.getPlayerPosition() + ac_;
+    mic::types::Position2D new_pos = state.getPlayerPosition() + ac_;
 
 	// Check whether the state is allowed.
-	if (!gridworld.isStateAllowed(new_pos))
+	if (!state.isStateAllowed(new_pos))
 		return false;
 
 	// Move player.
-	gridworld.movePlayerToPosition(new_pos);
+	state.movePlayerToPosition(new_pos);
 	return true;
 }
 
@@ -156,7 +180,7 @@ bool GridworldQLearning::move (mic::types::Action2DInterface ac_) {
 float GridworldQLearning::computeBestValue(mic::types::Position2D pos_){
 	float qbest_value = -std::numeric_limits<float>::infinity();
 	// Check if the state is allowed.
-	if (!gridworld.isStateAllowed(pos_))
+	if (!state.isStateAllowed(pos_))
 		return qbest_value;
 
 	// Create a list of possible actions.
@@ -168,7 +192,7 @@ float GridworldQLearning::computeBestValue(mic::types::Position2D pos_){
 
 	// Check the actions one by one.
 	for(mic::types::NESWAction action : actions) {
-		if(gridworld.isActionAllowed(pos_, action)) {
+		if(state.isActionAllowed(pos_, action)) {
 			float qvalue = qstate_table({(size_t)pos_.x, (size_t)pos_.y, (size_t)action.getType()});
 			if (qvalue > qbest_value)
 				qbest_value = qvalue;
@@ -194,7 +218,7 @@ mic::types::NESWAction GridworldQLearning::selectBestAction(mic::types::Position
 
 	// Check the actions one by one.
 	for(mic::types::NESWAction action : actions) {
-		if(gridworld.isActionAllowed(pos_, action)) {
+		if(state.isActionAllowed(pos_, action)) {
 			float qvalue = qstate_table({(size_t)pos_.x, (size_t)pos_.y, (size_t)action.getType()});
 			if (qvalue > best_qvalue){
 				best_qvalue = qvalue;
@@ -210,19 +234,19 @@ bool GridworldQLearning::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
 
 	// Get state s(t).
-	mic::types::Position2D state_t = gridworld.getPlayerPosition();
+	mic::types::Position2D state_t = state.getPlayerPosition();
 
 	// Check whether state is terminal.
-	if(gridworld.isStateTerminal(state_t)) {
+	if(state.isStateTerminal(state_t)) {
 		// In the terminal state we can select only one special action: "terminate".
 		// All "other" actions receive the same value related to the "reward".
-		float final_reward = gridworld.getStateReward(state_t);
+		float final_reward = state.getStateReward(state_t);
 		for (size_t a=0; a<4; a++)
 			qstate_table({(size_t)state_t.x,(size_t)state_t.y, a}) = final_reward;
 
 		LOG(LINFO) << "Player action = " << A_EXIT;
 		LOG(LDEBUG) << "Player position = " << state_t;
-		LOG(LSTATUS) << std::endl << gridworld.streamGrid();
+		LOG(LSTATUS) << std::endl << state.streamGrid();
 		LOG(LSTATUS) << std::endl << streamQStateTable();
 
 		// Finish the episode.
@@ -254,7 +278,7 @@ bool GridworldQLearning::performSingleStep() {
 	}//: while
 
 	// Get new state s(t+1).
-	mic::types::Position2D state_t_prim = gridworld.getPlayerPosition();
+	mic::types::Position2D state_t_prim = state.getPlayerPosition();
 
 	LOG(LINFO) << "Performed action = " << action;
 	LOG(LDEBUG) << "Player position = " << state_t;
@@ -271,7 +295,7 @@ bool GridworldQLearning::performSingleStep() {
 	if (std::isfinite(q_st_at) && std::isfinite(max_q_st_prim_at_prim))
 			qstate_table({(size_t)state_t.x, (size_t)state_t.y, (size_t)action.getType()}) = q_st_at + learning_rate * (r + discount_rate*max_q_st_prim_at_prim - q_st_at);
 
-	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
+	LOG(LSTATUS) << std::endl << state.streamGrid();
 	LOG(LSTATUS) << std::endl << streamQStateTable();
 
 	return true;

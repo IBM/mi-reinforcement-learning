@@ -4,13 +4,13 @@
 		"single_step_mode": 1
 	},
 	"gridworld_drl_er_app": {
-		"width": 4,
-		"height": 4,
-		"gridworld_type": 7,
+		"width": 5,
+		"height": 5,
+		"gridworld_type": -1,
 		"step_reward": -1.0,
 		"discount_rate" : 0.9,
 		"learning_rate" : 0.02,
 		"epsilon": -0.1,
-		"statistics_filename" : "gridworld_drl_er_app-convergence-maze7.csv"
+		"statistics_filename" : "gridworld_drl_er_app-convergence-maze-random5x5.csv"
 	}
 }

@@ -547,73 +547,6 @@ std::string Gridworld::streamGrid() {
 
 
 mic::types::MatrixXfPtr Gridworld::encodePlayerGrid() {
-/*	// Temporarily reshape the gridworld.
-	gridworld.conservativeResize({1, width * height * 4});
-	// Create a matrix pointer and copy data from grid into the matrix.
-	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(gridworld));
-	// Back to the original shape.
-	gridworld.resize({width, height, 4});*/
-
-//	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(height*width, 1));
-//	encoded_grid->setZero();
-
-/*	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
-			// Check object occupancy.
-			if (gridworld({x,y, (size_t)GridworldChannels::Goal}) != 0) {
-				// Set one.
-				(*encoded_grid)(x*y+ 3*height*width,0) = 1;
-				break;
-			}
-		}//: for x
-	}//: for y
-
-
-	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
-			// Check object occupancy.
-			if (gridworld({x,y, (size_t)GridworldChannels::Pit}) != 0) {
-				// Set one.
-				(*encoded_grid)(x*y + height*width,0) = 1;
-				break;
-			}
-		}//: for x
-	}//: for y
-
-
-	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
-			// Check object occupancy.
-			if (gridworld({x,y, (size_t)GridworldChannels::Wall}) != 0) {
-				// Set one.
-				(*encoded_grid)(x*y + 2*height*width,0) = 1;
-				break;
-			}
-		}//: for x
-	}//: for y*/
-
-
-
-/*	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
-			// Check object occupancy.
-			if (gridworld({x,y, (size_t)GridworldChannels::Player}) != 0) {
-				// Set one.
-				(*encoded_grid)(x*y ,0) = 1;
-				break;
-			}
-		}//: for x
-	}//: for y*/
-
-
-	// Copty and truncate "pits" and "goals"
-/*	float* data = encoded_grid->data();
-	for(size_t i=0; i < width * height * 4; i++) {
-		if (data[i] > 1)
-			data[i] = 0.5; // GOAL
-		else if (data[i] < -1)
-			data[i] = -1; // PIT
-	}*/
 
 	// DEBUG - copy only player pose data, avoid goals etc.
 	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(height, width));
@@ -692,6 +625,21 @@ float Gridworld::getStateReward(mic::types::Position2D pos_) {
 }
 
 
+bool Gridworld::isStateAllowed(long x_, long y_) {
+	if ((x_ < 0) || (x_ >= width))
+		return false;
+
+	if ((y_ < 0) || (y_ >= height))
+		return false;
+
+	// Check walls!
+	if (gridworld({(size_t)x_, (size_t)y_, (size_t)GridworldChannels::Wall}) != 0)
+		return false;
+
+	return true;
+}
+
+
 bool Gridworld::isStateAllowed(mic::types::Position2D pos_) {
 	if ((pos_.x < 0) || (pos_.x >= width))
 		return false;
@@ -707,7 +655,30 @@ bool Gridworld::isStateAllowed(mic::types::Position2D pos_) {
 }
 
 
+bool Gridworld::isStateTerminal(long x_, long y_) {
+	if ((x_ < 0) || (x_ >= width))
+		return false;
+
+	if ((y_ < 0) || (y_ >= height))
+		return false;
+
+    if (gridworld({(size_t)x_, (size_t)y_, (size_t)GridworldChannels::Pit}) != 0)
+    	// Pit.
+        return true;
+    else if (gridworld({(size_t)x_, (size_t)y_, (size_t)GridworldChannels::Goal}) != 0)
+    	// Goal.
+        return true;
+    else
+        return false;
+}
+
 bool Gridworld::isStateTerminal(mic::types::Position2D pos_) {
+	if ((pos_.x < 0) || (pos_.x >= width))
+		return false;
+
+	if ((pos_.y < 0) || (pos_.y >= height))
+			return false;
+
     if (gridworld({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pit}) != 0)
     	// Pit.
         return true;
@@ -716,6 +687,14 @@ bool Gridworld::isStateTerminal(mic::types::Position2D pos_) {
         return true;
     else
         return false;
+}
+
+bool Gridworld::isActionAllowed(long x_, long y_, size_t action_) {
+    mic::types::Position2D pos(x_,y_);
+    mic::types::NESWAction ac(action_);
+	// Compute the "destination" coordinates.
+    mic::types::Position2D new_pos = pos + ac;
+    return isStateAllowed(new_pos);
 }
 
 
