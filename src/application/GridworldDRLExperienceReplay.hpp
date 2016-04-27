@@ -108,14 +108,9 @@ private:
 	mic::configuration::Property<float> discount_rate;
 
 	/*!
-	 * Property: learning rate (should be in range 0.0-1.0).
+	 * Property: neural network learning rate (should be in range 0.0-1.0).
 	 */
 	mic::configuration::Property<float> learning_rate;
-
-	/*!
-	 * Property: move noise, determining gow often action results in unintended direction.
-	 */
-	mic::configuration::Property<float> move_noise;
 
 	/*!
 	 * Property: variable denoting epsilon in action selection (the probability "below" which a random action will be selected).
@@ -142,6 +137,14 @@ private:
 	 * @return Value of the best possible action for given state.
 	 */
 	float computeBestValueForGivenState(mic::types::Position2D player_position_);
+
+	/*!
+	 * Calculates the best value for the current state and predictions.
+	 * @param player_position_ State (player position).
+	 * @param predictions_ Vector of predictions to be analyzed.
+	 * @return Value of the best possible action for given state.
+	 */
+	float computeBestValueForGivenStateAndPredictions(mic::types::Position2D player_position_, float* predictions_);
 
 	/*!
 	 * Returns the predicted rewards for given state.
