@@ -8,7 +8,7 @@
 		"step_reward": -0.1,
 		"learning_rate" : 0.001,
 		"discount_rate" : 0.9,
-		"move_noise": 0.2,
-		"epsilon": -0.1
+		"epsilon": -0.1,
+		"statistics_filename" : "gridworld_drl_app-convergence.txt"
 	}
 }

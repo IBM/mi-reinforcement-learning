@@ -117,8 +117,8 @@ void GridworldDRLExperienceReplay::finishCurrentEpisode() {
 	collector_ptr->addDataToContainer("average_number_of_steps",(float)sum_of_iterations/episode);
 	collector_ptr->addDataToContainer("collected_reward",state.getStateReward(state.getPlayerPosition()));
 
-/*		// Export reward "convergence" diagram.
-		collector_ptr->exportDataToCsv(statistics_filename);*/
+	// Export reward "convergence" diagram.
+	collector_ptr->exportDataToCsv(statistics_filename);
 
 }
 

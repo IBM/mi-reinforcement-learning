@@ -157,12 +157,6 @@ private:
 	long long sum_of_iterations;
 
 	/*!
-	 * A desired motion trajectory.
-	 */
-	std::vector<mic::types::NESWAction> trajectory;
-	size_t step_number;
-
-	/*!
 	 * Player position at time (t-1).
 	 */
 	mic::types::Position2D player_pos_t_minus_prim;

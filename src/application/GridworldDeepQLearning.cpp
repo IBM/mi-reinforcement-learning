@@ -84,57 +84,6 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 	neural_net.addLayer(new Linear(100, 4, 1));
 	neural_net.addLayer(new Regression(4, 4, 1));
 
-	// first
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	// - goal
-
-	// second
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_WEST);
-	// - goal
-
-	// third
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_NORTH);
-	// - pit
-
-	// fourth
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_WEST);
-	// - pit
-
-	// fifth
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_SOUTH);
-	// - goal
-
-	// sixth
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_EAST);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_NORTH);
-	trajectory.push_back(A_WEST);
-	trajectory.push_back(A_SOUTH);
-	// - goal
-
-	step_number = 0;
 }
 
 
@@ -159,8 +108,8 @@ void GridworldDeepQLearning::finishCurrentEpisode() {
 	collector_ptr->addDataToContainer("average_number_of_steps",(float)sum_of_iterations/episode);
 	collector_ptr->addDataToContainer("collected_reward",state.getStateReward(state.getPlayerPosition()));
 
-/*		// Export reward "convergence" diagram.
-		collector_ptr->exportDataToCsv(statistics_filename);*/
+	// Export reward "convergence" diagram.
+	collector_ptr->exportDataToCsv(statistics_filename);
 
 }
 
@@ -188,27 +137,6 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 	// Remember the current state i.e. player position.
 	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
 
-/*	os << "All rewards:\n";
-	// Generate all possible states and all possible rewards.
-	for (size_t y=0; y<height; y++){
-		os << "| ";
-		for (size_t x=0; x<width; x++) {
-
-			for (size_t a=0; a<4; a++) {
-				os << qstate[a];
-				if (a==3)
-					os << " | ";
-				else
-					os << " , ";
-				// Remember the best value.
-				if (qstate[a] >= best_vals(y,x))
-					best_vals(y,x) = qstate[a];
-
-			}//: for a(ctions)
-		}//: for x
-		os << std::endl;
-	}//: for y
-*/
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
 	// Generate all possible states and all possible rewards.
@@ -292,19 +220,6 @@ float GridworldDeepQLearning::computeBestValueForCurrentState(){
 		}//if is allowed
 	}//: for
 
-
-/*	// Check the results of actions one by one... (there is no need to create a separate copy of predictions)
-	float* pred = getPredictedRewardsForCurrentState()->data();
-
-	for(mic::types::NESWAction action : actions) {
-		// .. and find the value of teh best allowed action.
-		if(state.isActionAllowed(action)) {
-			float qvalue = pred[(size_t)action.getType()];
-			if (qvalue > best_qvalue)
-				best_qvalue = qvalue;
-		}//if is allowed
-	}//: for*/
-
 	return best_qvalue;
 }
 
@@ -370,32 +285,6 @@ bool GridworldDeepQLearning::performSingleStep() {
 	LOG(LINFO) << "Player position at state t: " << player_pos_t;
 	LOG(LSTATUS) << "Predicted rewards for state t: " << predicted_rewards_t->transpose();
 
-/*	// Check whether state is terminal.
-	if(state.isStateTerminal(player_pos_t)) {
-		// In the terminal state we can select only one special action: "terminate".
-		// All "other" actions receive the same value related to the "reward".
-		float final_reward = state.getStateReward(player_pos_t);
-		// Create a vector of rewards and train the network.
-		for (size_t a=0; a<4; a++)
-			(*predicted_rewards_t)(a, 0) = final_reward;
-
-		LOG(LINFO) << "Player position at t+1:" << player_pos_t<< " and the performed action = " << A_EXIT;
-		LOG(LSTATUS) << "The resulting state:" << std::endl << state.streamGrid();
-
-
-		LOG(LERROR) << "Training with desired rewards: " << predicted_rewards_t->transpose();
-		LOG(LSTATUS) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
-
-		// Train network with rewards.
-		float loss = neural_net.train (encoded_state_t, predicted_rewards_t, nn_learning_rate, nn_weight_decay);
-
-		LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
-
-		// Finish the episode.
-		return false;
-	}//: if terminal*/
-
-
 	// Select the action.
 	mic::types::NESWAction action;
 	//action = A_NORTH;
@@ -414,16 +303,6 @@ bool GridworldDeepQLearning::performSingleStep() {
 		// Random action.
 		action = A_RANDOM;
 	}//: if
-
-
-	/*	// Move along the two good trajectories only.
-		action = trajectory[step_number];
-		move(action);
-		// prepare next step.
-		step_number++;
-		if (step_number >= trajectory.size())
-				step_number= 0;*/
-
 
 	// Execute action - until success.
 	if (!move(action)) {
