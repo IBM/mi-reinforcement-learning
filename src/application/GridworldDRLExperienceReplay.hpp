@@ -131,12 +131,12 @@ private:
 	 */
 	bool move (mic::types::Action2DInterface ac_);
 
-	/*!
+	/*
 	 * Calculates the best value for the current state - by finding the action having the maximal expected value.
 	 * @param player_position_ State (player position).
 	 * @return Value of the best possible action for given state.
 	 */
-	float computeBestValueForGivenState(mic::types::Position2D player_position_);
+	//float computeBestValueForGivenState(mic::types::Position2D player_position_);
 
 	/*!
 	 * Calculates the best value for the current state and predictions.

@@ -79,6 +79,9 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 	width = state.getWidth();
 	height = state.getHeight();
 
+	// Hardcode batchsize - for fasteinng the display!
+	batch_size = width * height;
+
 	// Create a simple neural network.
 	// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
 	neural_net.addLayer(new Linear((size_t) width * height , 250, batch_size));
@@ -137,62 +140,88 @@ bool GridworldDRLExperienceReplay::move (mic::types::Action2DInterface ac_) {
 
 std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	LOG(LTRACE) << "streamNetworkResponseTable()";
-	std::ostringstream os;
-	// Make a copy of current gridworld.
-	Gridworld tmp_grid = state;
-	MatrixXf best_vals (height, width);
-	best_vals.setValue(-std::numeric_limits<float>::infinity());
+	std::string rewards_table;
+	std::string actions_table;
 
-	os << "All rewards:\n";
+	// Remember the current state i.e. player position.
+	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
+
+	// Create new matrices for batches of inputs and targets.
+	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height, batch_size));
+
+	// Assume that the batch_size = width * height
+	assert(width*height == batch_size);
+	for (size_t y=0; y<height; y++){
+		for (size_t x=0; x<width; x++) {
+			// Move the player to given state.
+			state.movePlayerToPosition(Position2D(x,y));
+			// Encode the current state.
+			mic::types::MatrixXfPtr encoded_state = state.encodeGrid();
+			// Add to batch.
+			inputs_batch->col(y*width+x) = encoded_state->col(0);
+		}//: for x
+	}//: for y
+
+	// Get rewards for the whole batch.
+	neural_net.forward(*inputs_batch);
+	// Get predictions for all those states - there is no need to create a copy.
+	MatrixXfPtr predicted_batch = neural_net.getPredictions();
+
+
+	rewards_table += "Action values:\n";
+	actions_table += "Best actions:\n";
 	// Generate all possible states and all possible rewards.
 	for (size_t y=0; y<height; y++){
-		os << "| ";
+		rewards_table += "| ";
+		actions_table += "| ";
 		for (size_t x=0; x<width; x++) {
-			// Check network response for given state.
-			// Get the first prediction only.
-			MatrixXfPtr predictions = getPredictedRewardsForGivenState(Position2D(x,y));
-			//LOG(LWARNING) << "Received predictions:\n" << predictions->transpose();
-			float*  qstate = predictions->data();
-
+			float bestqval = -std::numeric_limits<float>::infinity();
+			size_t best_action = -1;
 			for (size_t a=0; a<4; a++) {
-				os << qstate[a];
+				float qval = (*predicted_batch)(a, y*width+x);
+
+				rewards_table += std::to_string(qval);
 				if (a==3)
-					os << " | ";
+					rewards_table += " | ";
 				else
-					os << " , ";
+					rewards_table += " , ";
+
 				// Remember the best value.
-				if (qstate[a] >= best_vals(y,x))
-					best_vals(y,x) = qstate[a];
+				if (qval > bestqval){
+					bestqval = qval;
+					best_action = a;
+				}//: if
 
 			}//: for a(ctions)
+			switch(best_action){
+			case 0 : actions_table += "N | "; break;
+			case 1 : actions_table += "E | "; break;
+			case 2 : actions_table += "S | "; break;
+			case 3 : actions_table += "W | "; break;
+			default: actions_table += "- | ";
+			}
+
 		}//: for x
-		os << std::endl;
+		rewards_table += "\n";
+		actions_table += "\n";
 	}//: for y
-/*	os << std::endl;
 
-	os << "Best rewards:\n";
-	// Stream only the biggerst states.
-	for (size_t y=0; y<height; y++){
-		os << "| ";
-		for (size_t x=0; x<width; x++) {
-			os << best_vals(y,x) << " | ";
-		}//: for x
-		os << std::endl;
-	}//: for y*/
+	// Move player to previous position.
+	state.movePlayerToPosition(current_player_pos_t);
 
-	return os.str();
+	return rewards_table + actions_table;
 }
 
 
 
-float GridworldDRLExperienceReplay::computeBestValueForGivenState(mic::types::Position2D player_position_){
+/*float GridworldDRLExperienceReplay::computeBestValueForGivenState(mic::types::Position2D player_position_){
 	LOG(LTRACE) << "computeBestValueForGivenState()";
 
 	// Check the results of actions one by one... (there is no need to create a separate copy of predictions)
 	float* pred = getPredictedRewardsForGivenState(player_position_)->data();
 
 	return computeBestValueForGivenStateAndPredictions(player_position_, pred);
-}
+}*/
 
 
 float GridworldDRLExperienceReplay::computeBestValueForGivenStateAndPredictions(mic::types::Position2D player_position_, float* predictions_){
@@ -224,7 +253,7 @@ mic::types::MatrixXfPtr GridworldDRLExperienceReplay::getPredictedRewardsForGive
 	// Remember the current state i.e. player position.
 	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
 
-	// Move the player to giveh state.
+	// Move the player to given state.
 	state.movePlayerToPosition(player_position_);
 
 	// Encode the current state.
@@ -274,15 +303,17 @@ mic::types::NESWAction GridworldDRLExperienceReplay::selectBestActionForGivenSta
 	actions.push_back(A_WEST);
 
 	// Check the results of actions one by one... (there is no need to create a separate copy of predictions)
-	float* pred = getPredictedRewardsForGivenState(player_position_)->data();
+	MatrixXfPtr predictions_sample = getPredictedRewardsForGivenState(player_position_);
+	LOG(LERROR) << "Selecting action from predictions:\n" << predictions_sample->transpose();
+	float* pred = predictions_sample->data();
 
-	for(mic::types::NESWAction action : actions) {
+	for(size_t a=0; a<4; a++) {
 		// ... and find the best allowed.
-		if(state.isActionAllowed(player_position_, action)) {
-			float qvalue = pred[(size_t)action.getType()];
+		if(state.isActionAllowed(player_position_, mic::types::NESWAction((mic::types::NESW)a))) {
+			float qvalue = pred[a];
 			if (qvalue > best_qvalue){
 				best_qvalue = qvalue;
-				best_action = action;
+				best_action.setAction((mic::types::NESW)a);
 			}
 		}//if is allowed
 	}//: for
@@ -308,8 +339,9 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 		eps = 1.0/(1.0+sqrt(episode));
 	if (eps < 0.1)
 		eps = 0.1;
-
 	LOG(LDEBUG) << "eps = " << eps;
+	bool random = false;
+
 	// Epsilon-greedy action selection.
 	if (RAN_GEN->uniRandReal() > eps){
 		// Select best action.
@@ -317,6 +349,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	} else {
 		// Random action.
 		action = A_RANDOM;
+		random = true;
 	}//: if
 
 	// Execute action - do not monitor the success.
@@ -324,7 +357,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 	// Get new state s(t+1).
 	mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
-	LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << " action index=" << (size_t)action.getType();
+	LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 	// Collect the experience.
 	GridworldExperiencePtr exp(new GridworldExperience(player_pos_t, action, player_pos_t_prim));
@@ -349,7 +382,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 		for (size_t i=0; i<batch_size; i++) {
 			GridworldExperienceSample ges = geb.getNextSample();
 			GridworldExperiencePtr ge_ptr = ges.data();
-			LOG(LERROR) << "Training sample : " << ge_ptr->s_t << " -> " << ge_ptr->a_t << " -> " << ge_ptr->s_t_prim;
+			LOG(LDEBUG) << "Training sample : " << ge_ptr->s_t << " -> " << ge_ptr->a_t << " -> " << ge_ptr->s_t_prim;
 		}//: for
 
 		// Iterate through samples and create inputs_t_batch.
@@ -405,11 +438,10 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 			GridworldExperienceSample ges = geb.getNextSample();
 			GridworldExperiencePtr ge_ptr = ges.data();
 
-			/*if (ge_ptr->s_t == ge_ptr->s_t_prim) {
+			if (ge_ptr->s_t == ge_ptr->s_t_prim) {
 				// The move was not possible! Learn that as well.
-				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = -0.1;
-			} else*/
-			if(state.isStateTerminal(ge_ptr->s_t_prim)) {
+				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = -step_reward;
+			} else if(state.isStateTerminal(ge_ptr->s_t_prim)) {
 				// The position at (t+1) state appears to be terminal - learn the reward.
 				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = state.getStateReward(ge_ptr->s_t_prim);
 			} else {
@@ -425,17 +457,17 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 		}//: for
 
-		LOG(LWARNING) <<"Inputs batch:\n" << inputs_t_batch->transpose();
-		LOG(LWARNING) <<"Targets batch:\n" << targets_t_batch->transpose();
+		LOG(LDEBUG) <<"Inputs batch:\n" << inputs_t_batch->transpose();
+		LOG(LDEBUG) <<"Targets batch:\n" << targets_t_batch->transpose();
 
 		// Perform the Deep-Q-learning.
-		LOG(LSTATUS) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
+		LOG(LDEBUG) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
 
 		// Train network with rewards.
 		float loss = neural_net.train (inputs_t_batch, targets_t_batch, learning_rate, nn_weight_decay);
-		LOG(LSTATUS) << "Training loss:" << loss;
+		LOG(LDEBUG) << "Training loss:" << loss;
 
-		//LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
+		//LOG(LDEBUG) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
 
 		// Finish the replay: move the player to REAL, CURRENT POSITION.
 		state.movePlayerToPosition(player_pos_t_prim);
