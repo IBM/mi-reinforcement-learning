@@ -119,6 +119,11 @@ public:
 	NESWAction(NESW type_) : Action2D() { setAction(type_); };
 
 	/*!
+	 * Default NESW action constructor. Sets increments according to action type.
+	 */
+	NESWAction(size_t type_) : Action2D() { setAction((NESW)type_); };
+
+	/*!
 	 * Sets increments according to action value.
 	 * @param ActionType Type of action.
 	 */

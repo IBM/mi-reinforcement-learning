@@ -9,6 +9,6 @@
 		"learning_rate" : 0.001,
 		"discount_rate" : 0.9,
 		"epsilon": -0.1,
-		"statistics_filename" : "gridworld_drl_app-convergence.txt"
+		"statistics_filename" : "gridworld_drl_app-convergence-maze6.csv"
 	}
 }

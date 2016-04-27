@@ -38,8 +38,9 @@ void Gridworld::generateGridworld(int gridworld_type_, size_t width_, size_t hei
 		case 4 : initBookGrid(); break;
 		case 5 : initMazeGrid(); break;
 		case 6 : initExemplaryDQLGrid(); break;
-		case 7 : initDebug2x2Grid(); break;
-		case 8 : initDebug3x3Grid(); break;
+		case 7 : initModifiedDQLGrid(); break;
+		case 8 : initDebug2x2Grid(); break;
+		case 9 : initDebug3x3Grid(); break;
 		case -1:
 		default: initRandomGrid(width_, height_);
 	}//: switch
@@ -266,6 +267,37 @@ void Gridworld::initExemplaryDQLGrid() {
 	gridworld({2,1, (size_t)GridworldChannels::Goal}) = 10;
 }
 
+void Gridworld::initModifiedDQLGrid() {
+	LOG(LINFO) << "Generating a slightly modified grid from Deep Q-Learning example";
+	/*
+	 * [[' ',' ',' ',' '],
+	 *  [' ','#',+10,' '],
+	 *  [' ',' ',-10,' '],
+	 *  ['S',' ',' ',' ']]
+	 */
+
+	// Overwrite dimensions.
+	width = 4;
+	height = 4;
+
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
+
+	// Place the player.
+	initial_position.set(0,3);
+	movePlayerToPosition(initial_position);
+
+	// Place wall(s).
+	gridworld({1,1, (size_t)GridworldChannels::Wall}) = 1;
+
+	// Place pit(s).
+	gridworld({2,2, (size_t)GridworldChannels::Pit}) = -10;
+
+	// Place goal(s).
+	gridworld({2,1, (size_t)GridworldChannels::Goal}) = 10;
+}
+
 
 void Gridworld::initDebug2x2Grid() {
 	LOG(LINFO) << "Generating the 2x2 debug grid";
@@ -318,6 +350,9 @@ void Gridworld::initDebug3x3Grid() {
 	initial_position.set(1,1);
 	movePlayerToPosition(initial_position);
 
+	// Place wall(s).
+	gridworld({1,2, (size_t)GridworldChannels::Wall}) = 1;
+
 	// Place pit(s).
 	gridworld({0,1, (size_t)GridworldChannels::Pit}) = -10;
 	gridworld({1,0, (size_t)GridworldChannels::Pit}) = -10;
@@ -325,20 +360,150 @@ void Gridworld::initDebug3x3Grid() {
 
 	// Place goal(s).
 	gridworld({1,2, (size_t)GridworldChannels::Goal}) = 10;
+
 }
 
 
 
-
-
-
-
 void Gridworld::initRandomGrid(size_t width_, size_t height_) {
-	// TODO!
+	// Overwrite the dimensions.
 	width = width_;
 	height = height_;
-	LOG(LFATAL) << "initRandomGrid() not implemented!";
-	exit(1);
+	//LOG(LFATAL) << "initRandomGrid() not implemented!";
+	//exit(1);
+
+	// Set gridworld size.
+	gridworld.resize({width, height, 4});
+	gridworld.zeros();
+
+	// Place the player.
+	mic::types::Position2D player(0, width-1, 0, height-1);
+	initial_position = player;
+	movePlayerToPosition(initial_position);
+
+	// Initialize random device and generator.
+	std::random_device rd;
+	std::mt19937_64 rng_mt19937_64(rd());
+
+	// Initialize uniform integer distribution.
+	size_t max_obstacles = sqrt(width*height) - 2;
+	std::uniform_int_distribution<size_t> obstacle_dist(0, max_obstacles);
+
+	// Calculate number of walls.
+	size_t number_of_walls = obstacle_dist(rng_mt19937_64);
+
+	// Place wall(s).
+	for (size_t i=0; i<number_of_walls; i++) {
+		while (1){
+			// Random position.
+			mic::types::Position2D wall(0, width-1, 0, height-1);
+
+			// Validate pose.
+			if (gridworld({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Player}) != 0)
+				continue;
+			if (gridworld({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Wall}) != 0)
+				continue;
+
+			// Add wall...
+			gridworld({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Wall}) = 1;
+
+			// ... but additionally check the player surroundings - there must be at least one way out!
+			bool can_quit = false;
+			for (size_t a=0; a<4; a++){
+				if (isActionAllowed(NESWAction(a))) {
+					can_quit = true;
+					break;
+				}//: if
+			}//: for
+			if (!can_quit) {
+				// Sorry, we must remove this wall...
+				gridworld({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Wall}) = 0;
+				// .. and try once again.
+				continue;
+			}//: if
+
+			break;
+		}//: while
+	}//: for number of walls
+
+
+	// Calculate number of pits.
+	size_t number_of_pits = obstacle_dist(rng_mt19937_64);
+
+	// Place pit(s).
+	for (size_t i=0; i<number_of_pits; i++) {
+		while(1){
+			// Random position.
+			mic::types::Position2D pit(0, width-1, 0, height-1);
+			std::cout <<"pit i =" << i << " " << pit << std::endl;
+
+			// Validate pose.
+			if (gridworld({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Player}) != 0)
+				continue;
+			if (gridworld({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Wall}) != 0)
+				continue;
+			if (gridworld({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Pit}) != 0)
+				continue;
+
+			// Add pit...
+			gridworld({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Pit}) = -10;
+
+			// ... but additionally check the player surroundings - there must be at least one way out, and not going through the pit!
+			bool can_quit = false;
+			for (size_t a=0; a<4; a++){
+				NESWAction action(a);
+				mic::types::Position2D new_player_pop = player + action;
+				if ((isStateAllowed(new_player_pop)) &&
+						(gridworld({(size_t)new_player_pop.x, (size_t)new_player_pop.y, (size_t)GridworldChannels::Pit}) == 0)) {
+					can_quit = true;
+					break;
+				}//: if
+			}//: for
+			if (!can_quit) {
+				// Sorry, we must remove this pit...
+				gridworld({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Pit}) = 0;
+				// .. and try once again.
+				continue;
+			}//: if
+
+			break;
+		}//: while
+	}//: for number of walls
+
+
+	// Place goal(s).
+	while(1) {
+		// Random position.
+		mic::types::Position2D goal(0, width-1, 0, height-1);
+
+		// Validate pose.
+		if (gridworld({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Player}) != 0)
+			continue;
+		if (gridworld({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Wall}) != 0)
+			continue;
+		if (gridworld({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Pit}) != 0)
+			continue;
+
+		// ... but additionally check the player surroundings - there must be at least one way out, and not going through the pit!
+		bool reachable = false;
+		for (size_t a=0; a<4; a++){
+			NESWAction action(a);
+			mic::types::Position2D way_to_goal = goal + action;
+			if ((isStateAllowed(way_to_goal)) &&
+					(gridworld({(size_t)way_to_goal.x, (size_t)way_to_goal.y, (size_t)GridworldChannels::Pit}) == 0)) {
+				reachable = true;
+				break;
+			}//: if
+		}//: for
+		if (!reachable)
+			continue;
+
+		// Ok, add the goal.
+		gridworld({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Goal}) = 10;
+		break;
+	}//: while
+
+
 }
 
 mic::types::Tensor<char> Gridworld::flattenGrid() {
@@ -381,7 +546,7 @@ std::string Gridworld::streamGrid() {
 }
 
 
-mic::types::MatrixXfPtr Gridworld::encodeGrid() {
+mic::types::MatrixXfPtr Gridworld::encodePlayerGrid() {
 /*	// Temporarily reshape the gridworld.
 	gridworld.conservativeResize({1, width * height * 4});
 	// Create a matrix pointer and copy data from grid into the matrix.
@@ -469,6 +634,23 @@ mic::types::MatrixXfPtr Gridworld::encodeGrid() {
 	// Return the matrix pointer.
 	return encoded_grid;
 }
+
+
+mic::types::MatrixXfPtr Gridworld::encodeWholeGrid() {
+	// Temporarily reshape the gridworld.
+	gridworld.conservativeResize({1, width * height * 4});
+	// Create a matrix pointer and copy data from grid into the matrix.
+	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(gridworld));
+	// Back to the original shape.
+	gridworld.resize({width, height, 4});
+
+	// Return the matrix pointer.
+	return encoded_grid;
+}
+
+
+
+
 
 mic::types::Position2D Gridworld::getPlayerPosition() {
 	mic::types::Position2D position;

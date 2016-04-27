@@ -61,7 +61,9 @@ public:
 	 * 4: the classic book grid 4x4.
 	 * 5: the classic maze grid 4x4.
 	 * 6: gridworld from DQL example 4x4.
-	 * 7: debug grid 2x2.
+	 * 7: alightly gridworld from DQL example 4x4.
+	 * 8: debug grid 2x2.
+	 * 9: debug grid 3x3.
 	 * -1 (or else): random grid - all items (wall, goal and pit, player) placed randomly
 	 * @param width_ Grid width (used in the case of random grid generation).
 	 * @param height_ Grid height (used in the case of random grid generation).
@@ -137,6 +139,16 @@ public:
 	 */
 	void initExemplaryDQLGrid();
 
+	/*!
+	 * 	Method initializes a slightly modified grid from Deep Q-Learning example.
+	 *
+	 * [[' ',' ',' ',' '],
+	 *  [' ','#',+10,' '],
+	 *  [' ',' ',-10,' '],
+	 *  ['S',' ',' ',' ']]
+	 */
+	void initModifiedDQLGrid();
+
 
 	/*!
 	 * 	Method initializes the 2x2 grid useful during the debugging.
@@ -173,8 +185,11 @@ public:
 	 */
 	std::string streamGrid();
 
-	/// Encode the current state of the grid as a matrix of size [1, width * height * 4]
-	mic::types::MatrixXfPtr encodeGrid();
+	/// Encode the current state of the grid (walls, pits, goals and player position) as a matrix of size [1, width * height * 4]
+	mic::types::MatrixXfPtr encodeWholeGrid();
+
+	/// Encode the current state of the reduced grid (only the player position) as a matrix of size [1, width * height]
+	mic::types::MatrixXfPtr encodePlayerGrid();
 
 	/*!
 	 * Calculates the player position.

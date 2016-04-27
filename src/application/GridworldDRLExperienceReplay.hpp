@@ -94,8 +94,8 @@ private:
 	/// Property: height of gridworld.
 	mic::configuration::Property<size_t> height;
 
-	/// Property: size of the batch in experience replay.
-	mic::configuration::Property<size_t> batch_size;
+	/// Size of the batch in experience replay - set to the size of maze (width*height).
+	size_t batch_size;
 
 	/*!
 	 * Property: the "expected intermediate reward", i.e. reward received by performing each step (typically negative, but can be positive as all).
@@ -131,13 +131,6 @@ private:
 	 */
 	bool move (mic::types::Action2DInterface ac_);
 
-	/*
-	 * Calculates the best value for the current state - by finding the action having the maximal expected value.
-	 * @param player_position_ State (player position).
-	 * @return Value of the best possible action for given state.
-	 */
-	//float computeBestValueForGivenState(mic::types::Position2D player_position_);
-
 	/*!
 	 * Calculates the best value for the current state and predictions.
 	 * @param player_position_ State (player position).
@@ -167,9 +160,14 @@ private:
 	std::string streamNetworkResponseTable();
 
 	/*!
-	 * Used in statistics.
+	 * Sum of all iterations made till now - used in statistics.
 	 */
 	long long sum_of_iterations;
+
+	/*!
+	 * Sum of all rewards collected till now - used in statistics.
+	 */
+	long long sum_of_rewards;
 
 	/*!
 	 * Table of past experiences.

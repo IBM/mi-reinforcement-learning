@@ -37,6 +37,32 @@ public:
 	Position2D(long x_, long y_) : x(x_), y(y_) { };
 
 	/*!
+	 * Constructor responsible for generation of a random position.
+	 * @param min_x_ Min x cooridnate.
+	 * @param max_x_ Max x cooridnate.
+	 * @param min_y_ Min y cooridnate.
+	 * @param max_y_ Max y cooridnate.
+	 */
+	Position2D(size_t min_x_, size_t max_x_, size_t min_y_, size_t max_y_) {
+		// Initialize device and generator.
+		std::random_device rd;
+		std::mt19937_64 rng_mt19937_64(rd());
+
+		// Initialize uniform integer distribution for x
+		std::uniform_int_distribution<size_t> x_dist(min_x_, max_x_);
+
+		// Select a random action.
+		x = x_dist(rng_mt19937_64);
+
+		// Initialize uniform integer distribution for x
+		std::uniform_int_distribution<size_t> y_dist(min_y_, max_y_);
+
+		// Select a random action.
+		y = y_dist(rng_mt19937_64);
+	}
+
+
+	/*!
 	 * Sets position coodrinates.
 	 * @param x_ The x coordinate.
 	 * @param y_ The y coordinate.

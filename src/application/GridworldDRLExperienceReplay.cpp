@@ -25,7 +25,6 @@ GridworldDRLExperienceReplay::GridworldDRLExperienceReplay(std::string node_name
 		gridworld_type("gridworld_type", 0),
 		width("width", 4),
 		height("height", 4),
-		batch_size("batch_size",1),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.005),
@@ -37,7 +36,6 @@ GridworldDRLExperienceReplay::GridworldDRLExperienceReplay(std::string node_name
 	registerProperty(gridworld_type);
 	registerProperty(width);
 	registerProperty(height);
-	registerProperty(batch_size);
 	registerProperty(step_reward);
 	registerProperty(discount_rate);
 	registerProperty(learning_rate);
@@ -59,9 +57,11 @@ void GridworldDRLExperienceReplay::initialize(int argc, char* argv[]) {
 
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
+	// Add containers to collector.
 	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
-	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(0, 255, 0, 180));
-	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 0, 255, 180));
+	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(255, 255, 0, 180));
+	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 255, 0, 180));
+	collector_ptr->createContainer("average_collected_reward", mic::types::color_rgba(0, 255, 255, 180));
 
 	sum_of_iterations = 0;
 
@@ -79,12 +79,12 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 	width = state.getWidth();
 	height = state.getHeight();
 
-	// Hardcode batchsize - for fasteinng the display!
+	// Hardcode batchsize - for fastening the display!
 	batch_size = width * height;
 
 	// Create a simple neural network.
 	// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
-	neural_net.addLayer(new Linear((size_t) width * height , 250, batch_size));
+	neural_net.addLayer(new Linear((size_t) width * height * 4, 250, batch_size));
 	neural_net.addLayer(new ReLU(250, 250, batch_size));
 	neural_net.addLayer(new Linear(250, 100, batch_size));
 	neural_net.addLayer(new ReLU(100, 100, batch_size));
@@ -99,7 +99,9 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 void GridworldDRLExperienceReplay::startNewEpisode() {
 	LOG(LERROR) << "Start new episode";
 	// Move player to start position.
-	state.movePlayerToInitialPosition();
+//	state.movePlayerToInitialPosition();
+	// Generate the gridworld.
+	state.generateGridworld(gridworld_type, width, height);
 
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
 	LOG(LSTATUS) << std::endl << state.streamGrid();
@@ -110,12 +112,15 @@ void GridworldDRLExperienceReplay::startNewEpisode() {
 void GridworldDRLExperienceReplay::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
+	float reward = state.getStateReward(state.getPlayerPosition());
 	sum_of_iterations += iteration;
+	sum_of_rewards += reward;
 
 	// Add variables to container.
 	collector_ptr->addDataToContainer("number_of_steps",iteration);
 	collector_ptr->addDataToContainer("average_number_of_steps",(float)sum_of_iterations/episode);
-	collector_ptr->addDataToContainer("collected_reward",state.getStateReward(state.getPlayerPosition()));
+	collector_ptr->addDataToContainer("collected_reward", reward);
+	collector_ptr->addDataToContainer("average_collected_reward", (float)sum_of_rewards/episode);
 
 	// Export reward "convergence" diagram.
 	collector_ptr->exportDataToCsv(statistics_filename);
@@ -147,7 +152,7 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
 
 	// Create new matrices for batches of inputs and targets.
-	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height, batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * 4, batch_size));
 
 	// Assume that the batch_size = width * height
 	assert(width*height == batch_size);
@@ -156,7 +161,7 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 			// Move the player to given state.
 			state.movePlayerToPosition(Position2D(x,y));
 			// Encode the current state.
-			mic::types::MatrixXfPtr encoded_state = state.encodeGrid();
+			mic::types::MatrixXfPtr encoded_state = state.encodeWholeGrid();
 			// Add to batch.
 			inputs_batch->col(y*width+x) = encoded_state->col(0);
 		}//: for x
@@ -214,16 +219,6 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 
 
 
-/*float GridworldDRLExperienceReplay::computeBestValueForGivenState(mic::types::Position2D player_position_){
-	LOG(LTRACE) << "computeBestValueForGivenState()";
-
-	// Check the results of actions one by one... (there is no need to create a separate copy of predictions)
-	float* pred = getPredictedRewardsForGivenState(player_position_)->data();
-
-	return computeBestValueForGivenStateAndPredictions(player_position_, pred);
-}*/
-
-
 float GridworldDRLExperienceReplay::computeBestValueForGivenStateAndPredictions(mic::types::Position2D player_position_, float* predictions_){
 	LOG(LTRACE) << "computeBestValueForGivenState()";
 	float best_qvalue = -std::numeric_limits<float>::infinity();
@@ -257,14 +252,14 @@ mic::types::MatrixXfPtr GridworldDRLExperienceReplay::getPredictedRewardsForGive
 	state.movePlayerToPosition(player_position_);
 
 	// Encode the current state.
-	mic::types::MatrixXfPtr encoded_state = state.encodeGrid();
+	mic::types::MatrixXfPtr encoded_state = state.encodeWholeGrid();
 
 	// Create NEW matrix for the inputs batch.
-	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height, batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * 4, batch_size));
+	inputs_batch->setZero();
 
-	// Iterate through samples and copy the same inputs n times.
-	for (size_t i=0; i<batch_size; i++)
-		inputs_batch->col(i) = encoded_state->col(0);
+	// Set the first input - only this one interests us.
+	inputs_batch->col(0) = encoded_state->col(0);
 
 	//LOG(LERROR) << "Getting predictions for input batch:\n" <<inputs_batch->transpose();
 
@@ -362,7 +357,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	// Collect the experience.
 	GridworldExperiencePtr exp(new GridworldExperience(player_pos_t, action, player_pos_t_prim));
 	// Create an empty matrix for rewards - this will be recalculated each time the experience will be replayed anyway.
-	MatrixXfPtr rewards (new MatrixXf(width * height , batch_size));
+	MatrixXfPtr rewards (new MatrixXf(4 , batch_size));
 	// Add experience to experience table.
 	experiences.add(exp, rewards);
 
@@ -370,8 +365,8 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	// Deep Q learning - train network with random sample from the experience memory.
 	if (experiences.size() >= 2*batch_size) {
 		// Create new matrices for batches of inputs and targets.
-		MatrixXfPtr inputs_t_batch(new MatrixXf((size_t) width * height, batch_size));
-		MatrixXfPtr inputs_t_prim_batch(new MatrixXf((size_t) width * height, batch_size));
+		MatrixXfPtr inputs_t_batch(new MatrixXf((size_t) width * height * 4, batch_size));
+		MatrixXfPtr inputs_t_prim_batch(new MatrixXf((size_t) width * height *4, batch_size));
 		MatrixXfPtr targets_t_batch(new MatrixXf(4, batch_size));
 
 		// Get the random batch.
@@ -394,7 +389,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 			// "Simulate" moving player to position from state/time (t).
 			state.movePlayerToPosition(ge_ptr->s_t);
 			// Encode the state at time (t).
-			mic::types::MatrixXfPtr encoded_state_t = state.encodeGrid();
+			mic::types::MatrixXfPtr encoded_state_t = state.encodeWholeGrid();
 			//float* state = encoded_state_t->data();
 
 			// Copy the encoded state to inputs batch.
@@ -418,7 +413,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 			// "Simulate" moving player to position from state/time (t+1).
 			state.movePlayerToPosition(ge_ptr->s_t_prim);
 			// Encode the state at time (t+1).
-			mic::types::MatrixXfPtr encoded_state_t = state.encodeGrid();
+			mic::types::MatrixXfPtr encoded_state_t = state.encodeWholeGrid();
 			//float* state = encoded_state_t->data();
 
 			// Copy the encoded state to inputs batch.
@@ -440,7 +435,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 			if (ge_ptr->s_t == ge_ptr->s_t_prim) {
 				// The move was not possible! Learn that as well.
-				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = step_reward;
+				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = 3*step_reward;
 			} else if(state.isStateTerminal(ge_ptr->s_t_prim)) {
 				// The position at (t+1) state appears to be terminal - learn the reward.
 				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = state.getStateReward(ge_ptr->s_t_prim);

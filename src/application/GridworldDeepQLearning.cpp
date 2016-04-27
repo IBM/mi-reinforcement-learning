@@ -56,8 +56,9 @@ void GridworldDeepQLearning::initialize(int argc, char* argv[]) {
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
 	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
-	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(0, 255, 0, 180));
-	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 0, 255, 180));
+	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(255, 255, 0, 180));
+	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 255, 0, 180));
+	collector_ptr->createContainer("average_collected_reward", mic::types::color_rgba(0, 255, 255, 180));
 
 	sum_of_iterations = 0;
 
@@ -88,7 +89,7 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 
 
 void GridworldDeepQLearning::startNewEpisode() {
-	LOG(LERROR) << "Start new episode";
+	LOG(LERROR) << "Starting new episode " << episode;
 	// Move player to start position.
 	state.movePlayerToInitialPosition();
 
@@ -99,7 +100,7 @@ void GridworldDeepQLearning::startNewEpisode() {
 
 
 void GridworldDeepQLearning::finishCurrentEpisode() {
-	LOG(LTRACE) << "End current episode";
+	LOG(LTRACE) << "End of the episode " << episode;
 
 	sum_of_iterations += iteration;
 
@@ -149,7 +150,7 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 
 			// Check network response for given state.
 			state.movePlayerToPosition(Position2D(x,y));
-			mic::types::MatrixXfPtr tmp_state = state.encodeGrid();
+			mic::types::MatrixXfPtr tmp_state = state.encodePlayerGrid();
 			//std::cout<< "tmp_state = " << tmp_state->transpose() << std::endl;
 			// Pass the data and get predictions.
 			neural_net.forward(*tmp_state);
@@ -225,7 +226,7 @@ float GridworldDeepQLearning::computeBestValueForCurrentState(){
 
 mic::types::MatrixXfPtr GridworldDeepQLearning::getPredictedRewardsForCurrentState() {
 	// Encode the current state.
-	mic::types::MatrixXfPtr encoded_state = state.encodeGrid();
+	mic::types::MatrixXfPtr encoded_state = state.encodePlayerGrid();
 	// Pass the data and get predictions.
 	neural_net.forward(*encoded_state);
 	// Return the predictions.
@@ -276,7 +277,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 	mic::types::Position2D player_pos_t= state.getPlayerPosition();
 
 	// Encode the current state at time t.
-	mic::types::MatrixXfPtr encoded_state_t = state.encodeGrid();
+	mic::types::MatrixXfPtr encoded_state_t = state.encodePlayerGrid();
 
 	// Get the prediced rewards at time t...
 	MatrixXfPtr tmp_rewards_t = getPredictedRewardsForCurrentState();
