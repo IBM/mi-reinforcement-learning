@@ -194,12 +194,12 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 
 			}//: for a(ctions)
 			switch(best_action){
-			case 0 : actions_table += "N | "; break;
-			case 1 : actions_table += "E | "; break;
-			case 2 : actions_table += "S | "; break;
-			case 3 : actions_table += "W | "; break;
-			default: actions_table += "- | ";
-			}
+				case 0 : actions_table += "N | "; break;
+				case 1 : actions_table += "E | "; break;
+				case 2 : actions_table += "S | "; break;
+				case 3 : actions_table += "W | "; break;
+				default: actions_table += "- | ";
+			}//: switch
 
 		}//: for x
 		rewards_table += "\n";
@@ -293,7 +293,7 @@ mic::types::NESWAction GridworldDRLExperienceReplay::selectBestActionForGivenSta
 
 	// Greedy methods - returns the index of element with greatest value.
 	mic::types::NESWAction best_action = A_RANDOM;
-    float best_qvalue = 0;
+    float best_qvalue = -std::numeric_limits<float>::infinity();
 
 	// Create a list of possible actions.
 	std::vector<mic::types::NESWAction> actions;
@@ -304,11 +304,11 @@ mic::types::NESWAction GridworldDRLExperienceReplay::selectBestActionForGivenSta
 
 	// Check the results of actions one by one... (there is no need to create a separate copy of predictions)
 	MatrixXfPtr predictions_sample = getPredictedRewardsForGivenState(player_position_);
-	LOG(LERROR) << "Selecting action from predictions:\n" << predictions_sample->transpose();
+	//LOG(LERROR) << "Selecting action from predictions:\n" << predictions_sample->transpose();
 	float* pred = predictions_sample->data();
 
 	for(size_t a=0; a<4; a++) {
-		// ... and find the best allowed.
+		// Find the best action allowed.
 		if(state.isActionAllowed(player_position_, mic::types::NESWAction((mic::types::NESW)a))) {
 			float qvalue = pred[a];
 			if (qvalue > best_qvalue){
@@ -440,7 +440,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 			if (ge_ptr->s_t == ge_ptr->s_t_prim) {
 				// The move was not possible! Learn that as well.
-				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = -step_reward;
+				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = step_reward;
 			} else if(state.isStateTerminal(ge_ptr->s_t_prim)) {
 				// The position at (t+1) state appears to be terminal - learn the reward.
 				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = state.getStateReward(ge_ptr->s_t_prim);

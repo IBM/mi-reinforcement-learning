@@ -8,7 +8,7 @@
 		"gridworld_type": 6,
 		"step_reward": -1.0,
 		"discount_rate" : 0.9,
-		"learning_rate" : 0.03,
+		"learning_rate" : 0.02,
 		"epsilon": -0.1
 	}
 }
