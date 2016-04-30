@@ -22,10 +22,10 @@ namespace types {
  */
 enum class GridworldChannels : std::size_t
 {
-	Goal = 0, ///< Channel storing the goal(s)
-	Pit = 1, ///< Channel storing the pits(s)
-	Wall = 2, ///< Channel storing the walls(s)
-	Player = 3 ///< Channel storing the player pose
+	Rewards = 0, ///< Channel storing the goal(s) and pit(s)
+	Walls = 1, ///< Channel storing the walls(s)
+	Player = 2, ///< Channel storing the player pose
+	Count = 3 ///< Number of channels
 };
 
 
@@ -61,7 +61,7 @@ public:
 	 * 4: the classic book grid 4x4.
 	 * 5: the classic maze grid 4x4.
 	 * 6: gridworld from DQL example 4x4.
-	 * 7: alightly gridworld from DQL example 4x4.
+	 * 7: slightly modified gridworld from DQL example 4x4.
 	 * 8: debug grid 2x2.
 	 * 9: debug grid 3x3.
 	 * -1 (or else): random grid - all items (wall, goal and pit, player) placed randomly
@@ -300,6 +300,9 @@ protected:
 
 	/// Height of gridworld.
 	size_t height;
+
+	/// Number of gridworld channels.
+	size_t channels;
 
 	/// Property: height of gridworld.
 	mic::types::Position2D initial_position;

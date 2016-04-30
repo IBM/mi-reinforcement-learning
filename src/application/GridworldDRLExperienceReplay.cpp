@@ -94,7 +94,7 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 	} else {
 		// Create a simple neural network.
 		// gridworld wxhx4 -> 100 -> 4 -> regression!.
-		neural_net.addLayer(new Linear((size_t) width * height *4, 250, batch_size));
+		neural_net.addLayer(new Linear((size_t) width * height * (size_t)(GridworldChannels::Count), 250, batch_size));
 		neural_net.addLayer(new ReLU(250, 250, batch_size));
 		neural_net.addLayer(new Linear(250, 100, batch_size));
 		neural_net.addLayer(new ReLU(100, 100, batch_size));
@@ -167,7 +167,7 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
 
 	// Create new matrices for batches of inputs and targets.
-	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * 4, batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)GridworldChannels::Count, batch_size));
 
 	// Assume that the batch_size = width * height
 	assert(width*height == batch_size);
@@ -270,7 +270,7 @@ mic::types::MatrixXfPtr GridworldDRLExperienceReplay::getPredictedRewardsForGive
 	mic::types::MatrixXfPtr encoded_state = state.encodeWholeGrid();
 
 	// Create NEW matrix for the inputs batch.
-	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * 4, batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)GridworldChannels::Count, batch_size));
 	inputs_batch->setZero();
 
 	// Set the first input - only this one interests us.
@@ -380,8 +380,8 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	// Deep Q learning - train network with random sample from the experience memory.
 	if (experiences.size() >= 2*batch_size) {
 		// Create new matrices for batches of inputs and targets.
-		MatrixXfPtr inputs_t_batch(new MatrixXf((size_t) width * height * 4, batch_size));
-		MatrixXfPtr inputs_t_prim_batch(new MatrixXf((size_t) width * height *4, batch_size));
+		MatrixXfPtr inputs_t_batch(new MatrixXf((size_t) width * height * (size_t)GridworldChannels::Count, batch_size));
+		MatrixXfPtr inputs_t_prim_batch(new MatrixXf((size_t) width * height * (size_t)GridworldChannels::Count, batch_size));
 		MatrixXfPtr targets_t_batch(new MatrixXf(4, batch_size));
 
 		// Get the random batch.
