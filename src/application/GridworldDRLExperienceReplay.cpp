@@ -29,7 +29,10 @@ GridworldDRLExperienceReplay::GridworldDRLExperienceReplay(std::string node_name
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.005),
 		epsilon("epsilon", 0.1),
-		statistics_filename("statistics_filename","statistics_filename.csv"),
+		statistics_filename("statistics_filename","drl_er_statistics.csv"),
+		mlnn_filename("mlnn_filename", "drl_er_mlnn.txt"),
+		mlnn_save("mlnn_save", false),
+		mlnn_load("mlnn_load", false),
 		experiences(10000,1)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
@@ -41,6 +44,9 @@ GridworldDRLExperienceReplay::GridworldDRLExperienceReplay(std::string node_name
 	registerProperty(learning_rate);
 	registerProperty(epsilon);
 	registerProperty(statistics_filename);
+	registerProperty(mlnn_filename);
+	registerProperty(mlnn_save);
+	registerProperty(mlnn_load);
 
 	LOG(LINFO) << "Properties registered";
 }
@@ -82,14 +88,20 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 	// Hardcode batchsize - for fastening the display!
 	batch_size = width * height;
 
-	// Create a simple neural network.
-	// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
-	neural_net.addLayer(new Linear((size_t) width * height * 4, 250, batch_size));
-	neural_net.addLayer(new ReLU(250, 250, batch_size));
-	neural_net.addLayer(new Linear(250, 100, batch_size));
-	neural_net.addLayer(new ReLU(100, 100, batch_size));
-	neural_net.addLayer(new Linear(100, 4, batch_size));
-	neural_net.addLayer(new Regression(4, 4, batch_size));
+	// Try to load neural network from file.
+	if ((mlnn_load) && (neural_net.load(mlnn_filename))) {
+		// Do nothing ;)
+	} else {
+		// Create a simple neural network.
+		// gridworld wxhx4 -> 100 -> 4 -> regression!.
+		neural_net.addLayer(new Linear((size_t) width * height *4, 250, batch_size));
+		neural_net.addLayer(new ReLU(250, 250, batch_size));
+		neural_net.addLayer(new Linear(250, 100, batch_size));
+		neural_net.addLayer(new ReLU(100, 100, batch_size));
+		neural_net.addLayer(new Linear(100, 4, batch_size));
+		neural_net.addLayer(new Regression(4, 4, batch_size));
+		LOG(LINFO) << "Generated new neural network";
+	}//: else
 
 	// Set batch size in experience replay memory.
 	experiences.setBatchSize(batch_size);
@@ -125,6 +137,9 @@ void GridworldDRLExperienceReplay::finishCurrentEpisode() {
 	// Export reward "convergence" diagram.
 	collector_ptr->exportDataToCsv(statistics_filename);
 
+	// Save nn to file.
+	if (mlnn_save)
+		neural_net.save(mlnn_filename);
 }
 
 

@@ -121,6 +121,15 @@ private:
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
 
+	/// Property: name of the file to which the neural network will be serialized (or deserialized from).
+	mic::configuration::Property<std::string> mlnn_filename;
+
+	/// Property: flad denoting thether the nn should be saved to a file (after every episode end).
+	mic::configuration::Property<bool> mlnn_save;
+
+	/// Property: flad denoting thether the nn should be loaded from a file (at the initialization of the task).
+	mic::configuration::Property<bool> mlnn_load;
+
 	/// Multi-layer neural network used for approximation of the Qstate rewards.
 	MultiLayerNeuralNetwork neural_net;
 

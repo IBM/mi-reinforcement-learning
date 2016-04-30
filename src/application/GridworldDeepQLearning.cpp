@@ -29,7 +29,10 @@ GridworldDeepQLearning::GridworldDeepQLearning(std::string node_name_) : OpenGLE
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.1),
 		epsilon("epsilon", 0.1),
-		statistics_filename("statistics_filename","statistics_filename.csv")
+		statistics_filename("statistics_filename","dql_statistics.csv"),
+		mlnn_filename("mlnn_filename", "dql_mlnn.txt"),
+		mlnn_save("mlnn_save", false),
+		mlnn_load("mlnn_load", false)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(gridworld_type);
@@ -39,6 +42,9 @@ GridworldDeepQLearning::GridworldDeepQLearning(std::string node_name_) : OpenGLE
 	registerProperty(learning_rate);
 	registerProperty(epsilon);
 	registerProperty(statistics_filename);
+	registerProperty(mlnn_filename);
+	registerProperty(mlnn_save);
+	registerProperty(mlnn_load);
 
 	LOG(LINFO) << "Properties registered";
 }
@@ -76,15 +82,20 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 	width = state.getWidth();
 	height = state.getHeight();
 
-	// Create a simple neural network.
-	// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
-	neural_net.addLayer(new Linear((size_t) width * height , 250, 1));
-	neural_net.addLayer(new ReLU(250, 250, 1));
-	neural_net.addLayer(new Linear(250, 100, 1));
-	neural_net.addLayer(new ReLU(100, 100, 1));
-	neural_net.addLayer(new Linear(100, 4, 1));
-	neural_net.addLayer(new Regression(4, 4, 1));
-
+	// Try to load neural network from file.
+	if ((mlnn_load) && (neural_net.load(mlnn_filename))) {
+		// Do nothing ;)
+	} else {
+		// Create a simple neural network.
+		// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
+		neural_net.addLayer(new Linear((size_t) width * height , 250, 1));
+		neural_net.addLayer(new ReLU(250, 250, 1));
+		neural_net.addLayer(new Linear(250, 100, 1));
+		neural_net.addLayer(new ReLU(100, 100, 1));
+		neural_net.addLayer(new Linear(100, 4, 1));
+		neural_net.addLayer(new Regression(4, 4, 1));
+		LOG(LINFO) << "Generated new neural network";
+	}//: else
 }
 
 
@@ -112,6 +123,9 @@ void GridworldDeepQLearning::finishCurrentEpisode() {
 	// Export reward "convergence" diagram.
 	collector_ptr->exportDataToCsv(statistics_filename);
 
+	// Save nn to file.
+	if (mlnn_save)
+		neural_net.save(mlnn_filename);
 }
 
 

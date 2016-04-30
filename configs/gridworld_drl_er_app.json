@@ -1,16 +1,19 @@
 {
 	"app_state": {
 		"application_sleep_interval": "1",
-		"single_step_mode": 1
+		"single_step_mode": 0
 	},
 	"gridworld_drl_er_app": {
-		"width": 5,
-		"height": 5,
+		"width": 6,
+		"height": 6,
 		"gridworld_type": -1,
 		"step_reward": -1.0,
 		"discount_rate" : 0.9,
 		"learning_rate" : 0.02,
 		"epsilon": -0.1,
-		"statistics_filename" : "gridworld_drl_er_app-convergence-maze-random5x5.csv"
+		"statistics_filename" : "gridworld_drl_er_app-convergence-maze-random-6x6.csv",
+		"mlnn_filename": "gridworld_dlr-maze-random-6x6.txt",
+		"mlnn_save" : 1,
+		"mlnn_load" : 1
 	}
 }
