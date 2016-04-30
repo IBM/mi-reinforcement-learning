@@ -12,7 +12,7 @@
 		"learning_rate" : 0.02,
 		"epsilon": -0.1,
 		"statistics_filename" : "gridworld_drl_er_app-convergence-maze-random-6x6.csv",
-		"mlnn_filename": "gridworld_dlr-maze-random-6x6.txt",
+		"mlnn_filename": "gridworld_dlr_el-mlnn-maze-random-6x6.txt",
 		"mlnn_save" : 1,
 		"mlnn_load" : 1
 	}
