@@ -150,6 +150,16 @@ private:
 	mic::types::NESWAction selectBestAction(mic::types::Position2D pos_);
 
 
+	/*!
+	 * Sum of all iterations made till now - used in statistics.
+	 */
+	long long sum_of_iterations;
+
+	/*!
+	 * Sum of all rewards collected till now - used in statistics.
+	 */
+	long long sum_of_rewards;
+
 };
 
 } /* namespace application */

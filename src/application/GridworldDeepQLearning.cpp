@@ -67,6 +67,7 @@ void GridworldDeepQLearning::initialize(int argc, char* argv[]) {
 	collector_ptr->createContainer("average_collected_reward", mic::types::color_rgba(0, 255, 255, 180));
 
 	sum_of_iterations = 0;
+	sum_of_rewards = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_chart = new WindowFloatCollectorChart("GridworldDeepQLearning", 256, 256, 0, 0);
@@ -100,7 +101,7 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 
 
 void GridworldDeepQLearning::startNewEpisode() {
-	LOG(LERROR) << "Starting new episode " << episode;
+	LOG(LSTATUS) << "Starting new episode " << episode;
 	// Move player to start position.
 	state.movePlayerToInitialPosition();
 
@@ -113,12 +114,15 @@ void GridworldDeepQLearning::startNewEpisode() {
 void GridworldDeepQLearning::finishCurrentEpisode() {
 	LOG(LTRACE) << "End of the episode " << episode;
 
+	float reward = state.getStateReward(state.getPlayerPosition());
 	sum_of_iterations += iteration;
+	sum_of_rewards += reward;
 
 	// Add variables to container.
 	collector_ptr->addDataToContainer("number_of_steps",iteration);
 	collector_ptr->addDataToContainer("average_number_of_steps",(float)sum_of_iterations/episode);
-	collector_ptr->addDataToContainer("collected_reward",state.getStateReward(state.getPlayerPosition()));
+	collector_ptr->addDataToContainer("collected_reward", reward);
+	collector_ptr->addDataToContainer("average_collected_reward", (float)sum_of_rewards/episode);
 
 	// Export reward "convergence" diagram.
 	collector_ptr->exportDataToCsv(statistics_filename);
@@ -282,7 +286,7 @@ mic::types::NESWAction GridworldDeepQLearning::selectBestActionForCurrentState()
 }
 
 bool GridworldDeepQLearning::performSingleStep() {
-	LOG(LERROR) << "Episode "<< episode << ": step " << iteration << "";
+	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
 	// TMP!
 	double 	nn_weight_decay = 0;
@@ -308,8 +312,9 @@ bool GridworldDeepQLearning::performSingleStep() {
 		eps = 1.0/(1.0+sqrt(episode));
 	if (eps < 0.1)
 		eps = 0.1;
-
 	LOG(LDEBUG) << "eps = " << eps;
+	bool random = false;
+
 	// Epsilon-greedy action selection.
 	if (RAN_GEN->uniRandReal() > eps){
 		// Select best action.
@@ -317,6 +322,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 	} else {
 		// Random action.
 		action = A_RANDOM;
+		random = true;
 	}//: if
 
 	// Execute action - until success.
@@ -330,7 +336,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 		// Get new state s(t+1).
 		mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
 
-		LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << " action index=" << (size_t)action.getType();
+		LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 		// Check whether state t+1 is terminal.
 		if(state.isStateTerminal(player_pos_t_prim))

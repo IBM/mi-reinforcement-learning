@@ -63,13 +63,13 @@ void GridworldDRLExperienceReplay::initialize(int argc, char* argv[]) {
 
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
-	// Add containers to collector.
 	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
 	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(255, 255, 0, 180));
 	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 255, 0, 180));
 	collector_ptr->createContainer("average_collected_reward", mic::types::color_rgba(0, 255, 255, 180));
 
 	sum_of_iterations = 0;
+	sum_of_rewards = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_chart = new WindowFloatCollectorChart("GridworldDRLExperienceReplay", 256, 256, 0, 0);
@@ -109,7 +109,7 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 
 
 void GridworldDRLExperienceReplay::startNewEpisode() {
-	LOG(LERROR) << "Start new episode";
+	LOG(LSTATUS) << "Starting new episode " << episode;
 	// Move player to start position.
 //	state.movePlayerToInitialPosition();
 	// Generate the gridworld.
@@ -332,7 +332,7 @@ mic::types::NESWAction GridworldDRLExperienceReplay::selectBestActionForGivenSta
 }
 
 bool GridworldDRLExperienceReplay::performSingleStep() {
-	LOG(LERROR) << "Episode "<< episode << ": step " << iteration << "";
+	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
 	// TMP!
 	double 	nn_weight_decay = 0;

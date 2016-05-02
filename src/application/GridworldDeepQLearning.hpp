@@ -161,14 +161,20 @@ private:
 	std::string streamNetworkResponseTable();
 
 	/*!
-	 * Used in statistics.
+	 * Player position at time (t-1).
+	 */
+	mic::types::Position2D player_pos_t_minus_prim;
+
+	/*!
+	 * Sum of all iterations made till now - used in statistics.
 	 */
 	long long sum_of_iterations;
 
 	/*!
-	 * Player position at time (t-1).
+	 * Sum of all rewards collected till now - used in statistics.
 	 */
-	mic::types::Position2D player_pos_t_minus_prim;
+	long long sum_of_rewards;
+
 };
 
 } /* namespace application */

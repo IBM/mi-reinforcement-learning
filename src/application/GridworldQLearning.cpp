@@ -60,12 +60,17 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
-/*	collector_ptr->createContainer("average_reward", 0, 10, mic::types::color_rgba(255, 0, 0, 180));
-	collector_ptr->createContainer("correct_arms_percentage", 0, 100, mic::types::color_rgba(0, 255, 0, 180));
-	collector_ptr->createContainer("best_possible_reward", 0, 10, mic::types::color_rgba(0, 0, 255, 180));*/
+	// Add containers to collector.
+	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
+	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(255, 255, 0, 180));
+	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 255, 0, 180));
+	collector_ptr->createContainer("average_collected_reward", mic::types::color_rgba(0, 255, 255, 180));
+
+	sum_of_iterations = 0;
+	sum_of_rewards = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("nBandits", 256, 256, 0, 0);
+	w_chart = new WindowFloatCollectorChart("GridworldQLearning", 256, 256, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }
@@ -89,7 +94,7 @@ void GridworldQLearning::initializePropertyDependentVariables() {
 
 
 void GridworldQLearning::startNewEpisode() {
-	LOG(LTRACE) << "Start new episode";
+	LOG(LSTATUS) << "Starting new episode " << episode;
 	// Move player to start position.
 	state.movePlayerToInitialPosition();
 
@@ -99,13 +104,18 @@ void GridworldQLearning::startNewEpisode() {
 void GridworldQLearning::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
-	/*	// Add variables to container.
-		collector_ptr->addDataToContainer("average_reward",running_mean_reward);
-		collector_ptr->addDataToContainer("correct_arms_percentage",correct_arms_percentage);
-		collector_ptr->addDataToContainer("best_possible_reward",10.0*best_arm_prob);
+	float reward = state.getStateReward(state.getPlayerPosition());
+	sum_of_iterations += iteration;
+	sum_of_rewards += reward;
 
-		// Export reward "convergence" diagram.
-		collector_ptr->exportDataToCsv(statistics_filename);*/
+	// Add variables to container.
+	collector_ptr->addDataToContainer("number_of_steps",iteration);
+	collector_ptr->addDataToContainer("average_number_of_steps",(float)sum_of_iterations/episode);
+	collector_ptr->addDataToContainer("collected_reward", reward);
+	collector_ptr->addDataToContainer("average_collected_reward", (float)sum_of_rewards/episode);
+
+	// Export reward "convergence" diagram.
+	collector_ptr->exportDataToCsv(statistics_filename);
 
 }
 
@@ -231,7 +241,7 @@ mic::types::NESWAction GridworldQLearning::selectBestAction(mic::types::Position
 }
 
 bool GridworldQLearning::performSingleStep() {
-	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
+	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
 	// Get state s(t).
 	mic::types::Position2D state_t = state.getPlayerPosition();
@@ -258,38 +268,43 @@ bool GridworldQLearning::performSingleStep() {
 	double eps = (double)epsilon;
 	if ((double)epsilon < 0)
 		eps = 1.0/(1.0+episode);
-	LOG(LWARNING) << eps;
+	LOG(LDEBUG) << "eps =" << eps;
+	bool random = false;
+
 	// Epsilon-greedy action selection.
 	if (RAN_GEN->uniRandReal() > eps){
 		// Select best action.
 		action = selectBestAction(state_t);
 		// If action could not be found.
-		if (action.getType() == mic::types::NESW::None)
+		if (action.getType() == mic::types::NESW::None){
 			action = A_RANDOM;
+			random = true;
+		}
 	} else {
 		// Random move - repeat until an allowed move is made.
 		action = A_RANDOM;
+		random = true;
 	}//: if
 
 	// Execture action - until success.
 	while (!move(action)) {
 		// If action could not be performed - random.
 		action = A_RANDOM;
+		random = true;
 	}//: while
 
 	// Get new state s(t+1).
-	mic::types::Position2D state_t_prim = state.getPlayerPosition();
+	mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
 
-	LOG(LINFO) << "Performed action = " << action;
-	LOG(LDEBUG) << "Player position = " << state_t;
+	LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 
 	// Update running average for given action - Q learning;)
 	float q_st_at = qstate_table({(size_t)state_t.x, (size_t)state_t.y, (size_t)action.getType()});
 	float r = step_reward;
-	float max_q_st_prim_at_prim = computeBestValue(state_t_prim);
+	float max_q_st_prim_at_prim = computeBestValue(player_pos_t_prim);
 	LOG(LDEBUG) << "q_st_at = " << q_st_at;
-	LOG(LDEBUG) << "state_t_prim = " << state_t_prim;
+	LOG(LDEBUG) << "state_t_prim = " << player_pos_t_prim;
 	LOG(LDEBUG) << "step_reward = " << step_reward;
 	LOG(LDEBUG) << "max_q_st_prim_at_prim = " << max_q_st_prim_at_prim;
 	if (std::isfinite(q_st_at) && std::isfinite(max_q_st_prim_at_prim))
