@@ -146,7 +146,7 @@ std::string GridworldQLearning::streamQStateTable() {
 					rewards_table += " , ";
 
 				// Remember the best value.
-				if (state.isStateAllowed(x,y) && (!state.isStateTerminal(x,y)) && state.isActionAllowed(x,y,a) && (qval > bestqval)){
+				if (state.isStateAllowed(x,y) && (!state.isStateTerminal(x,y)) && state.isActionAllowed(x,y,a) && (qval >= bestqval)){
 					bestqval = qval;
 					best_action = a;
 				}//: if
