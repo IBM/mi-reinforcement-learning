@@ -24,7 +24,7 @@ enum class GridworldChannels : std::size_t
 {
 	Rewards = 0, ///< Channel storing the goal(s) and pit(s)
 	Walls = 1, ///< Channel storing the walls(s)
-	Player = 2, ///< Channel storing the player pose
+	Player = 2, ///< Channel storing the agent pose
 	Count = 3 ///< Number of channels
 };
 
@@ -169,9 +169,22 @@ public:
 
 
 	/*!
-	 * Generates a random grid of size (width x height).
+	 * Generates a random grid of size (width x height), with a single pit, goal and wall.
 	 */
-	void initRandomGrid(size_t width_, size_t height_);
+	void initSimpleRandomGrid(size_t width_, size_t height_);
+
+	/*!
+	 * Generates a random grid of size (width x height), with a single goal, but several walls and pits.
+	 */
+	void initDifficultRandomGrid(size_t width_, size_t height_);
+
+	/*!
+	 * A recursive method for checking whether the grid is traversable (i.e. there is a path from agent to goal).
+	 * @param x_ Current x coordinate to check.
+	 * @param y_ Current x coordinate to check.
+	 * @param visited_ Matrix with visited states.
+	 */
+	bool isGridTraversible(long x_, long y_, mic::types::Matrix<bool> & visited_);
 
 	/*!
 	 * Returns the (flattened, i.e. 2D) grid of characters.

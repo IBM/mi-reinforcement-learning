@@ -357,8 +357,8 @@ bool GridworldDeepQLearning::performSingleStep() {
 				(*predicted_rewards_t)((size_t)action.getType(), 0) = r;
 
 			// Special case - punish going back!
-			if (player_pos_t_minus_prim == player_pos_t_prim)
-				(*predicted_rewards_t)((size_t)action.getType(), 0) = step_reward;
+			/*if (player_pos_t_minus_prim == player_pos_t_prim)
+				(*predicted_rewards_t)((size_t)action.getType(), 0) = step_reward;*/
 
 		}//: else is terminal state
 	}//: else !move
