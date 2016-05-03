@@ -4,7 +4,7 @@
 		"single_step_mode": 0
 	},
 	"gridworld_value_iteration_app": {
-		"gridworld_type": 4,
+		"gridworld_type": 2,
 		"step_reward": -0.5,
 		"discount_rate" : 0.9,
 		"move_noise": 0.2

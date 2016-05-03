@@ -268,7 +268,7 @@ bool GridworldQLearning::performSingleStep() {
 	double eps = (double)epsilon;
 	if ((double)epsilon < 0)
 		eps = 1.0/(1.0+episode);
-	LOG(LDEBUG) << "eps =" << eps;
+	LOG(LINFO) << "eps =" << eps;
 	bool random = false;
 
 	// Epsilon-greedy action selection.

@@ -6,14 +6,14 @@
 	"gridworld_drl_er_app": {
 		"width": 6,
 		"height": 6,
-		"gridworld_type": -2,
+		"gridworld_type": 1,
 		"step_reward": -1.0,
 		"discount_rate" : 0.9,
 		"learning_rate" : 0.01,
 		"epsilon": -0.1,
-		"statistics_filename" : "gridworld_drl_er_app-convergence-maze-complex-random-6x6.csv",
+		"statistics_filename" : "gridworld_drl_er_app-convergence.csv",
 		"mlnn_filename": "gridworld_dlr_el-mlnn-maze-complex-random-6x6.txt",
-		"mlnn_save" : 1,
-		"mlnn_load" : 1
+		"mlnn_save" : 0,
+		"mlnn_load" : 0
 	}
 }
