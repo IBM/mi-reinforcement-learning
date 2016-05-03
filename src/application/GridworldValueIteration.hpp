@@ -61,7 +61,7 @@ protected:
 private:
 
 	/// The gridworld object.
-	mic::types::Gridworld gridworld;
+	mic::environments::Gridworld gridworld;
 
 	/// Matrix storing values for all states (gridworld w * h). ROW MAJOR(!).
 	mic::types::MatrixXf state_value_table;

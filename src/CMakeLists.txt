@@ -162,6 +162,7 @@ if(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 	add_executable(gridworld_value_iteration_app 
 		application/GridworldValueIteration.cpp
 		types/Gridworld.cpp
+		types/Environment.cpp
 		application/console_application_main.cpp
 		)
 	# Link it with shared libraries.
@@ -188,6 +189,7 @@ if(${BUILD_APP_GRIDWORLD_QLEARNING})
 	add_executable(gridworld_qlearning_app 
 		application/GridworldQLearning.cpp
 		types/Gridworld.cpp
+		types/Environment.cpp
 		application/console_application_main.cpp
 		)
 	# Link it with shared libraries.
@@ -214,6 +216,7 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING})
 	add_executable(gridworld_drl_app 
 		application/GridworldDeepQLearning.cpp
 		types/Gridworld.cpp
+		types/Environment.cpp
 		application/console_application_main.cpp
 		)
 	# Link it with shared libraries.
@@ -241,6 +244,7 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY})
 	add_executable(gridworld_drl_er_app 
 		application/GridworldDRLExperienceReplay.cpp
 		types/Gridworld.cpp
+		types/Environment.cpp
 		application/console_application_main.cpp
 		)
 	# Link it with shared libraries.

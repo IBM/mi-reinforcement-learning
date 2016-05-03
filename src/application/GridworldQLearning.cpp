@@ -78,7 +78,7 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 void GridworldQLearning::initializePropertyDependentVariables() {
 	// Generate the gridworld.
 	state.generateGridworld(gridworld_type, width, height);
-	LOG(LSTATUS) << std::endl << state.streamGrid();
+	LOG(LSTATUS) << std::endl << state.toString();
 
 	// Get width and height.
 	width = state.getWidth();
@@ -96,7 +96,7 @@ void GridworldQLearning::initializePropertyDependentVariables() {
 void GridworldQLearning::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 	// Move player to start position.
-	state.movePlayerToInitialPosition();
+	state.moveAgentToInitialPosition();
 
 }
 
@@ -104,7 +104,7 @@ void GridworldQLearning::startNewEpisode() {
 void GridworldQLearning::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
-	float reward = state.getStateReward(state.getPlayerPosition());
+	float reward = state.getStateReward(state.getAgentPosition());
 	sum_of_iterations += iteration;
 	sum_of_rewards += reward;
 
@@ -174,14 +174,14 @@ std::string GridworldQLearning::streamQStateTable() {
 bool GridworldQLearning::move (mic::types::Action2DInterface ac_) {
 //	LOG(LINFO) << "Current move = " << ac_;
 	// Compute destination.
-    mic::types::Position2D new_pos = state.getPlayerPosition() + ac_;
+    mic::types::Position2D new_pos = state.getAgentPosition() + ac_;
 
 	// Check whether the state is allowed.
 	if (!state.isStateAllowed(new_pos))
 		return false;
 
 	// Move player.
-	state.movePlayerToPosition(new_pos);
+	state.moveAgentToPosition(new_pos);
 	return true;
 }
 
@@ -244,7 +244,7 @@ bool GridworldQLearning::performSingleStep() {
 	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
 	// Get state s(t).
-	mic::types::Position2D state_t = state.getPlayerPosition();
+	mic::types::Position2D state_t = state.getAgentPosition();
 
 	// Check whether state is terminal.
 	if(state.isStateTerminal(state_t)) {
@@ -254,9 +254,9 @@ bool GridworldQLearning::performSingleStep() {
 		for (size_t a=0; a<4; a++)
 			qstate_table({(size_t)state_t.x,(size_t)state_t.y, a}) = final_reward;
 
-		LOG(LINFO) << "Player action = " << A_EXIT;
-		LOG(LDEBUG) << "Player position = " << state_t;
-		LOG(LSTATUS) << std::endl << state.streamGrid();
+		LOG(LINFO) << "Agent action = " << A_EXIT;
+		LOG(LDEBUG) << "Agent position = " << state_t;
+		LOG(LSTATUS) << std::endl << state.toString();
 		LOG(LSTATUS) << std::endl << streamQStateTable();
 
 		// Finish the episode.
@@ -294,9 +294,9 @@ bool GridworldQLearning::performSingleStep() {
 	}//: while
 
 	// Get new state s(t+1).
-	mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
+	mic::types::Position2D player_pos_t_prim = state.getAgentPosition();
 
-	LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
+	LOG(LINFO) << "Agent position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 
 	// Update running average for given action - Q learning;)
@@ -310,7 +310,7 @@ bool GridworldQLearning::performSingleStep() {
 	if (std::isfinite(q_st_at) && std::isfinite(max_q_st_prim_at_prim))
 			qstate_table({(size_t)state_t.x, (size_t)state_t.y, (size_t)action.getType()}) = q_st_at + learning_rate * (r + discount_rate*max_q_st_prim_at_prim - q_st_at);
 
-	LOG(LSTATUS) << std::endl << state.streamGrid();
+	LOG(LSTATUS) << std::endl << state.toString();
 	LOG(LSTATUS) << std::endl << streamQStateTable();
 
 	return true;

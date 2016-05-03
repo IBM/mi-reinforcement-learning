@@ -83,7 +83,7 @@ private:
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
 	/// The gridworld object - current state.
-	mic::types::Gridworld state;
+	mic::environments::Gridworld state;
 
 	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
 	mic::configuration::Property<short> gridworld_type;

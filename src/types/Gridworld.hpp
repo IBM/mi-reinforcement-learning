@@ -8,13 +8,12 @@
 #ifndef SRC_TYPES_GRIDWORLD_HPP_
 #define SRC_TYPES_GRIDWORLD_HPP_
 
-#include <types/Position2D.hpp>
-#include <types/TensorTypes.hpp>
-#include <types/MatrixTypes.hpp>
 #include <logger/Log.hpp>
+#include <types/Environment.hpp>
+
 
 namespace mic {
-namespace types {
+namespace environments {
 
 /*!
  * \brief Gridworld channels
@@ -24,7 +23,7 @@ enum class GridworldChannels : std::size_t
 {
 	Rewards = 0, ///< Channel storing the goal(s) and pit(s)
 	Walls = 1, ///< Channel storing the walls(s)
-	Player = 2, ///< Channel storing the agent pose
+	Agent = 2, ///< Channel storing the agent position
 	Count = 3 ///< Number of channels
 };
 
@@ -33,7 +32,7 @@ enum class GridworldChannels : std::size_t
  * \brief Class responsible for generation and presentation of gridworld environments.
  * \author tkornuta
  */
-class Gridworld {
+class Gridworld : public mic::environments::Environment {
 public:
 	/*!
 	 * Constructor. Creates and empty gridworld (set size to 0x0).
@@ -48,7 +47,7 @@ public:
 	/*!
 	 * Assign operator. Copies the gridworld state along with its properties.
 	 */
-	mic::types::Gridworld & operator=(const mic::types::Gridworld & gw_);
+	mic::environments::Gridworld & operator=(const mic::environments::Gridworld & gw_);
 
 	/*!
 	 * Genrates the gridworld of a given, predefined type.
@@ -64,7 +63,8 @@ public:
 	 * 7: slightly modified gridworld from DQL example 4x4.
 	 * 8: debug grid 2x2.
 	 * 9: debug grid 3x3.
-	 * -1 (or else): random grid - all items (wall, goal and pit, player) placed randomly
+	 * -1 (or else): random grid - all items (wall, goal and pit, agent) placed randomly
+	 * -2 (or else): random grid - all items (wall, goal and pit, agent) placed randomly with multiple pits and walls
 	 * @param width_ Grid width (used in the case of random grid generation).
 	 * @param height_ Grid height (used in the case of random grid generation).
 	 */
@@ -187,145 +187,60 @@ public:
 	bool isGridTraversible(long x_, long y_, mic::types::Matrix<bool> & visited_);
 
 	/*!
-	 * Returns the (flattened, i.e. 2D) grid of characters.
-	 * @return Flattened grid of chars.
+	 * Returns the current state of the gridworld in the form of a string.
+	 * @return String with description of the gridworld.
 	 */
-	mic::types::Tensor<char> flattenGrid();
+	virtual std::string toString();
+
+	/// Encode the current state of the grid (walls, pits, goals and agent position) as a matrix of size [1, width * height * channels]
+	virtual mic::types::MatrixXfPtr encode();
+
+	/// Encode the current state of the reduced grid (only the agent position) as a matrix of size [1, width * height]
+	virtual mic::types::MatrixXfPtr encodeAgentGrid();
 
 	/*!
-	 * Steams the current state of the gridworld.
-	 * @return Ostream with description of the gridworld.
+	 * Calculates the agent position.
+	 * @return Agent position.
 	 */
-	std::string streamGrid();
-
-	/// Encode the current state of the grid (walls, pits, goals and player position) as a matrix of size [1, width * height * 4]
-	mic::types::MatrixXfPtr encodeWholeGrid();
-
-	/// Encode the current state of the reduced grid (only the player position) as a matrix of size [1, width * height]
-	mic::types::MatrixXfPtr encodePlayerGrid();
+	virtual mic::types::Position2D getAgentPosition();
 
 	/*!
-	 * Calculates the player position.
-	 * @return Player position.
-	 */
-	mic::types::Position2D getPlayerPosition();
-
-	/*!
-	 * Move player to the position.
+	 * Moves the agent to the position.
 	 * @param pos_ Position to be checked.
 	 * @param pos_ The position to be set.
 	 */
-	void movePlayerToPosition(mic::types::Position2D pos_);
-
-	/*!
-	 * Move player to the initial position.
-	 * @param pos_ Position to be checked.
-	 * @param pos_ The position to be set.
-	 */
-	void movePlayerToInitialPosition();
+	virtual void moveAgentToPosition(mic::types::Position2D pos_);
 
 	/*!
 	 * Returns the reward associated with the given state.
 	 * @param pos_ Position (state).
 	 * @return Reward for being in given state (r).
 	 */
-	float getStateReward(mic::types::Position2D pos_);
+	virtual float getStateReward(mic::types::Position2D pos_);
 
-
-	/*!
-	 * Checks if position is allowed, i.e. within the gridworld boundaries and there is no wall at that place.
-	 * @param x_ X state coordinate
-	 * @param y_ Y state coordinate
-	 * @return True if the position is allowed, false otherwise.
-	 */
-	bool isStateAllowed(long x_, long y_);
+	// Makes all versions of polymorphic method isStateAllowed() available.
+	using mic::environments::Environment::isStateAllowed;
 
 	/*!
 	 * Checks if position is allowed, i.e. within the gridworld boundaries and there is no wall at that place.
 	 * @param pos_ Position to be checked.
 	 * @return True if the position is allowed, false otherwise.
 	 */
-	bool isStateAllowed(mic::types::Position2D pos_);
+	virtual bool isStateAllowed(mic::types::Position2D pos_);
+
+	// Makes all versions of polymorphic method isStateTerminal() available.
+	using mic::environments::Environment::isStateTerminal;
 
 	/*!
-	 * Checks if position is terminal, i.e. player is standing in a pit or reached the goal. Returns reward associated with given state.
-	 * @param x_ X state coordinate
-	 * @param y_ Y state coordinate
-	 * @return The reward associated with "final" action (might be positive or negative), equal to zero means that the position is not final.
-	 */
-	bool isStateTerminal(long x_, long y_);
-
-
-	/*!
-	 * Checks if position is terminal, i.e. player is standing in a pit or reached the goal. Returns reward associated with given state.
+	 * Checks if position is terminal, i.e. agent is standing in a pit or reached the goal. Returns reward associated with given state.
 	 * @param pos_ Position (state) to be checked.
 	 * @return The reward associated with "final" action (might be positive or negative), equal to zero means that the position is not final.
 	 */
-	bool isStateTerminal(mic::types::Position2D pos_);
-
-
-	/*!
-	 * Checks whether performing given action starting in given state is allowed.
-	 * @param x_ X state coordinate
-	 * @param y_ Y state coordinate
-	 * @param action_ Action to be performed starting from given state.
-	 * @return True if action is allowed, false otherwise.
-	 */
-	bool isActionAllowed(long x_, long y_, size_t action_);
-
-	/*!
-	 * Checks whether performing given action starting in given state is allowed.
-	 * @param pos_ Starting state (position).
-	 * @param ac_ Action to be performed.
-	 * @return True if action is allowed, false otherwise.
-	 */
-	bool isActionAllowed(mic::types::Position2D pos_, mic::types::Action2DInterface ac_);
-
-	/*!
-	 * Checks whether performing given action from the current player state is allowed.
-	 * @param ac_ Action to be performed.
-	 * @return True if action is allowed, false otherwise.
-	 */
-	bool isActionAllowed(mic::types::Action2DInterface ac_);
-
-	/*!
-	 * Returns current width of the gridworld.
-	 * @return Width.
-	 */
-	size_t getWidth() { return width; }
-
-	/*!
-	 * Returns current height of the gridworld.
-	 * @return Height.
-	 */
-	size_t getHeight() { return height; }
-
-	/*!
-	 * Returns the grid tensor.
-	 * @return Grid.
-	 */
-	mic::types::TensorXf & getGrid() { return gridworld; }
-
-protected:
-
-	/// Width of gridworld.
-	size_t width;
-
-	/// Height of gridworld.
-	size_t height;
-
-	/// Number of gridworld channels.
-	size_t channels;
-
-	/// Property: height of gridworld.
-	mic::types::Position2D initial_position;
-
-	/// Tensor storing the 3D Gridworld (x + y + 4 "depth" channels representing: 0 - goals, 1 - pits, 2 - walls, 3 - player).
-	mic::types::TensorXf gridworld;
+	virtual bool isStateTerminal(mic::types::Position2D pos_);
 
 };
 
-} /* namespace types */
+} /* namespace environments */
 } /* namespace mic */
 
 #endif /* SRC_TYPES_GRIDWORLD_HPP_ */

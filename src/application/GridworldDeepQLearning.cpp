@@ -102,11 +102,12 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 
 void GridworldDeepQLearning::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
-	// Move player to start position.
-	state.movePlayerToInitialPosition();
+
+	// Generate the gridworld (and move player to initial position).
+	state.generateGridworld(gridworld_type, width, height);
 
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << std::endl << state.streamGrid();
+	LOG(LSTATUS) << std::endl << state.toString();
 
 }
 
@@ -114,7 +115,7 @@ void GridworldDeepQLearning::startNewEpisode() {
 void GridworldDeepQLearning::finishCurrentEpisode() {
 	LOG(LTRACE) << "End of the episode " << episode;
 
-	float reward = state.getStateReward(state.getPlayerPosition());
+	float reward = state.getStateReward(state.getAgentPosition());
 	sum_of_iterations += iteration;
 	sum_of_rewards += reward;
 
@@ -136,14 +137,14 @@ void GridworldDeepQLearning::finishCurrentEpisode() {
 bool GridworldDeepQLearning::move (mic::types::Action2DInterface ac_) {
 //	LOG(LINFO) << "Current move = " << ac_;
 	// Compute destination.
-    mic::types::Position2D new_pos = state.getPlayerPosition() + ac_;
+    mic::types::Position2D new_pos = state.getAgentPosition() + ac_;
 
 	// Check whether the state is allowed.
 	if (!state.isStateAllowed(new_pos))
 		return false;
 
 	// Move player.
-	state.movePlayerToPosition(new_pos);
+	state.moveAgentToPosition(new_pos);
 	return true;
 }
 
@@ -154,7 +155,7 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 	std::string actions_table;
 
 	// Remember the current state i.e. player position.
-	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
+	mic::types::Position2D current_player_pos_t = state.getAgentPosition();
 
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
@@ -167,8 +168,8 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 			size_t best_action = -1;
 
 			// Check network response for given state.
-			state.movePlayerToPosition(Position2D(x,y));
-			mic::types::MatrixXfPtr tmp_state = state.encodePlayerGrid();
+			state.moveAgentToPosition(Position2D(x,y));
+			mic::types::MatrixXfPtr tmp_state = state.encodeAgentGrid();
 			//std::cout<< "tmp_state = " << tmp_state->transpose() << std::endl;
 			// Pass the data and get predictions.
 			neural_net.forward(*tmp_state);
@@ -206,7 +207,7 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 
 
 	// Move player to previous position.
-	state.movePlayerToPosition(current_player_pos_t);
+	state.moveAgentToPosition(current_player_pos_t);
 
 	return rewards_table + actions_table;
 }
@@ -244,7 +245,7 @@ float GridworldDeepQLearning::computeBestValueForCurrentState(){
 
 mic::types::MatrixXfPtr GridworldDeepQLearning::getPredictedRewardsForCurrentState() {
 	// Encode the current state.
-	mic::types::MatrixXfPtr encoded_state = state.encodePlayerGrid();
+	mic::types::MatrixXfPtr encoded_state = state.encodeAgentGrid();
 	// Pass the data and get predictions.
 	neural_net.forward(*encoded_state);
 	// Return the predictions.
@@ -292,16 +293,16 @@ bool GridworldDeepQLearning::performSingleStep() {
 	double 	nn_weight_decay = 0;
 
 	// Get player pos at time t.
-	mic::types::Position2D player_pos_t= state.getPlayerPosition();
+	mic::types::Position2D player_pos_t= state.getAgentPosition();
 
 	// Encode the current state at time t.
-	mic::types::MatrixXfPtr encoded_state_t = state.encodePlayerGrid();
+	mic::types::MatrixXfPtr encoded_state_t = state.encodeAgentGrid();
 
 	// Get the prediced rewards at time t...
 	MatrixXfPtr tmp_rewards_t = getPredictedRewardsForCurrentState();
 	// ... but make a local copy!
 	MatrixXfPtr predicted_rewards_t (new MatrixXf(*tmp_rewards_t));
-	LOG(LINFO) << "Player position at state t: " << player_pos_t;
+	LOG(LINFO) << "Agent position at state t: " << player_pos_t;
 	LOG(LSTATUS) << "Predicted rewards for state t: " << predicted_rewards_t->transpose();
 
 	// Select the action.
@@ -334,9 +335,9 @@ bool GridworldDeepQLearning::performSingleStep() {
 		// Ok, move performed, get rewards.
 
 		// Get new state s(t+1).
-		mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
+		mic::types::Position2D player_pos_t_prim = state.getAgentPosition();
 
-		LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
+		LOG(LINFO) << "Agent position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 		// Check whether state t+1 is terminal.
 		if(state.isStateTerminal(player_pos_t_prim))
@@ -357,8 +358,8 @@ bool GridworldDeepQLearning::performSingleStep() {
 				(*predicted_rewards_t)((size_t)action.getType(), 0) = r;
 
 			// Special case - punish going back!
-			/*if (player_pos_t_minus_prim == player_pos_t_prim)
-				(*predicted_rewards_t)((size_t)action.getType(), 0) = step_reward;*/
+			if (player_pos_t_minus_prim == player_pos_t_prim)
+				(*predicted_rewards_t)((size_t)action.getType(), 0) = 5*r + discount_rate*max_q_st_prim_at_prim;;
 
 		}//: else is terminal state
 	}//: else !move
@@ -374,12 +375,12 @@ bool GridworldDeepQLearning::performSingleStep() {
 	LOG(LSTATUS) << "Training loss:" << loss;
 
 	LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << "The resulting state:" << std::endl << state.streamGrid();
+	LOG(LSTATUS) << "The resulting state:" << std::endl << state.toString();
 
 	// Remember the previous position.
 	player_pos_t_minus_prim = player_pos_t;
 	// Check whether state t+1 is terminal - finish the episode.
-	if(state.isStateTerminal(state.getPlayerPosition()))
+	if(state.isStateTerminal(state.getAgentPosition()))
 		return false;
 
 	return true;

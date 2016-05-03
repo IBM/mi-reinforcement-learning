@@ -56,7 +56,7 @@ void GridworldValueIteration::initialize(int argc, char* argv[]) {
 void GridworldValueIteration::initializePropertyDependentVariables() {
 	// Generate the gridworld.
 	gridworld.generateGridworld(gridworld_type, width, height);
-	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
+	LOG(LSTATUS) << std::endl << gridworld.toString();
 
 	// Get width and height.
 	width = gridworld.getWidth();
@@ -93,14 +93,14 @@ std::string GridworldValueIteration::streamStateActionTable() {
 bool GridworldValueIteration::move (mic::types::Action2DInterface ac_) {
 //	LOG(LINFO) << "Current move = " << ac_;
 	// Compute destination.
-    mic::types::Position2D new_pos = gridworld.getPlayerPosition() + ac_;
+    mic::types::Position2D new_pos = gridworld.getAgentPosition() + ac_;
 
 	// Check whether the state is allowed.
 	if (!gridworld.isStateAllowed(new_pos))
 		return false;
 
 	// Move player.
-	gridworld.movePlayerToPosition(new_pos);
+	gridworld.moveAgentToPosition(new_pos);
 	return true;
 }
 
@@ -216,7 +216,7 @@ bool GridworldValueIteration::performSingleStep() {
 	// Update state.
 	state_value_table = new_state_value_table;
 
-	LOG(LSTATUS) << std::endl << gridworld.streamGrid();
+	LOG(LSTATUS) << std::endl << gridworld.toString();
 	LOG(LSTATUS) << std::endl << streamStateActionTable();
 	LOG(LINFO) << "Delta Value = " << running_delta;
 

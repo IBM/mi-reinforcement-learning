@@ -94,7 +94,7 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 	} else {
 		// Create a simple neural network.
 		// gridworld wxhx4 -> 100 -> 4 -> regression!.
-		neural_net.addLayer(new Linear((size_t) width * height * (size_t)(GridworldChannels::Count), 250, batch_size));
+		neural_net.addLayer(new Linear((size_t) width * height * (size_t)(mic::environments::GridworldChannels::Count), 250, batch_size));
 		neural_net.addLayer(new ReLU(250, 250, batch_size));
 		neural_net.addLayer(new Linear(250, 100, batch_size));
 		neural_net.addLayer(new ReLU(100, 100, batch_size));
@@ -110,13 +110,12 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 
 void GridworldDRLExperienceReplay::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
-	// Move player to start position.
-//	state.movePlayerToInitialPosition();
-	// Generate the gridworld.
+
+	// Generate the gridworld (and move player to initial position).
 	state.generateGridworld(gridworld_type, width, height);
 
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << std::endl << state.streamGrid();
+	LOG(LSTATUS) << std::endl << state.toString();
 
 }
 
@@ -124,7 +123,7 @@ void GridworldDRLExperienceReplay::startNewEpisode() {
 void GridworldDRLExperienceReplay::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
-	float reward = state.getStateReward(state.getPlayerPosition());
+	float reward = state.getStateReward(state.getAgentPosition());
 	sum_of_iterations += iteration;
 	sum_of_rewards += reward;
 
@@ -146,14 +145,14 @@ void GridworldDRLExperienceReplay::finishCurrentEpisode() {
 bool GridworldDRLExperienceReplay::move (mic::types::Action2DInterface ac_) {
 //	LOG(LINFO) << "Current move = " << ac_;
 	// Compute destination.
-    mic::types::Position2D new_pos = state.getPlayerPosition() + ac_;
+    mic::types::Position2D new_pos = state.getAgentPosition() + ac_;
 
 	// Check whether the state is allowed.
 	if (!state.isStateAllowed(new_pos))
 		return false;
 
 	// Move player.
-	state.movePlayerToPosition(new_pos);
+	state.moveAgentToPosition(new_pos);
 	return true;
 }
 
@@ -164,19 +163,19 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	std::string actions_table;
 
 	// Remember the current state i.e. player position.
-	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
+	mic::types::Position2D current_player_pos_t = state.getAgentPosition();
 
 	// Create new matrices for batches of inputs and targets.
-	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)GridworldChannels::Count, batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
 
 	// Assume that the batch_size = width * height
 	assert(width*height == batch_size);
 	for (size_t y=0; y<height; y++){
 		for (size_t x=0; x<width; x++) {
 			// Move the player to given state.
-			state.movePlayerToPosition(Position2D(x,y));
+			state.moveAgentToPosition(Position2D(x,y));
 			// Encode the current state.
-			mic::types::MatrixXfPtr encoded_state = state.encodeWholeGrid();
+			mic::types::MatrixXfPtr encoded_state = state.encode();
 			// Add to batch.
 			inputs_batch->col(y*width+x) = encoded_state->col(0);
 		}//: for x
@@ -227,7 +226,7 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	}//: for y
 
 	// Move player to previous position.
-	state.movePlayerToPosition(current_player_pos_t);
+	state.moveAgentToPosition(current_player_pos_t);
 
 	return rewards_table + actions_table;
 }
@@ -261,16 +260,16 @@ float GridworldDRLExperienceReplay::computeBestValueForGivenStateAndPredictions(
 mic::types::MatrixXfPtr GridworldDRLExperienceReplay::getPredictedRewardsForGivenState(mic::types::Position2D player_position_) {
 	LOG(LTRACE) << "getPredictedRewardsForGivenState()";
 	// Remember the current state i.e. player position.
-	mic::types::Position2D current_player_pos_t = state.getPlayerPosition();
+	mic::types::Position2D current_player_pos_t = state.getAgentPosition();
 
 	// Move the player to given state.
-	state.movePlayerToPosition(player_position_);
+	state.moveAgentToPosition(player_position_);
 
 	// Encode the current state.
-	mic::types::MatrixXfPtr encoded_state = state.encodeWholeGrid();
+	mic::types::MatrixXfPtr encoded_state = state.encode();
 
 	// Create NEW matrix for the inputs batch.
-	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)GridworldChannels::Count, batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
 	inputs_batch->setZero();
 
 	// Set the first input - only this one interests us.
@@ -292,7 +291,7 @@ mic::types::MatrixXfPtr GridworldDRLExperienceReplay::getPredictedRewardsForGive
 	//LOG(LERROR) << "Returned predictions sample:\n" << predictions_sample->transpose();
 
 	// Move player to previous position.
-	state.movePlayerToPosition(current_player_pos_t);
+	state.moveAgentToPosition(current_player_pos_t);
 
 	// Return the predictions.
 	return predictions_sample;
@@ -338,8 +337,8 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	double 	nn_weight_decay = 0;
 
 	// Get player pos at time t.
-	mic::types::Position2D player_pos_t= state.getPlayerPosition();
-	LOG(LINFO) << "Player position at state t: " << player_pos_t;
+	mic::types::Position2D player_pos_t= state.getAgentPosition();
+	LOG(LINFO) << "Agent position at state t: " << player_pos_t;
 
 	// Select the action.
 	mic::types::NESWAction action;
@@ -366,8 +365,8 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	move(action);
 
 	// Get new state s(t+1).
-	mic::types::Position2D player_pos_t_prim = state.getPlayerPosition();
-	LOG(LINFO) << "Player position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
+	mic::types::Position2D player_pos_t_prim = state.getAgentPosition();
+	LOG(LINFO) << "Agent position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 	// Collect the experience.
 	GridworldExperiencePtr exp(new GridworldExperience(player_pos_t, action, player_pos_t_prim));
@@ -380,8 +379,8 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	// Deep Q learning - train network with random sample from the experience memory.
 	if (experiences.size() >= 2*batch_size) {
 		// Create new matrices for batches of inputs and targets.
-		MatrixXfPtr inputs_t_batch(new MatrixXf((size_t) width * height * (size_t)GridworldChannels::Count, batch_size));
-		MatrixXfPtr inputs_t_prim_batch(new MatrixXf((size_t) width * height * (size_t)GridworldChannels::Count, batch_size));
+		MatrixXfPtr inputs_t_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
+		MatrixXfPtr inputs_t_prim_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
 		MatrixXfPtr targets_t_batch(new MatrixXf(4, batch_size));
 
 		// Get the random batch.
@@ -402,9 +401,9 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 			// Replay the experience.
 			// "Simulate" moving player to position from state/time (t).
-			state.movePlayerToPosition(ge_ptr->s_t);
+			state.moveAgentToPosition(ge_ptr->s_t);
 			// Encode the state at time (t).
-			mic::types::MatrixXfPtr encoded_state_t = state.encodeWholeGrid();
+			mic::types::MatrixXfPtr encoded_state_t = state.encode();
 			//float* state = encoded_state_t->data();
 
 			// Copy the encoded state to inputs batch.
@@ -426,9 +425,9 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 			// Replay the experience.
 			// "Simulate" moving player to position from state/time (t+1).
-			state.movePlayerToPosition(ge_ptr->s_t_prim);
+			state.moveAgentToPosition(ge_ptr->s_t_prim);
 			// Encode the state at time (t+1).
-			mic::types::MatrixXfPtr encoded_state_t = state.encodeWholeGrid();
+			mic::types::MatrixXfPtr encoded_state_t = state.encode();
 			//float* state = encoded_state_t->data();
 
 			// Copy the encoded state to inputs batch.
@@ -480,16 +479,16 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 		//LOG(LDEBUG) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
 
 		// Finish the replay: move the player to REAL, CURRENT POSITION.
-		state.movePlayerToPosition(player_pos_t_prim);
+		state.moveAgentToPosition(player_pos_t_prim);
 	}//: if enough experiences
 	else
 		LOG(LWARNING) << "Not enough samples in the experience replay memory!";
 
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << std::endl << state.streamGrid();
+	LOG(LSTATUS) << std::endl << state.toString();
 
 	// Check whether state t+1 is terminal - finish the episode.
-	if(state.isStateTerminal(state.getPlayerPosition()))
+	if(state.isStateTerminal(state.getAgentPosition()))
 		return false;
 
 	return true;

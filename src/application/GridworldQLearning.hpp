@@ -78,7 +78,7 @@ private:
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
 	/// The gridworld object.
-	mic::types::Gridworld state;
+	mic::environments::Gridworld state;
 
 	/// Tensor storing values for all states (gridworld w * h * 4 (number of actions)). COL MAJOR(!).
 	mic::types::TensorXf qstate_table;
