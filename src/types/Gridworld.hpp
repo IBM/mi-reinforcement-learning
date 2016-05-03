@@ -21,10 +21,11 @@ namespace environments {
  */
 enum class GridworldChannels : std::size_t
 {
-	Rewards = 0, ///< Channel storing the goal(s) and pit(s)
-	Walls = 1, ///< Channel storing the walls(s)
-	Agent = 2, ///< Channel storing the agent position
-	Count = 3 ///< Number of channels
+	Goals = 0, ///< Channel storing goal(s)
+	Pits = 1, ///< Channel storing  pit(s)
+	Walls = 2, ///< Channel storing walls(s)
+	Agent = 3, ///< Channel storing the agent position
+	Count = 4 ///< Number of channels
 };
 
 
@@ -176,7 +177,7 @@ public:
 	/*!
 	 * Generates a random grid of size (width x height), with a single goal, but several walls and pits.
 	 */
-	void initDifficultRandomGrid(size_t width_, size_t height_);
+	void initHardRandomGrid(size_t width_, size_t height_);
 
 	/*!
 	 * A recursive method for checking whether the grid is traversable (i.e. there is a path from agent to goal).

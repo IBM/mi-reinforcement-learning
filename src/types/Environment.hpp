@@ -62,7 +62,7 @@ public:
 	virtual std::string toString() = 0;
 
 
-	/// Encodes the current state of the environmentin as a matrix of size [1, environment * dimensions].
+	/// Encodes the current state of the environment in as a matrix of size [1, environment * dimensions].
 	virtual mic::types::MatrixXfPtr encode() = 0;
 
 

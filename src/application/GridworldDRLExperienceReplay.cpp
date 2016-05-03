@@ -64,12 +64,14 @@ void GridworldDRLExperienceReplay::initialize(int argc, char* argv[]) {
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
 	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
-	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(255, 255, 0, 180));
+	collector_ptr->createContainer("number_of_steps_average", mic::types::color_rgba(255, 255, 0, 180));
 	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 255, 0, 180));
-	collector_ptr->createContainer("average_collected_reward", mic::types::color_rgba(0, 255, 255, 180));
+	collector_ptr->createContainer("collected_reward_average", mic::types::color_rgba(0, 255, 255, 180));
+	collector_ptr->createContainer("success_ratio",  mic::types::color_rgba(255, 255, 255, 180));
 
 	sum_of_iterations = 0;
 	sum_of_rewards = 0;
+	number_of_successes = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_chart = new WindowFloatCollectorChart("GridworldDRLExperienceReplay", 256, 256, 0, 0);
@@ -123,15 +125,20 @@ void GridworldDRLExperienceReplay::startNewEpisode() {
 void GridworldDRLExperienceReplay::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
-	float reward = state.getStateReward(state.getAgentPosition());
+	mic::types::Position2D current_position = state.getAgentPosition();
+	float reward = state.getStateReward(current_position);
 	sum_of_iterations += iteration;
 	sum_of_rewards += reward;
+	if (reward > 0)
+			number_of_successes++;
 
 	// Add variables to container.
 	collector_ptr->addDataToContainer("number_of_steps",iteration);
-	collector_ptr->addDataToContainer("average_number_of_steps",(float)sum_of_iterations/episode);
+	collector_ptr->addDataToContainer("number_of_steps_average",(float)sum_of_iterations/episode);
 	collector_ptr->addDataToContainer("collected_reward", reward);
-	collector_ptr->addDataToContainer("average_collected_reward", (float)sum_of_rewards/episode);
+	collector_ptr->addDataToContainer("collected_reward_average", (float)sum_of_rewards/episode);
+	collector_ptr->addDataToContainer("success_ratio", (float)number_of_successes/episode);
+
 
 	// Export reward "convergence" diagram.
 	collector_ptr->exportDataToCsv(statistics_filename);
@@ -490,6 +497,11 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	// Check whether state t+1 is terminal - finish the episode.
 	if(state.isStateTerminal(state.getAgentPosition()))
 		return false;
+
+	// Check whether we reached maximum number of iterations.
+	if (iteration >= 100)
+		return false;
+
 
 	return true;
 }

@@ -41,7 +41,7 @@ void Gridworld::generateGridworld(int environment_grid_type_, size_t width_, siz
 		case 7 : initModifiedDQLGrid(); break;
 		case 8 : initDebug2x2Grid(); break;
 		case 9 : initDebug3x3Grid(); break;
-		case -2: initDifficultRandomGrid(width_, height_); break;
+		case -2: initHardRandomGrid(width_, height_); break;
 		case -1:
 		default: initSimpleRandomGrid(width_, height_);
 	}//: switch
@@ -71,10 +71,10 @@ void Gridworld::initExemplaryGrid() {
 	environment_grid({2,2, (size_t)GridworldChannels::Walls}) = 1;
 
 	// Place pit(s).
-	environment_grid({1,1, (size_t)GridworldChannels::Rewards}) = -10;
+	environment_grid({1,1, (size_t)GridworldChannels::Pits}) = -10;
 
 	// Place goal(s).
-	environment_grid({3,3, (size_t)GridworldChannels::Rewards}) = 10;
+	environment_grid({3,3, (size_t)GridworldChannels::Goals}) = 10;
 }
 
 
@@ -98,10 +98,10 @@ void Gridworld::initClassicCliffGrid() {
 
 	// Place pit(s).
 	for(size_t x=0; x<width; x++)
-		environment_grid({x,2, (size_t)GridworldChannels::Rewards}) = -100;
+		environment_grid({x,2, (size_t)GridworldChannels::Pits}) = -100;
 
 	// Place goal(s).
-	environment_grid({4,1, (size_t)GridworldChannels::Rewards}) = 10;
+	environment_grid({4,1, (size_t)GridworldChannels::Goals}) = 10;
 }
 
 void Gridworld::initDiscountGrid() {
@@ -126,7 +126,7 @@ void Gridworld::initDiscountGrid() {
 
 	// Place pits.
 	for(size_t x=0; x<width; x++)
-		environment_grid({x,4, (size_t)GridworldChannels::Rewards}) = -10;
+		environment_grid({x,4, (size_t)GridworldChannels::Pits}) = -10;
 
 	// Place wall(s).
 	environment_grid({1,1, (size_t)GridworldChannels::Walls}) = 1;
@@ -134,8 +134,8 @@ void Gridworld::initDiscountGrid() {
 	environment_grid({3,2, (size_t)GridworldChannels::Walls}) = 1;
 
 	// Place goal(s).
-	environment_grid({2,2, (size_t)GridworldChannels::Rewards}) = 1;
-	environment_grid({4,2, (size_t)GridworldChannels::Rewards}) = 10;
+	environment_grid({2,2, (size_t)GridworldChannels::Goals}) = 1;
+	environment_grid({4,2, (size_t)GridworldChannels::Goals}) = 10;
 }
 
 
@@ -159,8 +159,8 @@ void Gridworld::initBridgeGrid() {
 
 	// Place pits.
 	for(size_t x=1; x<width-1; x++) {
-		environment_grid({x,0, (size_t)GridworldChannels::Rewards}) = -100;
-		environment_grid({x,2, (size_t)GridworldChannels::Rewards}) = -100;
+		environment_grid({x,0, (size_t)GridworldChannels::Pits}) = -100;
+		environment_grid({x,2, (size_t)GridworldChannels::Pits}) = -100;
 	}//: for
 
 	// Place wall(s).
@@ -170,8 +170,8 @@ void Gridworld::initBridgeGrid() {
 	environment_grid({6,2, (size_t)GridworldChannels::Walls}) = 1;
 
 	// Place goal(s).
-	environment_grid({0,1, (size_t)GridworldChannels::Rewards}) = 1;
-	environment_grid({6,1, (size_t)GridworldChannels::Rewards}) = 10;
+	environment_grid({0,1, (size_t)GridworldChannels::Goals}) = 1;
+	environment_grid({6,1, (size_t)GridworldChannels::Goals}) = 10;
 }
 
 
@@ -197,10 +197,10 @@ void Gridworld::initBookGrid() {
 	environment_grid({1,1, (size_t)GridworldChannels::Walls}) = 1;
 
 	// Place pit(s).
-	environment_grid({3,1, (size_t)GridworldChannels::Rewards}) = -1;
+	environment_grid({3,1, (size_t)GridworldChannels::Pits}) = -1;
 
 	// Place goal(s).
-	environment_grid({3,0, (size_t)GridworldChannels::Rewards}) = 1;
+	environment_grid({3,0, (size_t)GridworldChannels::Goals}) = 1;
 }
 
 
@@ -233,7 +233,7 @@ void Gridworld::initMazeGrid() {
 	environment_grid({3,1, (size_t)GridworldChannels::Walls}) = 1;
 
 	// Place goal(s).
-	environment_grid({3,0, (size_t)GridworldChannels::Rewards}) = 1;
+	environment_grid({3,0, (size_t)GridworldChannels::Goals}) = 1;
 }
 
 
@@ -262,10 +262,10 @@ void Gridworld::initExemplaryDQLGrid() {
 	environment_grid({1,2, (size_t)GridworldChannels::Walls}) = 1;
 
 	// Place pit(s).
-	environment_grid({2,2, (size_t)GridworldChannels::Rewards}) = -10;
+	environment_grid({2,2, (size_t)GridworldChannels::Pits}) = -10;
 
 	// Place goal(s).
-	environment_grid({2,1, (size_t)GridworldChannels::Rewards}) = 10;
+	environment_grid({2,1, (size_t)GridworldChannels::Goals}) = 10;
 }
 
 void Gridworld::initModifiedDQLGrid() {
@@ -293,10 +293,10 @@ void Gridworld::initModifiedDQLGrid() {
 	environment_grid({1,1, (size_t)GridworldChannels::Walls}) = 1;
 
 	// Place pit(s).
-	environment_grid({2,2, (size_t)GridworldChannels::Rewards}) = -10;
+	environment_grid({2,2, (size_t)GridworldChannels::Pits}) = -10;
 
 	// Place goal(s).
-	environment_grid({2,1, (size_t)GridworldChannels::Rewards}) = 10;
+	environment_grid({2,1, (size_t)GridworldChannels::Goals}) = 10;
 }
 
 
@@ -320,10 +320,10 @@ void Gridworld::initDebug2x2Grid() {
 	moveAgentToPosition(initial_position);
 
 	// Place pit(s).
-	environment_grid({1,0, (size_t)GridworldChannels::Rewards}) = -10;
+	environment_grid({1,0, (size_t)GridworldChannels::Pits}) = -10;
 
 	// Place goal(s).
-	environment_grid({0,1, (size_t)GridworldChannels::Rewards}) = 10;
+	environment_grid({0,1, (size_t)GridworldChannels::Goals}) = 10;
 }
 
 
@@ -355,12 +355,12 @@ void Gridworld::initDebug3x3Grid() {
 	environment_grid({1,2, (size_t)GridworldChannels::Walls}) = 1;
 
 	// Place pit(s).
-	environment_grid({0,1, (size_t)GridworldChannels::Rewards}) = -10;
-	environment_grid({1,0, (size_t)GridworldChannels::Rewards}) = -10;
-	environment_grid({2,1, (size_t)GridworldChannels::Rewards}) = -10;
+	environment_grid({0,1, (size_t)GridworldChannels::Pits}) = -10;
+	environment_grid({1,0, (size_t)GridworldChannels::Pits}) = -10;
+	environment_grid({2,1, (size_t)GridworldChannels::Pits}) = -10;
 
 	// Place goal(s).
-	environment_grid({1,2, (size_t)GridworldChannels::Rewards}) = 10;
+	environment_grid({1,2, (size_t)GridworldChannels::Goals}) = 10;
 
 }
 
@@ -410,7 +410,7 @@ void Gridworld::initSimpleRandomGrid(size_t width_, size_t height_) {
 			continue;
 
 		// Add pit...
-		environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Rewards}) = -10;
+		environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Pits}) = -10;
 
 		break;
 	}//: while
@@ -426,7 +426,7 @@ void Gridworld::initSimpleRandomGrid(size_t width_, size_t height_) {
 			continue;
 		if (environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Walls}) != 0)
 			continue;
-		if (environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Rewards}) != 0)
+		if (environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Pits}) != 0)
 			continue;
 
 		// ... but additionally check the goal surroundings - there must be at least one way out, and not going through the pit!
@@ -435,7 +435,7 @@ void Gridworld::initSimpleRandomGrid(size_t width_, size_t height_) {
 			mic::types::NESWAction action(a);
 			mic::types::Position2D way_to_goal = goal + action;
 			if ((isStateAllowed(way_to_goal)) &&
-					(environment_grid({(size_t)way_to_goal.x, (size_t)way_to_goal.y, (size_t)GridworldChannels::Rewards}) >= 0)) {
+					(environment_grid({(size_t)way_to_goal.x, (size_t)way_to_goal.y, (size_t)GridworldChannels::Pits}) == 0)) {
 				reachable = true;
 				break;
 			}//: if
@@ -444,7 +444,7 @@ void Gridworld::initSimpleRandomGrid(size_t width_, size_t height_) {
 			continue;
 
 		// Ok, add the goal.
-		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Rewards}) = 10;
+		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Goals}) = 10;
 		break;
 	}//: while
 
@@ -455,13 +455,13 @@ bool Gridworld::isGridTraversible(long x_, long y_, mic::types::Matrix<bool> & v
 	if (!isStateAllowed(x_, y_))
 		return false;
 	// .. or is a pit...
-	if (environment_grid({(size_t)x_, (size_t)y_, (size_t)GridworldChannels::Rewards}) < 0)
+	if (environment_grid({(size_t)x_, (size_t)y_, (size_t)GridworldChannels::Pits}) < 0)
 		return false;
 	// ... or wasa already visited.
 	if (visited_(y_,x_))
 		return false;
 	// Ok found the goal!
-	if (environment_grid({(size_t)x_, (size_t)y_, (size_t)GridworldChannels::Rewards}) > 0)
+	if (environment_grid({(size_t)x_, (size_t)y_, (size_t)GridworldChannels::Goals}) > 0)
 		return true;
 	// Ok, new state.
 	visited_(y_,x_) = true;
@@ -481,8 +481,8 @@ bool Gridworld::isGridTraversible(long x_, long y_, mic::types::Matrix<bool> & v
 
 
 
-void Gridworld::initDifficultRandomGrid(size_t width_, size_t height_) {
-	LOG(LINFO) << "Generating difficult " << width_ << "x" << height_<< " random grid";
+void Gridworld::initHardRandomGrid(size_t width_, size_t height_) {
+	LOG(LINFO) << "Generating hard " << width_ << "x" << height_<< " random grid";
 	// Overwrite the dimensions.
 	width = width_;
 	height = height_;
@@ -506,7 +506,7 @@ void Gridworld::initDifficultRandomGrid(size_t width_, size_t height_) {
 			continue;
 
 		// Ok, add the goal.
-		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Rewards}) = 10;
+		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)GridworldChannels::Goals}) = 10;
 		break;
 	}//: while
 
@@ -534,7 +534,7 @@ void Gridworld::initDifficultRandomGrid(size_t width_, size_t height_) {
 			// Validate pose.
 			if (environment_grid({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Agent}) != 0)
 				continue;
-			if (environment_grid({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Rewards}) != 0)
+			if (environment_grid({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Goals}) != 0)
 				continue;
 			if (environment_grid({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Walls}) != 0)
 				continue;
@@ -568,19 +568,21 @@ void Gridworld::initDifficultRandomGrid(size_t width_, size_t height_) {
 			// Validate pose.
 			if (environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Agent}) != 0)
 				continue;
-			if (environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Rewards}) != 0)
+			if (environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Goals}) != 0)
+				continue;
+			if (environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Pits}) != 0)
 				continue;
 			if (environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Walls}) != 0)
 				continue;
 
 			// Add pit...
-			environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Rewards}) = -10;
+			environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Pits}) = -10;
 
 			// ... but additionally whether the path from agent to the goal is traversable!
 			visited.setZero();
 			if (!isGridTraversible(player.x, player.y, visited)) {
 				// Sorry, we must remove this pit...
-				environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Rewards}) = 0;
+				environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Pits}) = 0;
 				// .. and try once again.
 				continue;
 			}//: if
@@ -604,10 +606,10 @@ std::string Gridworld::toString() {
 			} else if (environment_grid({x,y, (size_t)GridworldChannels::Walls}) != 0) {
 				// Display wall.
 				s += " # ,";
-			} else if (environment_grid({x,y, (size_t)GridworldChannels::Rewards}) < 0) {
+			} else if (environment_grid({x,y, (size_t)GridworldChannels::Pits}) < 0) {
 				// Display pit.
 				s +=  " - ,";
-			} else if (environment_grid({x,y, (size_t)GridworldChannels::Rewards}) > 0) {
+			} else if (environment_grid({x,y, (size_t)GridworldChannels::Goals}) > 0) {
 				// Display goal.
 				s += " + ,";
 			} else
@@ -685,10 +687,12 @@ void Gridworld::moveAgentToPosition(mic::types::Position2D pos_) {
 
 
 float Gridworld::getStateReward(mic::types::Position2D pos_) {
-    if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Rewards}) != 0)
-    	// Pit or Goal.
-        return environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Rewards});
-    else
+	// Check reward - goal or pit.
+    if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pits}) != 0)
+        return environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pits});
+    else if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Goals}) != 0)
+		return environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Goals});
+	else
         return 0;
 }
 
@@ -715,10 +719,13 @@ bool Gridworld::isStateTerminal(mic::types::Position2D pos_) {
 	if ((pos_.y < 0) || (pos_.y >= height))
 			return false;
 
-    if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Rewards}) != 0)
-    	// Reward - goal or pit.
+	// Check reward - goal or pit.
+    if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Pits}) != 0)
+        return true;
+    else if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Goals}) != 0)
         return true;
     else
+
         return false;
 }
 
