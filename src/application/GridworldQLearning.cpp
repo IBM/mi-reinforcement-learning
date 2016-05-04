@@ -77,12 +77,12 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 
 void GridworldQLearning::initializePropertyDependentVariables() {
 	// Generate the gridworld.
-	state.generateGridworld(gridworld_type, width, height);
-	LOG(LSTATUS) << std::endl << state.toString();
+	grid_env.generateGridworld(gridworld_type, width, height);
+	LOG(LSTATUS) << std::endl << grid_env.toString();
 
 	// Get width and height.
-	width = state.getWidth();
-	height = state.getHeight();
+	width = grid_env.getWidth();
+	height = grid_env.getHeight();
 
 	// Resize and reset the action-value table.
 	qstate_table.resize({width,height,4});
@@ -96,7 +96,7 @@ void GridworldQLearning::initializePropertyDependentVariables() {
 void GridworldQLearning::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 	// Move player to start position.
-	state.moveAgentToInitialPosition();
+	grid_env.moveAgentToInitialPosition();
 
 }
 
@@ -104,7 +104,7 @@ void GridworldQLearning::startNewEpisode() {
 void GridworldQLearning::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
-	float reward = state.getStateReward(state.getAgentPosition());
+	float reward = grid_env.getStateReward(grid_env.getAgentPosition());
 	sum_of_iterations += iteration;
 	sum_of_rewards += reward;
 
@@ -146,7 +146,7 @@ std::string GridworldQLearning::streamQStateTable() {
 					rewards_table += " , ";
 
 				// Remember the best value.
-				if (state.isStateAllowed(x,y) && (!state.isStateTerminal(x,y)) && state.isActionAllowed(x,y,a) && (qval >= bestqval)){
+				if (grid_env.isStateAllowed(x,y) && (!grid_env.isStateTerminal(x,y)) && grid_env.isActionAllowed(x,y,a) && (qval > bestqval)){
 					bestqval = qval;
 					best_action = a;
 				}//: if
@@ -172,16 +172,17 @@ std::string GridworldQLearning::streamQStateTable() {
 
 
 bool GridworldQLearning::move (mic::types::Action2DInterface ac_) {
-//	LOG(LINFO) << "Current move = " << ac_;
+	LOG(LDEBUG) << "Current move = " << ac_;
 	// Compute destination.
-    mic::types::Position2D new_pos = state.getAgentPosition() + ac_;
+    mic::types::Position2D new_pos = grid_env.getAgentPosition() + ac_;
+	LOG(LDEBUG) << "Desired pose = " << new_pos;
 
 	// Check whether the state is allowed.
-	if (!state.isStateAllowed(new_pos))
+	if (!grid_env.isStateAllowed(new_pos))
 		return false;
 
 	// Move player.
-	state.moveAgentToPosition(new_pos);
+	grid_env.moveAgentToPosition(new_pos);
 	return true;
 }
 
@@ -190,7 +191,7 @@ bool GridworldQLearning::move (mic::types::Action2DInterface ac_) {
 float GridworldQLearning::computeBestValue(mic::types::Position2D pos_){
 	float qbest_value = -std::numeric_limits<float>::infinity();
 	// Check if the state is allowed.
-	if (!state.isStateAllowed(pos_))
+	if (!grid_env.isStateAllowed(pos_))
 		return qbest_value;
 
 	// Create a list of possible actions.
@@ -202,7 +203,7 @@ float GridworldQLearning::computeBestValue(mic::types::Position2D pos_){
 
 	// Check the actions one by one.
 	for(mic::types::NESWAction action : actions) {
-		if(state.isActionAllowed(pos_, action)) {
+		if(grid_env.isActionAllowed(pos_, action)) {
 			float qvalue = qstate_table({(size_t)pos_.x, (size_t)pos_.y, (size_t)action.getType()});
 			if (qvalue > qbest_value)
 				qbest_value = qvalue;
@@ -217,7 +218,7 @@ mic::types::NESWAction GridworldQLearning::selectBestAction(mic::types::Position
 
 	// Greedy methods - returns the index of element with greatest value.
 	mic::types::NESWAction best_action = A_NONE;
-    float best_qvalue = 0;
+    float best_qvalue = -std::numeric_limits<float>::infinity();
 
 	// Create a list of possible actions.
 	std::vector<mic::types::NESWAction> actions;
@@ -228,11 +229,13 @@ mic::types::NESWAction GridworldQLearning::selectBestAction(mic::types::Position
 
 	// Check the actions one by one.
 	for(mic::types::NESWAction action : actions) {
-		if(state.isActionAllowed(pos_, action)) {
+		if(grid_env.isActionAllowed(pos_, action)) {
 			float qvalue = qstate_table({(size_t)pos_.x, (size_t)pos_.y, (size_t)action.getType()});
+			std::cout << "  qvalue = " << qvalue << std::endl;
 			if (qvalue > best_qvalue){
 				best_qvalue = qvalue;
 				best_action = action;
+				std::cout << "  best_qvalue = " << best_qvalue << std::endl;
 			}
 		}//if is allowed
 	}//: for
@@ -244,19 +247,19 @@ bool GridworldQLearning::performSingleStep() {
 	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
 	// Get state s(t).
-	mic::types::Position2D state_t = state.getAgentPosition();
+	mic::types::Position2D agent_pos_t = grid_env.getAgentPosition();
 
 	// Check whether state is terminal.
-	if(state.isStateTerminal(state_t)) {
+	if(grid_env.isStateTerminal(agent_pos_t)) {
 		// In the terminal state we can select only one special action: "terminate".
 		// All "other" actions receive the same value related to the "reward".
-		float final_reward = state.getStateReward(state_t);
+		float final_reward = grid_env.getStateReward(agent_pos_t);
 		for (size_t a=0; a<4; a++)
-			qstate_table({(size_t)state_t.x,(size_t)state_t.y, a}) = final_reward;
+			qstate_table({(size_t)agent_pos_t.x,(size_t)agent_pos_t.y, a}) = final_reward;
 
 		LOG(LINFO) << "Agent action = " << A_EXIT;
-		LOG(LDEBUG) << "Agent position = " << state_t;
-		LOG(LSTATUS) << std::endl << state.toString();
+		LOG(LDEBUG) << "Agent position = " << agent_pos_t;
+		LOG(LSTATUS) << std::endl << grid_env.toString();
 		LOG(LSTATUS) << std::endl << streamQStateTable();
 
 		// Finish the episode.
@@ -268,13 +271,13 @@ bool GridworldQLearning::performSingleStep() {
 	double eps = (double)epsilon;
 	if ((double)epsilon < 0)
 		eps = 1.0/(1.0+episode);
-	LOG(LINFO) << "eps =" << eps;
+	LOG(LDEBUG) << "eps =" << eps;
 	bool random = false;
 
 	// Epsilon-greedy action selection.
 	if (RAN_GEN->uniRandReal() > eps){
 		// Select best action.
-		action = selectBestAction(state_t);
+		action = selectBestAction(agent_pos_t);
 		// If action could not be found.
 		if (action.getType() == mic::types::NESW::None){
 			action = A_RANDOM;
@@ -286,31 +289,37 @@ bool GridworldQLearning::performSingleStep() {
 		random = true;
 	}//: if
 
+	LOG(LINFO) << action  << action << ((random) ? " [Random]" : "");
+
 	// Execture action - until success.
-	while (!move(action)) {
+	move(action);
+/*	while (!move(action)) {
 		// If action could not be performed - random.
 		action = A_RANDOM;
 		random = true;
-	}//: while
+	}//: while*/
 
 	// Get new state s(t+1).
-	mic::types::Position2D player_pos_t_prim = state.getAgentPosition();
+	mic::types::Position2D agent_pos_t_prim = grid_env.getAgentPosition();
 
-	LOG(LINFO) << "Agent position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
+	LOG(LINFO) << "Agent position at t+1: " << agent_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 
 	// Update running average for given action - Q learning;)
-	float q_st_at = qstate_table({(size_t)state_t.x, (size_t)state_t.y, (size_t)action.getType()});
+	float q_st_at = qstate_table({(size_t)agent_pos_t.x, (size_t)agent_pos_t.y, (size_t)action.getType()});
 	float r = step_reward;
-	float max_q_st_prim_at_prim = computeBestValue(player_pos_t_prim);
+	float max_q_st_prim_at_prim = computeBestValue(agent_pos_t_prim);
 	LOG(LDEBUG) << "q_st_at = " << q_st_at;
-	LOG(LDEBUG) << "state_t_prim = " << player_pos_t_prim;
+	LOG(LDEBUG) << "agent_t_prim = " << agent_pos_t_prim;
 	LOG(LDEBUG) << "step_reward = " << step_reward;
 	LOG(LDEBUG) << "max_q_st_prim_at_prim = " << max_q_st_prim_at_prim;
-	if (std::isfinite(q_st_at) && std::isfinite(max_q_st_prim_at_prim))
-			qstate_table({(size_t)state_t.x, (size_t)state_t.y, (size_t)action.getType()}) = q_st_at + learning_rate * (r + discount_rate*max_q_st_prim_at_prim - q_st_at);
+	//if (std::isfinite(q_st_at) && std::isfinite(max_q_st_prim_at_prim))
+	if (agent_pos_t == agent_pos_t_prim)
+		qstate_table({(size_t)agent_pos_t.x, (size_t)agent_pos_t.y, (size_t)action.getType()}) = q_st_at + learning_rate * (2*r + discount_rate*max_q_st_prim_at_prim - q_st_at);
+	else
+		qstate_table({(size_t)agent_pos_t.x, (size_t)agent_pos_t.y, (size_t)action.getType()}) = q_st_at + learning_rate * (r + discount_rate*max_q_st_prim_at_prim - q_st_at);
 
-	LOG(LSTATUS) << std::endl << state.toString();
+	LOG(LSTATUS) << std::endl << grid_env.toString();
 	LOG(LSTATUS) << std::endl << streamQStateTable();
 
 	return true;
