@@ -82,8 +82,8 @@ private:
 	/// Data collector.
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
-	/// The gridworld object - current state.
-	mic::environments::Gridworld state;
+	/// The gridworld environment.
+	mic::environments::Gridworld grid_env;
 
 	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
 	mic::configuration::Property<short> gridworld_type;
@@ -132,13 +132,6 @@ private:
 
 	/// Multi-layer neural network used for approximation of the Qstate rewards.
 	MultiLayerNeuralNetwork neural_net;
-
-	/*!
-	 * Performs "deterministic" move. It is assumed that the move is truncated by the gridworld boundaries (no circular world assumption).
-	 * @param ac_ The action to be performed.
-	 * @return True if move was performed, false if it was not possible.
-	 */
-	bool move (mic::types::Action2DInterface ac_);
 
 	/*!
 	 * Calculates the best value for the current state and predictions.

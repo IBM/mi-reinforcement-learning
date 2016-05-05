@@ -81,11 +81,11 @@ void GridworldDRLExperienceReplay::initialize(int argc, char* argv[]) {
 
 void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 	// Generate the gridworld.
-	state.generateGridworld(gridworld_type, width, height);
+	grid_env.generateGridworld(gridworld_type, width, height);
 
 	// Get width and height.
-	width = state.getWidth();
-	height = state.getHeight();
+	width = grid_env.getWidth();
+	height = grid_env.getHeight();
 
 	// Hardcode batchsize - for fastening the display!
 	batch_size = width * height;
@@ -114,10 +114,10 @@ void GridworldDRLExperienceReplay::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
-	state.generateGridworld(gridworld_type, width, height);
+	grid_env.generateGridworld(gridworld_type, width, height);
 
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << std::endl << state.toString();
+	LOG(LSTATUS) << std::endl << grid_env.toString();
 
 }
 
@@ -125,8 +125,8 @@ void GridworldDRLExperienceReplay::startNewEpisode() {
 void GridworldDRLExperienceReplay::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
-	mic::types::Position2D current_position = state.getAgentPosition();
-	float reward = state.getStateReward(current_position);
+	mic::types::Position2D current_position = grid_env.getAgentPosition();
+	float reward = grid_env.getStateReward(current_position);
 	sum_of_iterations += iteration;
 	sum_of_rewards += reward;
 	if (reward > 0)
@@ -149,28 +149,13 @@ void GridworldDRLExperienceReplay::finishCurrentEpisode() {
 }
 
 
-bool GridworldDRLExperienceReplay::move (mic::types::Action2DInterface ac_) {
-//	LOG(LINFO) << "Current move = " << ac_;
-	// Compute destination.
-    mic::types::Position2D new_pos = state.getAgentPosition() + ac_;
-
-	// Check whether the state is allowed.
-	if (!state.isStateAllowed(new_pos))
-		return false;
-
-	// Move player.
-	state.moveAgentToPosition(new_pos);
-	return true;
-}
-
-
 std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	LOG(LTRACE) << "streamNetworkResponseTable()";
 	std::string rewards_table;
 	std::string actions_table;
 
 	// Remember the current state i.e. player position.
-	mic::types::Position2D current_player_pos_t = state.getAgentPosition();
+	mic::types::Position2D current_player_pos_t = grid_env.getAgentPosition();
 
 	// Create new matrices for batches of inputs and targets.
 	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
@@ -180,9 +165,9 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	for (size_t y=0; y<height; y++){
 		for (size_t x=0; x<width; x++) {
 			// Move the player to given state.
-			state.moveAgentToPosition(Position2D(x,y));
+			grid_env.moveAgentToPosition(Position2D(x,y));
 			// Encode the current state.
-			mic::types::MatrixXfPtr encoded_state = state.encode();
+			mic::types::MatrixXfPtr encoded_state = grid_env.encode();
 			// Add to batch.
 			inputs_batch->col(y*width+x) = encoded_state->col(0);
 		}//: for x
@@ -213,7 +198,7 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 					rewards_table += " , ";
 
 				// Remember the best value.
-				if (state.isStateAllowed(x,y) && (!state.isStateTerminal(x,y)) && state.isActionAllowed(x,y,a) && (qval > bestqval)){
+				if (grid_env.isStateAllowed(x,y) && (!grid_env.isStateTerminal(x,y)) && grid_env.isActionAllowed(x,y,a) && (qval > bestqval)){
 					bestqval = qval;
 					best_action = a;
 				}//: if
@@ -233,7 +218,7 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	}//: for y
 
 	// Move player to previous position.
-	state.moveAgentToPosition(current_player_pos_t);
+	grid_env.moveAgentToPosition(current_player_pos_t);
 
 	return rewards_table + actions_table;
 }
@@ -253,7 +238,7 @@ float GridworldDRLExperienceReplay::computeBestValueForGivenStateAndPredictions(
 
 	for(mic::types::NESWAction action : actions) {
 		// .. and find the value of teh best allowed action.
-		if(state.isActionAllowed(player_position_, action)) {
+		if(grid_env.isActionAllowed(player_position_, action)) {
 			float qvalue = predictions_[(size_t)action.getType()];
 			if (qvalue > best_qvalue)
 				best_qvalue = qvalue;
@@ -267,13 +252,13 @@ float GridworldDRLExperienceReplay::computeBestValueForGivenStateAndPredictions(
 mic::types::MatrixXfPtr GridworldDRLExperienceReplay::getPredictedRewardsForGivenState(mic::types::Position2D player_position_) {
 	LOG(LTRACE) << "getPredictedRewardsForGivenState()";
 	// Remember the current state i.e. player position.
-	mic::types::Position2D current_player_pos_t = state.getAgentPosition();
+	mic::types::Position2D current_player_pos_t = grid_env.getAgentPosition();
 
 	// Move the player to given state.
-	state.moveAgentToPosition(player_position_);
+	grid_env.moveAgentToPosition(player_position_);
 
 	// Encode the current state.
-	mic::types::MatrixXfPtr encoded_state = state.encode();
+	mic::types::MatrixXfPtr encoded_state = grid_env.encode();
 
 	// Create NEW matrix for the inputs batch.
 	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
@@ -298,7 +283,7 @@ mic::types::MatrixXfPtr GridworldDRLExperienceReplay::getPredictedRewardsForGive
 	//LOG(LERROR) << "Returned predictions sample:\n" << predictions_sample->transpose();
 
 	// Move player to previous position.
-	state.moveAgentToPosition(current_player_pos_t);
+	grid_env.moveAgentToPosition(current_player_pos_t);
 
 	// Return the predictions.
 	return predictions_sample;
@@ -325,7 +310,7 @@ mic::types::NESWAction GridworldDRLExperienceReplay::selectBestActionForGivenSta
 
 	for(size_t a=0; a<4; a++) {
 		// Find the best action allowed.
-		if(state.isActionAllowed(player_position_, mic::types::NESWAction((mic::types::NESW)a))) {
+		if(grid_env.isActionAllowed(player_position_, mic::types::NESWAction((mic::types::NESW)a))) {
 			float qvalue = pred[a];
 			if (qvalue > best_qvalue){
 				best_qvalue = qvalue;
@@ -344,7 +329,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	double 	nn_weight_decay = 0;
 
 	// Get player pos at time t.
-	mic::types::Position2D player_pos_t= state.getAgentPosition();
+	mic::types::Position2D player_pos_t= grid_env.getAgentPosition();
 	LOG(LINFO) << "Agent position at state t: " << player_pos_t;
 
 	// Select the action.
@@ -369,10 +354,10 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	}//: if
 
 	// Execute action - do not monitor the success.
-	move(action);
+	grid_env.moveAgent(action);
 
 	// Get new state s(t+1).
-	mic::types::Position2D player_pos_t_prim = state.getAgentPosition();
+	mic::types::Position2D player_pos_t_prim = grid_env.getAgentPosition();
 	LOG(LINFO) << "Agent position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 	// Collect the experience.
@@ -408,9 +393,9 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 			// Replay the experience.
 			// "Simulate" moving player to position from state/time (t).
-			state.moveAgentToPosition(ge_ptr->s_t);
+			grid_env.moveAgentToPosition(ge_ptr->s_t);
 			// Encode the state at time (t).
-			mic::types::MatrixXfPtr encoded_state_t = state.encode();
+			mic::types::MatrixXfPtr encoded_state_t = grid_env.encode();
 			//float* state = encoded_state_t->data();
 
 			// Copy the encoded state to inputs batch.
@@ -432,9 +417,9 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 
 			// Replay the experience.
 			// "Simulate" moving player to position from state/time (t+1).
-			state.moveAgentToPosition(ge_ptr->s_t_prim);
+			grid_env.moveAgentToPosition(ge_ptr->s_t_prim);
 			// Encode the state at time (t+1).
-			mic::types::MatrixXfPtr encoded_state_t = state.encode();
+			mic::types::MatrixXfPtr encoded_state_t = grid_env.encode();
 			//float* state = encoded_state_t->data();
 
 			// Copy the encoded state to inputs batch.
@@ -457,9 +442,9 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 			if (ge_ptr->s_t == ge_ptr->s_t_prim) {
 				// The move was not possible! Learn that as well.
 				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = 3*step_reward;
-			} else if(state.isStateTerminal(ge_ptr->s_t_prim)) {
+			} else if(grid_env.isStateTerminal(ge_ptr->s_t_prim)) {
 				// The position at (t+1) state appears to be terminal - learn the reward.
-				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = state.getStateReward(ge_ptr->s_t_prim);
+				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = grid_env.getStateReward(ge_ptr->s_t_prim);
 			} else {
 				MatrixXfPtr preds_t_prim (new MatrixXf(4, 1));
 				preds_t_prim->col(0) = predictions_t_prim_batch->col(i);
@@ -486,16 +471,16 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 		//LOG(LDEBUG) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
 
 		// Finish the replay: move the player to REAL, CURRENT POSITION.
-		state.moveAgentToPosition(player_pos_t_prim);
+		grid_env.moveAgentToPosition(player_pos_t_prim);
 	}//: if enough experiences
 	else
 		LOG(LWARNING) << "Not enough samples in the experience replay memory!";
 
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << std::endl << state.toString();
+	LOG(LSTATUS) << std::endl << grid_env.toString();
 
 	// Check whether state t+1 is terminal - finish the episode.
-	if(state.isStateTerminal(state.getAgentPosition()))
+	if(grid_env.isStateTerminal(grid_env.getAgentPosition()))
 		return false;
 
 	// Check whether we reached maximum number of iterations.

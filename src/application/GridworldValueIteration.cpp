@@ -90,20 +90,6 @@ std::string GridworldValueIteration::streamStateActionTable() {
 }
 
 
-bool GridworldValueIteration::move (mic::types::Action2DInterface ac_) {
-//	LOG(LINFO) << "Current move = " << ac_;
-	// Compute destination.
-    mic::types::Position2D new_pos = gridworld.getAgentPosition() + ac_;
-
-	// Check whether the state is allowed.
-	if (!gridworld.isStateAllowed(new_pos))
-		return false;
-
-	// Move player.
-	gridworld.moveAgentToPosition(new_pos);
-	return true;
-}
-
 
 float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D pos_, mic::types::NESWAction ac_){
 	//  Compute the Q-value of action in state from the value function stored table.

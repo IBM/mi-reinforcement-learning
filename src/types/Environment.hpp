@@ -51,6 +51,12 @@ public:
 	size_t getChannels() { return channels; }
 
 	/*!
+	 * Returns the environment size (basically width * height * channels).
+	 * @return Height.
+	 */
+	size_t getSize() { return width*height*channels; }
+
+	/*!
 	 * Returns the tensor storing the environment.
 	 * @return Tensor storing the environment.
 	 */
