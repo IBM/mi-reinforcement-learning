@@ -8,7 +8,6 @@
 #ifndef SRC_TYPES_GRIDWORLD_HPP_
 #define SRC_TYPES_GRIDWORLD_HPP_
 
-#include <logger/Log.hpp>
 #include <types/Environment.hpp>
 
 
@@ -206,11 +205,11 @@ public:
 	virtual mic::types::Position2D getAgentPosition();
 
 	/*!
-	 * Moves the agent to the position.
-	 * @param pos_ Position to be checked.
-	 * @param pos_ The position to be set.
+	 * Moves the agent to the position.Type of move (deterministic vs stochastic) depends on the environment (the same goes to e.g. circular world assumption).
+	 * @param pos_ Desired position of the agent.
+	 * @return True if position is valid and was reached, false otherwise.
 	 */
-	virtual void moveAgentToPosition(mic::types::Position2D pos_);
+	virtual bool moveAgentToPosition(mic::types::Position2D pos_);
 
 	/*!
 	 * Returns the reward associated with the given state.

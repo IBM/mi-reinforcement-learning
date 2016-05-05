@@ -23,6 +23,16 @@ Environment::~Environment() {
 	// TODO Auto-generated destructor stub
 }
 
+
+bool Environment::moveAgent (mic::types::Action2DInterface ac_) {
+	mic::types::Position2D cur_pos = getAgentPosition();
+	LOG(LDEBUG) << "Current agent position = " << cur_pos;
+	LOG(LDEBUG) << "Move to be performed = " << ac_;
+	// Compute destination.
+	mic::types::Position2D new_pos = cur_pos + ac_;
+	return moveAgentToPosition(new_pos);
+}
+
 void Environment::moveAgentToInitialPosition() {
 	moveAgentToPosition(initial_position);
 }

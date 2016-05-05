@@ -170,24 +170,6 @@ std::string GridworldQLearning::streamQStateTable() {
 
 
 
-
-bool GridworldQLearning::move (mic::types::Action2DInterface ac_) {
-	LOG(LDEBUG) << "Current move = " << ac_;
-	// Compute destination.
-    mic::types::Position2D new_pos = grid_env.getAgentPosition() + ac_;
-	LOG(LDEBUG) << "Desired pose = " << new_pos;
-
-	// Check whether the state is allowed.
-	if (!grid_env.isStateAllowed(new_pos))
-		return false;
-
-	// Move player.
-	grid_env.moveAgentToPosition(new_pos);
-	return true;
-}
-
-
-
 float GridworldQLearning::computeBestValue(mic::types::Position2D pos_){
 	float qbest_value = -std::numeric_limits<float>::infinity();
 	// Check if the state is allowed.
@@ -292,7 +274,7 @@ bool GridworldQLearning::performSingleStep() {
 	LOG(LINFO) << action  << action << ((random) ? " [Random]" : "");
 
 	// Execture action - until success.
-	move(action);
+	grid_env.moveAgent(action);
 /*	while (!move(action)) {
 		// If action could not be performed - random.
 		action = A_RANDOM;

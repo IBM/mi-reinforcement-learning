@@ -129,13 +129,6 @@ private:
 
 
 	/*!
-	 * Performs "deterministic" move. It is assumed that the move is truncated by the gridworld boundaries (no circular world assumption).
-	 * @param ac_ The action to be performed.
-	 * @return True if move was performed, false if it was not possible.
-	 */
-	bool move (mic::types::Action2DInterface ac_);
-
-	/*!
 	 * Calculates the best value for given state - by finding the action having the maximal expected value.
 	 * @param pos_ Starting state (position).
 	 * @return Value for given state.

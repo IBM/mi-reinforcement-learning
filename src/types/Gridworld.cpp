@@ -677,12 +677,20 @@ mic::types::Position2D Gridworld::getAgentPosition() {
 	return position;
 }
 
-void Gridworld::moveAgentToPosition(mic::types::Position2D pos_) {
+bool Gridworld::moveAgentToPosition(mic::types::Position2D pos_) {
+	LOG(LDEBUG) << "New agent position = " << pos_;
+
+	// Check whether the state is allowed.
+	if (!isStateAllowed(pos_))
+		return false;
+
 	// Clear old.
 	mic::types::Position2D old = getAgentPosition();
 	environment_grid({(size_t)old.x, (size_t)old.y, (size_t)GridworldChannels::Agent}) = 0;
 	// Set new.
 	environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Agent}) = 1;
+
+	return true;
 }
 
 

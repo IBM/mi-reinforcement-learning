@@ -11,6 +11,7 @@
 #include <types/Position2D.hpp>
 #include <types/TensorTypes.hpp>
 #include <types/MatrixTypes.hpp>
+#include <logger/Log.hpp>
 
 namespace mic {
 namespace environments {
@@ -73,11 +74,19 @@ public:
 	virtual mic::types::Position2D getAgentPosition() = 0;
 
 	/*!
-	 * Moves the agent to given position.
-	 * @param pos_ Position to be checked.
-	 * @param pos_ The position to be set.
+	 * Moves agent acording to the selected action.
+	 * @param ac_ Action to be performed.
+	 * @return True if action was performed, false if destination state was invalid.
 	 */
-	virtual void moveAgentToPosition(mic::types::Position2D pos_) = 0;
+	bool moveAgent (mic::types::Action2DInterface ac_);
+
+
+	/*!
+	 * Moves the agent to given position.
+	 * @param pos_ Desired position of the agent.
+	 * @return True if position is valid and was reached, false otherwise.
+	 */
+	virtual bool moveAgentToPosition(mic::types::Position2D pos_) = 0;
 
 	/*!
 	 * Moves the agent to the initial position.
