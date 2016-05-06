@@ -77,7 +77,7 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 	} else {
 		// Create a simple neural network.
 		// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
-		neural_net.addLayer(new Linear((size_t) grid_env.getWidth() * grid_env.getHeight() , 250, 1));
+		neural_net.addLayer(new Linear((size_t) grid_env.getEnvironmentWidth() * grid_env.getEnvironmentHeight(), 250, 1));
 		neural_net.addLayer(new ReLU(250, 250, 1));
 		neural_net.addLayer(new Linear(250, 100, 1));
 		neural_net.addLayer(new ReLU(100, 100, 1));
@@ -94,8 +94,8 @@ void GridworldDeepQLearning::startNewEpisode() {
 	// Generate the gridworld (and move player to initial position).
 	grid_env.initializePropertyDependentVariables();
 
-	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << std::endl << grid_env.toString();
+	LOG(LSTATUS) << "Network responses: \n" <<  streamNetworkResponseTable();
+	LOG(LSTATUS) << "Environment: \n" << grid_env.environmentToString();
 
 }
 
@@ -133,10 +133,10 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
 	// Generate all possible states and all possible rewards.
-	for (size_t y=0; y<grid_env.getHeight(); y++){
+	for (size_t y=0; y<grid_env.getEnvironmentHeight(); y++){
 		rewards_table += "| ";
 		actions_table += "| ";
-		for (size_t x=0; x<grid_env.getWidth(); x++) {
+		for (size_t x=0; x<grid_env.getEnvironmentWidth(); x++) {
 			float bestqval = -std::numeric_limits<float>::infinity();
 			size_t best_action = -1;
 
@@ -348,7 +348,7 @@ bool GridworldDeepQLearning::performSingleStep() {
 	LOG(LSTATUS) << "Training loss:" << loss;
 
 	LOG(LSTATUS) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
-	LOG(LSTATUS) << "The resulting state:" << std::endl << grid_env.toString();
+	LOG(LSTATUS) << "Current environment: \n"  << grid_env.environmentToString();
 
 	// Remember the previous position.
 	player_pos_t_minus_prim = player_pos_t;

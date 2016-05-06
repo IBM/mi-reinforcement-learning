@@ -12,11 +12,15 @@ namespace environments {
 
 Environment::Environment(std::string node_name_) : PropertyTree(node_name_),
 		width("width", 4),
-		height("height", 4)
+		height("height", 4),
+		roi_size("roi_size", 0)
 {
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(width);
 	registerProperty(height);
+	registerProperty(roi_size);
+
+	pomdp_flag = 0;
 }
 
 Environment::~Environment() {

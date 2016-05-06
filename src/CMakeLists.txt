@@ -265,3 +265,31 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY})
 endif(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY})
 
 
+set(BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP ON CACHE BOOL "Build the application solving the gridworld with partial observation and Deep Reinforcement Learning with Experience Replay.")
+
+if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
+	# Create exeutable.
+	add_executable(gridworld_drl_er_pomdp_app 
+		application/GridworldDRLExperienceReplayPOMDP.cpp
+		types/Gridworld.cpp
+		types/Environment.cpp
+		application/console_application_main.cpp
+		)
+	# Link it with shared libraries.
+	target_link_libraries(gridworld_drl_er_pomdp_app 
+		logger
+		configuration
+		application
+		types
+		data_utils
+		mlnn
+		visualization_opengl
+		${Boost_LIBRARIES}  
+		)
+
+	# install test to bin directory
+	install(TARGETS gridworld_drl_er_pomdp_app RUNTIME DESTINATION bin)
+	
+endif(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
+
+

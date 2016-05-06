@@ -37,6 +37,7 @@ mic::environments::Gridworld & Gridworld::operator= (const mic::environments::Gr
 
 // Initialize environment_grid.
 void Gridworld::initializePropertyDependentVariables() {
+	// Generate adequate gridworld.
 	switch(type) {
 		case 0 : initExemplaryGrid(); break;
 		case 1 : initClassicCliffGrid(); break;
@@ -52,6 +53,10 @@ void Gridworld::initializePropertyDependentVariables() {
 		case -1:
 		default: initSimpleRandomGrid();
 	}//: switch
+
+	// Check whether it is a POMDP or not.
+	if (roi_size >0)
+		pomdp_flag = true;
 }
 
 
@@ -596,21 +601,21 @@ void Gridworld::initHardRandomGrid() {
 }
 
 
-std::string Gridworld::toString() {
+std::string Gridworld::gridToString(mic::types::TensorXf & grid_) {
 	std::string s;
-	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
+	for (size_t y=0; y<grid_.dim(1); y++){
+		for (size_t x=0; x<grid_.dim(0); x++) {
 			// Check object occupancy.
-			if (environment_grid({x,y, (size_t)GridworldChannels::Agent}) != 0) {
+			if (grid_({x,y, (size_t)GridworldChannels::Agent}) != 0) {
 				// Display agent.
 				s += " A ,";
-			} else if (environment_grid({x,y, (size_t)GridworldChannels::Walls}) != 0) {
+			} else if (grid_({x,y, (size_t)GridworldChannels::Walls}) != 0) {
 				// Display wall.
 				s += " # ,";
-			} else if (environment_grid({x,y, (size_t)GridworldChannels::Pits}) < 0) {
+			} else if (grid_({x,y, (size_t)GridworldChannels::Pits}) < 0) {
 				// Display pit.
 				s +=  " - ,";
-			} else if (environment_grid({x,y, (size_t)GridworldChannels::Goals}) > 0) {
+			} else if (grid_({x,y, (size_t)GridworldChannels::Goals}) > 0) {
 				// Display goal.
 				s += " + ,";
 			} else
@@ -620,12 +625,88 @@ std::string Gridworld::toString() {
 	}//: for y
 
 	return s;
+}
 
+std::string Gridworld::environmentToString() {
+	return gridToString(environment_grid);
+}
+
+std::string Gridworld::observationToString() {
+	if (pomdp_flag) {
+		// Get observation.
+		mic::types::TensorXf obs = getObservation();
+		return gridToString(obs);
+	}
+	else
+		return gridToString(environment_grid);
+}
+
+mic::types::MatrixXfPtr Gridworld::encodeEnvironment() {
+	// Temporarily reshape the environment_grid.
+	environment_grid.conservativeResize({1, width * height * channels});
+	// Create a matrix pointer and copy data from grid into the matrix.
+	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(environment_grid));
+	// Back to the original shape.
+	environment_grid.resize({width, height, channels});
+
+	// Return the matrix pointer.
+	return encoded_grid;
+}
+
+mic::types::MatrixXfPtr Gridworld::encodeObservation() {
+	LOG(LDEBUG) << "encodeObservation()";
+	if (pomdp_flag) {
+		mic::types::Position2D p = getAgentPosition();
+		LOG(LERROR) << p;
+
+		mic::types::TensorXf obs = getObservation();
+		obs.conservativeResize({1, roi_size * roi_size * channels});
+
+		mic::types::MatrixXfPtr encoded_obs (new mic::types::MatrixXf(obs));
+
+		return encoded_obs;
+	}
+	else
+		return encodeEnvironment();
+}
+
+
+mic::types::TensorXf Gridworld::getObservation() {
+	LOG(LDEBUG) << "getObservation()";
+	// Set size.
+	mic::types::TensorXf observation({roi_size, roi_size, channels});
+	observation.zeros();
+
+	size_t delta = (roi_size-1)/2;
+	mic::types::Position2D p = getAgentPosition();
+	LOG(LERROR) << p;
+
+	// Copy data.
+	for (long oy=0, ey=(p.y-delta); oy<roi_size; oy++, ey++){
+		for (long ox=0, ex=(p.x-delta); ox<roi_size; ox++, ex++) {
+			// Check grid boundaries.
+			if ((ex < 0) || (ex >= width) || (ey < 0) || (ey >= height)){
+				// Place the wall only
+				observation({(size_t)ox, (size_t)oy, (size_t)GridworldChannels::Walls}) = 1;
+				continue;
+			}//: if
+			// Else : copy data for all channels.
+			observation({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Goals}) = environment_grid({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Goals});
+			observation({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Pits}) = environment_grid({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Pits});
+			observation({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Walls}) = environment_grid({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Walls});
+			observation({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Agent}) = environment_grid({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Agent});
+		}//: for x
+	}//: for y
+
+	LOG(LERROR) << observation;
+
+	LOG(LERROR) << std::endl << gridToString(observation);
+
+	return observation;
 }
 
 
 mic::types::MatrixXfPtr Gridworld::encodeAgentGrid() {
-
 	// DEBUG - copy only player pose data, avoid goals etc.
 	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(height, width));
 	encoded_grid->setZero();
@@ -645,22 +726,6 @@ mic::types::MatrixXfPtr Gridworld::encodeAgentGrid() {
 	// Return the matrix pointer.
 	return encoded_grid;
 }
-
-
-mic::types::MatrixXfPtr Gridworld::encode() {
-	// Temporarily reshape the environment_grid.
-	environment_grid.conservativeResize({1, width * height * channels});
-	// Create a matrix pointer and copy data from grid into the matrix.
-	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(environment_grid));
-	// Back to the original shape.
-	environment_grid.resize({width, height, channels});
-
-	// Return the matrix pointer.
-	return encoded_grid;
-}
-
-
-
 
 
 mic::types::Position2D Gridworld::getAgentPosition() {
@@ -693,6 +758,18 @@ bool Gridworld::moveAgentToPosition(mic::types::Position2D pos_) {
 
 	return true;
 }
+
+
+void Gridworld::moveAgentToPositionForced(mic::types::Position2D pos_) {
+	LOG(LDEBUG) << "New agent position = " << pos_;
+
+	// Clear old.
+	mic::types::Position2D old = getAgentPosition();
+	environment_grid({(size_t)old.x, (size_t)old.y, (size_t)GridworldChannels::Agent}) = 0;
+	// Set new.
+	environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Agent}) = 1;
+}
+
 
 
 float Gridworld::getStateReward(mic::types::Position2D pos_) {

@@ -188,13 +188,35 @@ public:
 	bool isGridTraversible(long x_, long y_, mic::types::Matrix<bool> & visited_);
 
 	/*!
+	 * Returns the tensor being the observation.
+	 * @return Observation tensor of size [roi_size, roi_size, channels].
+	 */
+	mic::types::TensorXf getObservation();
+
+	/*!
 	 * Returns the current state of the gridworld in the form of a string.
 	 * @return String with description of the gridworld.
 	 */
-	virtual std::string toString();
+	virtual std::string environmentToString();
 
-	/// Encode the current state of the grid (walls, pits, goals and agent position) as a matrix of size [1, width * height * channels]
-	virtual mic::types::MatrixXfPtr encode();
+	/*!
+	 * Returns the current observation taken in the gridworld in the form of a string.
+	 * @return String with description of the observation.
+	 */
+	virtual std::string observationToString();
+
+	/*!
+	 * Encodes the current state of the gridworld in as a matrix of size [1, width * height * channels].
+	 * @return Matrix of size [1, width * height * channels].
+	 */
+	virtual mic::types::MatrixXfPtr encodeEnvironment();
+
+	/*!
+	 * Encodes the current observation taken in the environment in as a matrix of size [1, roi_size * roi_size * channels].
+	 * @return Matrix of size [1, roi_size * roi_size * channels].
+	 */
+	virtual mic::types::MatrixXfPtr encodeObservation();
+
 
 	/// Encode the current state of the reduced grid (only the agent position) as a matrix of size [1, width * height]
 	virtual mic::types::MatrixXfPtr encodeAgentGrid();
@@ -211,6 +233,12 @@ public:
 	 * @return True if position is valid and was reached, false otherwise.
 	 */
 	virtual bool moveAgentToPosition(mic::types::Position2D pos_);
+
+	/*!
+	 * Moves agent to the desired position, disregarding whether it is valid or not.
+	 * @param pos_ Desired position of the agent.
+	 */
+	void moveAgentToPositionForced(mic::types::Position2D pos_);
 
 	/*!
 	 * Returns the reward associated with the given state.
@@ -243,6 +271,13 @@ protected:
 
 	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
 	mic::configuration::Property<short> type;
+
+	/*!
+	 * Returns the current state of the grid passed as an argument in the form of a string.
+	 * @param grid_ Grid to be processed.
+	 * @return String with description of the grid.
+	 */
+	std::string gridToString(mic::types::TensorXf & grid_);
 
 };
 

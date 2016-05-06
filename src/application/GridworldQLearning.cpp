@@ -72,7 +72,7 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 void GridworldQLearning::initializePropertyDependentVariables() {
 
 	// Resize and reset the action-value table.
-	qstate_table.resize({grid_env.getWidth(),grid_env.getHeight(),4});
+	qstate_table.resize({grid_env.getEnvironmentWidth(),grid_env.getEnvironmentHeight(),4});
 	qstate_table.zeros();
 	//qstate_table.setValue( -std::numeric_limits<float>::infinity() );
 
@@ -87,7 +87,7 @@ void GridworldQLearning::startNewEpisode() {
 	grid_env.initializePropertyDependentVariables();
 
 	LOG(LSTATUS) << std::endl << streamQStateTable();
-	LOG(LSTATUS) << std::endl << grid_env.toString();
+	LOG(LSTATUS) << std::endl << grid_env.environmentToString();
 
 }
 
@@ -118,10 +118,10 @@ std::string GridworldQLearning::streamQStateTable() {
 
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
-	for (size_t y=0; y<grid_env.getHeight(); y++){
+	for (size_t y=0; y<grid_env.getEnvironmentHeight(); y++){
 		rewards_table += "| ";
 		actions_table += "| ";
-		for (size_t x=0; x<grid_env.getWidth(); x++) {
+		for (size_t x=0; x<grid_env.getEnvironmentWidth(); x++) {
 			// Iterate through actions and find the best one.
 			float bestqval = -std::numeric_limits<float>::infinity();
 			size_t best_action = -1;
@@ -232,7 +232,7 @@ bool GridworldQLearning::performSingleStep() {
 
 		LOG(LINFO) << "Agent action = " << A_EXIT;
 		LOG(LDEBUG) << "Agent position = " << agent_pos_t;
-		LOG(LSTATUS) << std::endl << grid_env.toString();
+		LOG(LSTATUS) << std::endl << grid_env.environmentToString();
 		LOG(LSTATUS) << std::endl << streamQStateTable();
 
 		// Finish the episode.
@@ -293,7 +293,7 @@ bool GridworldQLearning::performSingleStep() {
 		qstate_table({(size_t)agent_pos_t.x, (size_t)agent_pos_t.y, (size_t)action.getType()}) = q_st_at + learning_rate * (r + discount_rate*max_q_st_prim_at_prim - q_st_at);
 
 	LOG(LSTATUS) << std::endl << streamQStateTable();
-	LOG(LSTATUS) << std::endl << grid_env.toString();
+	LOG(LSTATUS) << std::endl << grid_env.environmentToString();
 
 	return true;
 }

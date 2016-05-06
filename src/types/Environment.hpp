@@ -37,16 +37,46 @@ public:
 	virtual ~Environment();
 
 	/*!
+	 * Returns the tensor storing the environment.
+	 * @return Tensor storing the environment.
+	 */
+	mic::types::TensorXf & get() { return environment_grid; }
+
+	/*!
 	 * Returns current width of the environment.
 	 * @return Width.
 	 */
-	size_t getWidth() { return width; }
+	size_t getEnvironmentWidth() { return width; }
 
 	/*!
 	 * Returns current height of the environment.
 	 * @return Height.
 	 */
-	size_t getHeight() { return height; }
+	size_t getEnvironmentHeight() { return height; }
+
+	/*!
+	 * Returns the environment size (width * height * channels).
+	 * @return Size of the environment.
+	 */
+	size_t getEnvironmentSize() { return width * height * channels; }
+
+	/*!
+	 * Returns the width of the observation.
+	 * @return Width.
+	 */
+	size_t getObservationWidth() { return ((!pomdp_flag) ? width : roi_size); }
+
+	/*!
+	 * Returns the height of the observation.
+	 * @return Height.
+	 */
+	size_t getObservationHeight() { return ((!pomdp_flag) ?height : roi_size); }
+
+	/*!
+	 * Returns the observation size, depending on the process type: FOMDP (width * height * channels) or POMDP (roi_size * roi_size * channels).
+	 * @return Size of the observation.
+	 */
+	size_t getObservationSize() { return ((!pomdp_flag) ? width * height * channels : roi_size * roi_size * channels); }
 
 	/*!
 	 * Returns number of channels (depth) of the environment.
@@ -55,27 +85,36 @@ public:
 	size_t getChannels() { return channels; }
 
 	/*!
-	 * Returns the environment size (basically width * height * channels).
-	 * @return Height.
+	 * Returns size of the region of iterest.
+	 * @return ROI size.
 	 */
-	size_t getSize() { return width*height*channels; }
+	size_t getROISize() { return roi_size; }
 
-	/*!
-	 * Returns the tensor storing the environment.
-	 * @return Tensor storing the environment.
-	 */
-	mic::types::TensorXf & get() { return environment_grid; }
 
 	/*!
 	 * Returns the current state of the environment in the form of a string.
 	 * @return String with description of the environment.
 	 */
-	virtual std::string toString() = 0;
+	virtual std::string environmentToString() = 0;
+
+	/*!
+	 * Returns the current observation taken in the environment in the form of a string.
+	 * @return String with description of the observation.
+	 */
+	virtual std::string observationToString() = 0;
+
+	/*!
+	 * Encodes the current state of the environment in as a matrix of size [1, width * height * channels].
+	 * @return Matrix of size [1, width * height * channels].
+	 */
+	virtual mic::types::MatrixXfPtr encodeEnvironment() = 0;
 
 
-	/// Encodes the current state of the environment in as a matrix of size [1, environment * dimensions].
-	virtual mic::types::MatrixXfPtr encode() = 0;
-
+	/*!
+	 * Encodes the current observation taken in the environment in as a matrix of size [1, roi_size * roi_size * channels].
+	 * @return Matrix of size [1, roi_size * roi_size * channels].
+	 */
+	virtual mic::types::MatrixXfPtr encodeObservation() = 0;
 
 	/*!
 	 * Calculates the agent position.
@@ -84,7 +123,7 @@ public:
 	virtual mic::types::Position2D getAgentPosition() = 0;
 
 	/*!
-	 * Moves agent acording to the selected action.
+	 * Moves agent according to the selected action.
 	 * @param ac_ Action to be performed.
 	 * @return True if action was performed, false if destination state was invalid.
 	 */
@@ -178,8 +217,14 @@ protected:
 	/// Property: height of the environment.
 	mic::configuration::Property<size_t> height;
 
+	/// Property: size of the ROI (region of interest).
+	mic::configuration::Property<size_t> roi_size;
+
 	/// Number of channels.
 	size_t channels;
+
+	/// Flag related to
+	bool pomdp_flag;
 
 	/// Property: initial position of the agent.
 	mic::types::Position2D initial_position;

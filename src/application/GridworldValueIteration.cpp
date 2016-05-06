@@ -51,7 +51,7 @@ void GridworldValueIteration::initialize(int argc, char* argv[]) {
 void GridworldValueIteration::initializePropertyDependentVariables() {
 
 	// Resize and reset the action-value table.
-	state_value_table.resize(grid_env.getHeight(), grid_env.getWidth());
+	state_value_table.resize(grid_env.getEnvironmentHeight(), grid_env.getEnvironmentWidth());
 	//state_value_table.zeros();
 	state_value_table.setValue( -std::numeric_limits<float>::infinity() );
 	running_delta = -std::numeric_limits<float>::infinity();
@@ -63,9 +63,9 @@ void GridworldValueIteration::initializePropertyDependentVariables() {
 
 std::string GridworldValueIteration::streamStateActionTable() {
 	std::ostringstream os;
-	for (size_t y=0; y<grid_env.getHeight(); y++){
+	for (size_t y=0; y<grid_env.getEnvironmentHeight(); y++){
 		os << "| ";
-		for (size_t x=0; x<grid_env.getWidth(); x++) {
+		for (size_t x=0; x<grid_env.getEnvironmentWidth(); x++) {
 			if ( state_value_table(y,x) == -std::numeric_limits<float>::infinity())
 				os << "-INF | ";
 			else
@@ -157,11 +157,11 @@ bool GridworldValueIteration::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
 
 	// Perform the iterative policy iteration.
-	mic::types::MatrixXf new_state_value_table(grid_env.getHeight(), grid_env.getWidth());
+	mic::types::MatrixXf new_state_value_table(grid_env.getEnvironmentHeight(), grid_env.getEnvironmentWidth());
 	new_state_value_table.setValue( -std::numeric_limits<float>::infinity() );
 
-	for (size_t y=0; y<grid_env.getHeight(); y++){
-		for (size_t x=0; x<grid_env.getWidth(); x++) {
+	for (size_t y=0; y<grid_env.getEnvironmentHeight(); y++){
+		for (size_t x=0; x<grid_env.getEnvironmentWidth(); x++) {
 			mic::types::Position2D pos(x,y);
 			if (grid_env.isStateTerminal(pos) ) {
 				// Set the state rewared.
@@ -177,7 +177,7 @@ bool GridworldValueIteration::performSingleStep() {
 	// Compute delta.
 	mic::types::MatrixXf delta_value;
 	float curr_delta = 0;
-	for (size_t i =0; i < (size_t) grid_env.getWidth()* grid_env.getHeight(); i++){
+	for (size_t i =0; i < (size_t) grid_env.getEnvironmentWidth() * grid_env.getEnvironmentHeight(); i++){
 		float tmp_delta = 0;
 		if (std::isfinite(new_state_value_table(i)))
 			tmp_delta += new_state_value_table(i);
@@ -190,7 +190,7 @@ bool GridworldValueIteration::performSingleStep() {
 	// Update state.
 	state_value_table = new_state_value_table;
 
-	LOG(LSTATUS) << std::endl << grid_env.toString();
+	LOG(LSTATUS) << std::endl << grid_env.environmentToString();
 	LOG(LSTATUS) << std::endl << streamStateActionTable();
 	LOG(LINFO) << "Delta Value = " << running_delta;
 

@@ -16,6 +16,7 @@
 	"gridworld": {
 		"type": 5,
 		"width": 4,
-		"height": 4
+		"height": 4,
+		"roi_size": 3
 	}
 }
