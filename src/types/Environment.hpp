@@ -13,6 +13,8 @@
 #include <types/MatrixTypes.hpp>
 #include <logger/Log.hpp>
 
+#include <configuration/PropertyTree.hpp>
+
 namespace mic {
 namespace environments {
 
@@ -20,12 +22,14 @@ namespace environments {
  * \brief Abstract class representing an environment.
  * \author tkornuta
  */
-class Environment {
+class Environment : public mic::configuration::PropertyTree {
 public:
 	/*!
-	 * Constructor. Sets dimensions
+	 * Constructor. Registers properties.
+	 * @param node_name_ Name of the node in configuration file.
 	 */
-	Environment(size_t width_, size_t height_, size_t channels_);
+	Environment(std::string node_name_);
+
 
 	/*!
 	 * Virtual destructor. Empty.
@@ -168,16 +172,16 @@ public:
 
 protected:
 
-	/// Width of gridworld.
-	size_t width;
+	/// Property: width of the environment.
+	mic::configuration::Property<size_t> width;
 
-	/// Height of gridworld.
-	size_t height;
+	/// Property: height of the environment.
+	mic::configuration::Property<size_t> height;
 
-	/// Number of gridworld channels.
+	/// Number of channels.
 	size_t channels;
 
-	/// Property: height of gridworld.
+	/// Property: initial position of the agent.
 	mic::types::Position2D initial_position;
 
 	/// Tensor storing the environment (x, y, "depth" channels, representing: 0 - goals + pits, 1 - walls, 2 - agent).

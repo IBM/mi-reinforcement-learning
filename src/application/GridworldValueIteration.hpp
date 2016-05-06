@@ -61,19 +61,10 @@ protected:
 private:
 
 	/// The gridworld object.
-	mic::environments::Gridworld gridworld;
+	mic::environments::Gridworld grid_env;
 
 	/// Matrix storing values for all states (gridworld w * h). ROW MAJOR(!).
 	mic::types::MatrixXf state_value_table;
-
-	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
-	mic::configuration::Property<short> gridworld_type;
-
-	/// Property: width of gridworld.
-	mic::configuration::Property<size_t> width;
-
-	/// Property: height of gridworld.
-	mic::configuration::Property<size_t> height;
 
 	/*!
 	 * Property: the "expected intermediate reward", i.e. reward received by performing each step (typically negative, but can be positive as all).

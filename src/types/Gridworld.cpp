@@ -10,7 +10,14 @@
 namespace mic {
 namespace environments {
 
-Gridworld::Gridworld() : Environment(0, 0, (size_t)GridworldChannels::Count){
+Gridworld::Gridworld(std::string node_name_) : Environment(node_name_),
+	type("type", 0)
+{
+	// Register properties - so their values can be overridden (read from the configuration file).
+	registerProperty(type);
+
+	channels = (size_t)GridworldChannels::Count;
+
 }
 
 Gridworld::~Gridworld() {
@@ -29,8 +36,8 @@ mic::environments::Gridworld & Gridworld::operator= (const mic::environments::Gr
 
 
 // Initialize environment_grid.
-void Gridworld::generateGridworld(int environment_grid_type_, size_t width_, size_t height_) {
-	switch(environment_grid_type_) {
+void Gridworld::initializePropertyDependentVariables() {
+	switch(type) {
 		case 0 : initExemplaryGrid(); break;
 		case 1 : initClassicCliffGrid(); break;
 		case 2 : initDiscountGrid(); break;
@@ -41,9 +48,9 @@ void Gridworld::generateGridworld(int environment_grid_type_, size_t width_, siz
 		case 7 : initModifiedDQLGrid(); break;
 		case 8 : initDebug2x2Grid(); break;
 		case 9 : initDebug3x3Grid(); break;
-		case -2: initHardRandomGrid(width_, height_); break;
+		case -2: initHardRandomGrid(); break;
 		case -1:
-		default: initSimpleRandomGrid(width_, height_);
+		default: initSimpleRandomGrid();
 	}//: switch
 }
 
@@ -365,11 +372,8 @@ void Gridworld::initDebug3x3Grid() {
 }
 
 
-void Gridworld::initSimpleRandomGrid(size_t width_, size_t height_) {
-	LOG(LINFO) << "Generating simple " << width_ << "x" << height_<< " random grid";
-	// Overwrite the dimensions.
-	width = width_;
-	height = height_;
+void Gridworld::initSimpleRandomGrid() {
+	LOG(LINFO) << "Generating simple " << width << "x" << height<< " random grid";
 
 	// Set environment_grid size.
 	environment_grid.resize({width, height, channels});
@@ -481,11 +485,8 @@ bool Gridworld::isGridTraversible(long x_, long y_, mic::types::Matrix<bool> & v
 
 
 
-void Gridworld::initHardRandomGrid(size_t width_, size_t height_) {
-	LOG(LINFO) << "Generating hard " << width_ << "x" << height_<< " random grid";
-	// Overwrite the dimensions.
-	width = width_;
-	height = height_;
+void Gridworld::initHardRandomGrid() {
+	LOG(LINFO) << "Generating hard " << width << "x" << height<< " random grid";
 
 	// Set environment_grid size.
 	environment_grid.resize({width, height, channels});

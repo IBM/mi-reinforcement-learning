@@ -83,15 +83,6 @@ private:
 	/// Tensor storing values for all states (gridworld w * h * 4 (number of actions)). COL MAJOR(!).
 	mic::types::TensorXf qstate_table;
 
-	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
-	mic::configuration::Property<short> gridworld_type;
-
-	/// Property: width of gridworld.
-	mic::configuration::Property<size_t> width;
-
-	/// Property: height of gridworld.
-	mic::configuration::Property<size_t> height;
-
 	/*!
 	 * Property: the "expected intermediate reward", i.e. reward received by performing each step (typically negative, but can be positive as all).
 	 */

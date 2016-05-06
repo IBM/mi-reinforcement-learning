@@ -4,7 +4,6 @@
 		"single_step_mode": 1
 	},
 	"gridworld_drl_app": {
-		"gridworld_type": 5,
 		"step_reward": -0.1,
 		"learning_rate" : 0.001,
 		"discount_rate" : 0.9,
@@ -13,5 +12,10 @@
 		"mlnn_filename": "gridworld_dlr-mlnn-maze6.txt",
 		"mlnn_save" : 0,
 		"mlnn_load" : 0
+	},
+	"gridworld": {
+		"type": 5,
+		"width": 4,
+		"height": 4
 	}
 }

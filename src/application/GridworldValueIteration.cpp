@@ -23,9 +23,6 @@ void RegisterApplication (void) {
 
 
 GridworldValueIteration::GridworldValueIteration(std::string node_name_) : Application(node_name_),
-		gridworld_type("gridworld_type", 0),
-		width("width", 4),
-		height("height", 4),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		move_noise("move_noise",0.2),
@@ -33,8 +30,6 @@ GridworldValueIteration::GridworldValueIteration(std::string node_name_) : Appli
 
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
-	registerProperty(gridworld_type);
-	registerProperty(width);
 	registerProperty(step_reward);
 	registerProperty(discount_rate);
 	registerProperty(move_noise);
@@ -54,16 +49,9 @@ void GridworldValueIteration::initialize(int argc, char* argv[]) {
 }
 
 void GridworldValueIteration::initializePropertyDependentVariables() {
-	// Generate the gridworld.
-	gridworld.generateGridworld(gridworld_type, width, height);
-	LOG(LSTATUS) << std::endl << gridworld.toString();
-
-	// Get width and height.
-	width = gridworld.getWidth();
-	height = gridworld.getHeight();
 
 	// Resize and reset the action-value table.
-	state_value_table.resize(height,width);
+	state_value_table.resize(grid_env.getHeight(), grid_env.getWidth());
 	//state_value_table.zeros();
 	state_value_table.setValue( -std::numeric_limits<float>::infinity() );
 	running_delta = -std::numeric_limits<float>::infinity();
@@ -75,9 +63,9 @@ void GridworldValueIteration::initializePropertyDependentVariables() {
 
 std::string GridworldValueIteration::streamStateActionTable() {
 	std::ostringstream os;
-	for (size_t y=0; y<height; y++){
+	for (size_t y=0; y<grid_env.getHeight(); y++){
 		os << "| ";
-		for (size_t x=0; x<width; x++) {
+		for (size_t x=0; x<grid_env.getWidth(); x++) {
 			if ( state_value_table(y,x) == -std::numeric_limits<float>::infinity())
 				os << "-INF | ";
 			else
@@ -99,14 +87,14 @@ float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D po
 
 	// Consider also east and west actions as possible actions - due to move_noise.
 	if ((ac_.getType() == types::NESW::North) || (ac_.getType() == types::NESW::South)) {
-		if (gridworld.isActionAllowed(pos_, A_EAST)) {
+		if (grid_env.isActionAllowed(pos_, A_EAST)) {
 			mic::types::Position2D east_pos = pos_ + A_EAST;
 			if (state_value_table((size_t)east_pos.y, (size_t)east_pos.x) != -std::numeric_limits<float>::infinity()) {
 				q_value += (move_noise/2)*(step_reward + discount_rate * state_value_table( (size_t)east_pos.y, (size_t)east_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
-		if (gridworld.isActionAllowed(pos_, A_WEST)) {
+		if (grid_env.isActionAllowed(pos_, A_WEST)) {
 			mic::types::Position2D west_pos = pos_ + A_WEST;
 			if (state_value_table((size_t)west_pos.y, (size_t)west_pos.x) != -std::numeric_limits<float>::infinity()) {
 				q_value += (move_noise/2)*(step_reward + discount_rate * state_value_table((size_t)west_pos.y, (size_t)west_pos.x));
@@ -117,14 +105,14 @@ float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D po
 
 	// Consider also north and south actions as possible actions - due to move_noise.
 	if ((ac_.getType() == types::NESW::East) || (ac_.getType() == types::NESW::West)) {
-		if (gridworld.isActionAllowed(pos_, A_NORTH)) {
+		if (grid_env.isActionAllowed(pos_, A_NORTH)) {
 			mic::types::Position2D north_pos = pos_ + A_NORTH;
 			if (state_value_table((size_t)north_pos.y, (size_t)north_pos.x) != -std::numeric_limits<float>::infinity()) {
 				q_value += (move_noise/2)*(step_reward + discount_rate * state_value_table((size_t)north_pos.y, (size_t)north_pos.x));
 				probs_normalizer += (move_noise/2);
 			}//:if != -INF
 		}//: if
-		if (gridworld.isActionAllowed(pos_, A_SOUTH)) {
+		if (grid_env.isActionAllowed(pos_, A_SOUTH)) {
 			mic::types::Position2D south_pos = pos_ + A_SOUTH;
 			if (state_value_table((size_t)south_pos.y, (size_t)south_pos.x) != -std::numeric_limits<float>::infinity()) {
 				q_value += (move_noise/2)*(step_reward + discount_rate * state_value_table((size_t)south_pos.y, (size_t)south_pos.x));
@@ -142,7 +130,7 @@ float GridworldValueIteration::computeQValueFromValues(mic::types::Position2D po
 float GridworldValueIteration::computeBestValue(mic::types::Position2D pos_){
 	float best_value = -std::numeric_limits<float>::infinity();
 	// Check if the state is allowed.
-	if (!gridworld.isStateAllowed(pos_))
+	if (!grid_env.isStateAllowed(pos_))
 		return best_value;
 
 	// Create a list of possible actions.
@@ -154,7 +142,7 @@ float GridworldValueIteration::computeBestValue(mic::types::Position2D pos_){
 
 	// Check the actions one by one.
 	for(mic::types::NESWAction action : actions) {
-		if(gridworld.isActionAllowed(pos_, action)) {
+		if(grid_env.isActionAllowed(pos_, action)) {
 			float value = computeQValueFromValues(pos_, action);
 			if (value > best_value)
 				best_value = value;
@@ -169,19 +157,19 @@ bool GridworldValueIteration::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
 
 	// Perform the iterative policy iteration.
-	mic::types::MatrixXf new_state_value_table(height, width);
+	mic::types::MatrixXf new_state_value_table(grid_env.getHeight(), grid_env.getWidth());
 	new_state_value_table.setValue( -std::numeric_limits<float>::infinity() );
 
-	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
+	for (size_t y=0; y<grid_env.getHeight(); y++){
+		for (size_t x=0; x<grid_env.getWidth(); x++) {
 			mic::types::Position2D pos(x,y);
-			if (gridworld.isStateTerminal(pos) ) {
+			if (grid_env.isStateTerminal(pos) ) {
 				// Set the state rewared.
-				new_state_value_table((size_t)pos.y, (size_t)pos.x) = gridworld.getStateReward(pos);
+				new_state_value_table((size_t)pos.y, (size_t)pos.x) = grid_env.getStateReward(pos);
 				continue;
 			}//: if
 			// Else - compute the best value.
-			if (gridworld.isStateAllowed(pos) )
+			if (grid_env.isStateAllowed(pos) )
 				new_state_value_table((size_t)pos.y, (size_t)pos.x) = computeBestValue(pos);
 		}//: for x
 	}//: for y
@@ -189,7 +177,7 @@ bool GridworldValueIteration::performSingleStep() {
 	// Compute delta.
 	mic::types::MatrixXf delta_value;
 	float curr_delta = 0;
-	for (size_t i =0; i < (size_t) width*height; i++){
+	for (size_t i =0; i < (size_t) grid_env.getWidth()* grid_env.getHeight(); i++){
 		float tmp_delta = 0;
 		if (std::isfinite(new_state_value_table(i)))
 			tmp_delta += new_state_value_table(i);
@@ -202,7 +190,7 @@ bool GridworldValueIteration::performSingleStep() {
 	// Update state.
 	state_value_table = new_state_value_table;
 
-	LOG(LSTATUS) << std::endl << gridworld.toString();
+	LOG(LSTATUS) << std::endl << grid_env.toString();
 	LOG(LSTATUS) << std::endl << streamStateActionTable();
 	LOG(LINFO) << "Delta Value = " << running_delta;
 

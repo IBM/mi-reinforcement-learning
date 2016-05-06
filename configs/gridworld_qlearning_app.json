@@ -4,10 +4,14 @@
 		"single_step_mode": 1
 	},
 	"gridworld_qlearning_app": {
-		"gridworld_type": 5,
 		"step_reward": -0.1,
 		"discount_rate" : 0.9,
 		"move_noise": 0.0,
 		"epsilon": -0.1
+	},
+	"gridworld": {
+		"type": 5,
+		"width": 4,
+		"height": 4
 	}
 }

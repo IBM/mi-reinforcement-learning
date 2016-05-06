@@ -22,9 +22,6 @@ void RegisterApplication (void) {
 
 
 GridworldDeepQLearning::GridworldDeepQLearning(std::string node_name_) : OpenGLEpisodicApplication(node_name_),
-		gridworld_type("gridworld_type", 0),
-		width("width", 4),
-		height("height", 4),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.1),
@@ -35,8 +32,6 @@ GridworldDeepQLearning::GridworldDeepQLearning(std::string node_name_) : OpenGLE
 		mlnn_load("mlnn_load", false)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
-	registerProperty(gridworld_type);
-	registerProperty(width);
 	registerProperty(step_reward);
 	registerProperty(discount_rate);
 	registerProperty(learning_rate);
@@ -76,20 +71,13 @@ void GridworldDeepQLearning::initialize(int argc, char* argv[]) {
 }
 
 void GridworldDeepQLearning::initializePropertyDependentVariables() {
-	// Generate the gridworld.
-	grid_env.generateGridworld(gridworld_type, width, height);
-
-	// Get width and height.
-	width = grid_env.getWidth();
-	height = grid_env.getHeight();
-
 	// Try to load neural network from file.
 	if ((mlnn_load) && (neural_net.load(mlnn_filename))) {
 		// Do nothing ;)
 	} else {
 		// Create a simple neural network.
 		// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
-		neural_net.addLayer(new Linear((size_t) width * height , 250, 1));
+		neural_net.addLayer(new Linear((size_t) grid_env.getWidth() * grid_env.getHeight() , 250, 1));
 		neural_net.addLayer(new ReLU(250, 250, 1));
 		neural_net.addLayer(new Linear(250, 100, 1));
 		neural_net.addLayer(new ReLU(100, 100, 1));
@@ -104,7 +92,7 @@ void GridworldDeepQLearning::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
-	grid_env.generateGridworld(gridworld_type, width, height);
+	grid_env.initializePropertyDependentVariables();
 
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
 	LOG(LSTATUS) << std::endl << grid_env.toString();
@@ -145,10 +133,10 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
 	// Generate all possible states and all possible rewards.
-	for (size_t y=0; y<height; y++){
+	for (size_t y=0; y<grid_env.getHeight(); y++){
 		rewards_table += "| ";
 		actions_table += "| ";
-		for (size_t x=0; x<width; x++) {
+		for (size_t x=0; x<grid_env.getWidth(); x++) {
 			float bestqval = -std::numeric_limits<float>::infinity();
 			size_t best_action = -1;
 

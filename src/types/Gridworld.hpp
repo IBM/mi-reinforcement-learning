@@ -35,9 +35,10 @@ enum class GridworldChannels : std::size_t
 class Gridworld : public mic::environments::Environment {
 public:
 	/*!
-	 * Constructor. Creates and empty gridworld (set size to 0x0).
+	 * Constructor. Registers properties.
+	 * @param node_name_ Name of the node in configuration file.
 	 */
-	Gridworld();
+	Gridworld(std::string node_name_ = "gridworld");
 
 	/*!
 	 * Destructor. Empty for now.
@@ -50,7 +51,7 @@ public:
 	mic::environments::Gridworld & operator=(const mic::environments::Gridworld & gw_);
 
 	/*!
-	 * Genrates the gridworld of a given, predefined type.
+	 * Initializes all variables that are property-dependent - generates the gridworld of a given, predefined type.
 	 * @param gridworld_type_ Type of the generated gridworld.
 	 * Currently available types:
 	 * 0: the exemplary grid 4x3.
@@ -68,7 +69,7 @@ public:
 	 * @param width_ Grid width (used in the case of random grid generation).
 	 * @param height_ Grid height (used in the case of random grid generation).
 	 */
-	void generateGridworld(int gridworld_type_, size_t width_, size_t height_);
+	virtual void initializePropertyDependentVariables();
 
 	/*!
 	 * 	Method initializes the exemplary grid.
@@ -171,12 +172,12 @@ public:
 	/*!
 	 * Generates a random grid of size (width x height), with a single pit, goal and wall.
 	 */
-	void initSimpleRandomGrid(size_t width_, size_t height_);
+	void initSimpleRandomGrid();
 
 	/*!
 	 * Generates a random grid of size (width x height), with a single goal, but several walls and pits.
 	 */
-	void initHardRandomGrid(size_t width_, size_t height_);
+	void initHardRandomGrid();
 
 	/*!
 	 * A recursive method for checking whether the grid is traversable (i.e. there is a path from agent to goal).
@@ -237,6 +238,11 @@ public:
 	 * @return The reward associated with "final" action (might be positive or negative), equal to zero means that the position is not final.
 	 */
 	virtual bool isStateTerminal(mic::types::Position2D pos_);
+
+protected:
+
+	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
+	mic::configuration::Property<short> type;
 
 };
 

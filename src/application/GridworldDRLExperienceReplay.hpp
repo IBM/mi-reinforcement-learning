@@ -85,15 +85,6 @@ private:
 	/// The gridworld environment.
 	mic::environments::Gridworld grid_env;
 
-	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
-	mic::configuration::Property<short> gridworld_type;
-
-	/// Property: width of gridworld.
-	mic::configuration::Property<size_t> width;
-
-	/// Property: height of gridworld.
-	mic::configuration::Property<size_t> height;
-
 	/// Size of the batch in experience replay - set to the size of maze (width*height).
 	size_t batch_size;
 

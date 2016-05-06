@@ -10,13 +10,13 @@
 namespace mic {
 namespace environments {
 
-Environment::Environment(size_t width_, size_t height_, size_t channels_) :
-		width(width_),
-		height(height_),
-		channels(channels_)
+Environment::Environment(std::string node_name_) : PropertyTree(node_name_),
+		width("width", 4),
+		height("height", 4)
 {
-	// TODO Auto-generated constructor stub
-
+	// Register properties - so their values can be overridden (read from the configuration file).
+	registerProperty(width);
+	registerProperty(height);
 }
 
 Environment::~Environment() {

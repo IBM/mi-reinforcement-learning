@@ -24,9 +24,6 @@ void RegisterApplication (void) {
 
 
 GridworldQLearning::GridworldQLearning(std::string node_name_) : OpenGLEpisodicApplication(node_name_),
-		gridworld_type("gridworld_type", 0),
-		width("width", 4),
-		height("height", 4),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.1),
@@ -36,8 +33,6 @@ GridworldQLearning::GridworldQLearning(std::string node_name_) : OpenGLEpisodicA
 
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
-	registerProperty(gridworld_type);
-	registerProperty(width);
 	registerProperty(step_reward);
 	registerProperty(discount_rate);
 	registerProperty(learning_rate);
@@ -60,7 +55,6 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
-	// Add containers to collector.
 	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
 	collector_ptr->createContainer("average_number_of_steps", mic::types::color_rgba(255, 255, 0, 180));
 	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 255, 0, 180));
@@ -76,16 +70,9 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 }
 
 void GridworldQLearning::initializePropertyDependentVariables() {
-	// Generate the gridworld.
-	grid_env.generateGridworld(gridworld_type, width, height);
-	LOG(LSTATUS) << std::endl << grid_env.toString();
-
-	// Get width and height.
-	width = grid_env.getWidth();
-	height = grid_env.getHeight();
 
 	// Resize and reset the action-value table.
-	qstate_table.resize({width,height,4});
+	qstate_table.resize({grid_env.getWidth(),grid_env.getHeight(),4});
 	qstate_table.zeros();
 	//qstate_table.setValue( -std::numeric_limits<float>::infinity() );
 
@@ -95,8 +82,12 @@ void GridworldQLearning::initializePropertyDependentVariables() {
 
 void GridworldQLearning::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
-	// Move player to start position.
-	grid_env.moveAgentToInitialPosition();
+
+	// Generate the gridworld (and move player to initial position).
+	grid_env.initializePropertyDependentVariables();
+
+	LOG(LSTATUS) << std::endl << streamQStateTable();
+	LOG(LSTATUS) << std::endl << grid_env.toString();
 
 }
 
@@ -127,10 +118,10 @@ std::string GridworldQLearning::streamQStateTable() {
 
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
-	for (size_t y=0; y<height; y++){
+	for (size_t y=0; y<grid_env.getHeight(); y++){
 		rewards_table += "| ";
 		actions_table += "| ";
-		for (size_t x=0; x<width; x++) {
+		for (size_t x=0; x<grid_env.getWidth(); x++) {
 			// Iterate through actions and find the best one.
 			float bestqval = -std::numeric_limits<float>::infinity();
 			size_t best_action = -1;
@@ -301,8 +292,8 @@ bool GridworldQLearning::performSingleStep() {
 	else
 		qstate_table({(size_t)agent_pos_t.x, (size_t)agent_pos_t.y, (size_t)action.getType()}) = q_st_at + learning_rate * (r + discount_rate*max_q_st_prim_at_prim - q_st_at);
 
-	LOG(LSTATUS) << std::endl << grid_env.toString();
 	LOG(LSTATUS) << std::endl << streamQStateTable();
+	LOG(LSTATUS) << std::endl << grid_env.toString();
 
 	return true;
 }

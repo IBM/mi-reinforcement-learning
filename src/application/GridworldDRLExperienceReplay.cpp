@@ -22,9 +22,6 @@ void RegisterApplication (void) {
 
 
 GridworldDRLExperienceReplay::GridworldDRLExperienceReplay(std::string node_name_) : OpenGLEpisodicApplication(node_name_),
-		gridworld_type("gridworld_type", 0),
-		width("width", 4),
-		height("height", 4),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.005),
@@ -36,9 +33,6 @@ GridworldDRLExperienceReplay::GridworldDRLExperienceReplay(std::string node_name
 		experiences(10000,1)
 	{
 	// Register properties - so their values can be overridden (read from the configuration file).
-	registerProperty(gridworld_type);
-	registerProperty(width);
-	registerProperty(height);
 	registerProperty(step_reward);
 	registerProperty(discount_rate);
 	registerProperty(learning_rate);
@@ -80,15 +74,8 @@ void GridworldDRLExperienceReplay::initialize(int argc, char* argv[]) {
 }
 
 void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
-	// Generate the gridworld.
-	grid_env.generateGridworld(gridworld_type, width, height);
-
-	// Get width and height.
-	width = grid_env.getWidth();
-	height = grid_env.getHeight();
-
 	// Hardcode batchsize - for fastening the display!
-	batch_size = width * height;
+	batch_size = grid_env.getWidth() * grid_env.getHeight();
 
 	// Try to load neural network from file.
 	if ((mlnn_load) && (neural_net.load(mlnn_filename))) {
@@ -96,7 +83,7 @@ void GridworldDRLExperienceReplay::initializePropertyDependentVariables() {
 	} else {
 		// Create a simple neural network.
 		// gridworld wxhx4 -> 100 -> 4 -> regression!.
-		neural_net.addLayer(new Linear((size_t) width * height * (size_t)(mic::environments::GridworldChannels::Count), 250, batch_size));
+		neural_net.addLayer(new Linear((size_t) grid_env.getWidth() * grid_env.getHeight() * (size_t)(mic::environments::GridworldChannels::Count), 250, batch_size));
 		neural_net.addLayer(new ReLU(250, 250, batch_size));
 		neural_net.addLayer(new Linear(250, 100, batch_size));
 		neural_net.addLayer(new ReLU(100, 100, batch_size));
@@ -114,7 +101,7 @@ void GridworldDRLExperienceReplay::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
-	grid_env.generateGridworld(gridworld_type, width, height);
+	grid_env.initializePropertyDependentVariables();
 
 	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
 	LOG(LSTATUS) << std::endl << grid_env.toString();
@@ -158,18 +145,18 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	mic::types::Position2D current_player_pos_t = grid_env.getAgentPosition();
 
 	// Create new matrices for batches of inputs and targets.
-	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf(grid_env.getSize(), batch_size));
 
-	// Assume that the batch_size = width * height
-	assert(width*height == batch_size);
-	for (size_t y=0; y<height; y++){
-		for (size_t x=0; x<width; x++) {
+	// Assume that the batch_size = grid_env.getWidth() * grid_env.getHeight()
+	assert(grid_env.getWidth()*grid_env.getHeight() == batch_size);
+	for (size_t y=0; y<grid_env.getHeight(); y++){
+		for (size_t x=0; x<grid_env.getWidth(); x++) {
 			// Move the player to given state.
 			grid_env.moveAgentToPosition(Position2D(x,y));
 			// Encode the current state.
 			mic::types::MatrixXfPtr encoded_state = grid_env.encode();
 			// Add to batch.
-			inputs_batch->col(y*width+x) = encoded_state->col(0);
+			inputs_batch->col(y*grid_env.getWidth()+x) = encoded_state->col(0);
 		}//: for x
 	}//: for y
 
@@ -182,14 +169,14 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
 	// Generate all possible states and all possible rewards.
-	for (size_t y=0; y<height; y++){
+	for (size_t y=0; y<grid_env.getHeight(); y++){
 		rewards_table += "| ";
 		actions_table += "| ";
-		for (size_t x=0; x<width; x++) {
+		for (size_t x=0; x<grid_env.getWidth(); x++) {
 			float bestqval = -std::numeric_limits<float>::infinity();
 			size_t best_action = -1;
 			for (size_t a=0; a<4; a++) {
-				float qval = (*predicted_batch)(a, y*width+x);
+				float qval = (*predicted_batch)(a, y*grid_env.getWidth()+x);
 
 				rewards_table += std::to_string(qval);
 				if (a==3)
@@ -261,7 +248,7 @@ mic::types::MatrixXfPtr GridworldDRLExperienceReplay::getPredictedRewardsForGive
 	mic::types::MatrixXfPtr encoded_state = grid_env.encode();
 
 	// Create NEW matrix for the inputs batch.
-	MatrixXfPtr inputs_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf(grid_env.getSize(), batch_size));
 	inputs_batch->setZero();
 
 	// Set the first input - only this one interests us.
@@ -371,8 +358,8 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	// Deep Q learning - train network with random sample from the experience memory.
 	if (experiences.size() >= 2*batch_size) {
 		// Create new matrices for batches of inputs and targets.
-		MatrixXfPtr inputs_t_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
-		MatrixXfPtr inputs_t_prim_batch(new MatrixXf((size_t) width * height * (size_t)mic::environments::GridworldChannels::Count, batch_size));
+		MatrixXfPtr inputs_t_batch(new MatrixXf(grid_env.getSize(), batch_size));
+		MatrixXfPtr inputs_t_prim_batch(new MatrixXf(grid_env.getSize(), batch_size));
 		MatrixXfPtr targets_t_batch(new MatrixXf(4, batch_size));
 
 		// Get the random batch.
