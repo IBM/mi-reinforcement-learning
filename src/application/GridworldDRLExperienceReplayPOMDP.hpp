@@ -110,6 +110,11 @@ private:
 	 */
 	mic::configuration::Property<double> epsilon;
 
+	/*!
+	 * Limit of steps for episode. Setting step_limit <= 0 means that the limit should not be considered.
+	 */
+	mic::configuration::Property<int> step_limit;
+
 	/// Property: name of the file to which the statistics will be exported.
 	mic::configuration::Property<std::string> statistics_filename;
 

@@ -27,6 +27,7 @@ GridworldDRLExperienceReplayPOMDP::GridworldDRLExperienceReplayPOMDP(std::string
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.005),
 		epsilon("epsilon", 0.1),
+		step_limit("step_limit",0),
 		statistics_filename("statistics_filename","drl_er_statistics.csv"),
 		mlnn_filename("mlnn_filename", "drl_er_mlnn.txt"),
 		mlnn_save("mlnn_save", false),
@@ -38,6 +39,7 @@ GridworldDRLExperienceReplayPOMDP::GridworldDRLExperienceReplayPOMDP(std::string
 	registerProperty(discount_rate);
 	registerProperty(learning_rate);
 	registerProperty(epsilon);
+	registerProperty(step_limit);
 	registerProperty(statistics_filename);
 	registerProperty(mlnn_filename);
 	registerProperty(mlnn_save);
@@ -485,7 +487,7 @@ bool GridworldDRLExperienceReplayPOMDP::performSingleStep() {
 		return false;
 
 	// Check whether we reached maximum number of iterations.
-	if (iteration >= 100)
+	if ((step_limit>0) && (iteration >= step_limit))
 		return false;
 
 
