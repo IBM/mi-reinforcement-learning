@@ -20,7 +20,7 @@ using namespace mic::opengl::visualization;
 using namespace mic::mlnn;
 using namespace mic::types;
 
-#include <types/Gridworld.hpp> //MazeOfDigits.hpp>
+#include <types/MazeOfDigits.hpp>
 #include <types/SpatialExperienceMemory.hpp>
 
 namespace mic {
@@ -83,8 +83,8 @@ private:
 	/// Data collector.
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
 
-	/// The gridworld environment.
-	mic::environments::Gridworld grid_env;
+	/// The maze of digits environment.
+	mic::environments::MazeOfDigits env;
 
 	/// Size of the batch in experience replay - set to the size of maze (width*height).
 	size_t batch_size;

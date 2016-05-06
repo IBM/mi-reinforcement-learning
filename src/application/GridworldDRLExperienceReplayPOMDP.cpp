@@ -107,8 +107,8 @@ void GridworldDRLExperienceReplayPOMDP::startNewEpisode() {
 	grid_env.initializePropertyDependentVariables();
 
 	LOG(LSTATUS) << "Network responses: \n" <<  streamNetworkResponseTable();
-	LOG(LSTATUS) << "Environment: \n" << grid_env.environmentToString();
 	LOG(LSTATUS) << "Observation: \n"  << grid_env.observationToString();
+	LOG(LSTATUS) << "Environment: \n" << grid_env.environmentToString();
 }
 
 

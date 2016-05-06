@@ -3,21 +3,21 @@
 		"application_sleep_interval": "1",
 		"single_step_mode": 1
 	},
-	"gridworld_drl_er_pomdp_app": {
+	"mazeofdigits_drl_er_pomdp_app": {
 		"step_reward": -1.0,
 		"discount_rate" : 0.9,
 		"learning_rate" : 0.01,
 		"epsilon": -0.1,
 		"step_limit": 200,
-		"statistics_filename" : "gridworld_drl_er_pomdp-roi5x5-convergence.csv",
-		"mlnn_filename": "gridworld_dlr_el_pomdp-mlnn-roi5x5.txt",
-		"mlnn_save" : 0,
-		"mlnn_load" : 0
+		"statistics_filename" : "mazeofdigits_drl_er_pomdp-roi5x5-convergence.csv",
+		"mlnn_filename": "mazeofdigits_dlr_el_pomdp-mlnn-roi5x5.txt",
+		"mlnn_save" : 1,
+		"mlnn_load" : 1
 	},
-	"gridworld": {
-		"type": -2,
-		"width": 7,
-		"height": 7,
+	"maze_of_digits": {
+		"type": -1,
+		"width": 10,
+		"height": 10,
 		"roi_size": 5
 	}
 }

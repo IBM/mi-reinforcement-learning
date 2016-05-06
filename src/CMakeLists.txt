@@ -299,7 +299,7 @@ if(${BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 	# Create exeutable.
 	add_executable(mazeofdigits_drl_er_pomdp_app 
 		application/MazeOfDigitsDLRERPOMPD.cpp
-		types/Gridworld.cpp
+		types/MazeOfDigits.cpp
 		types/Environment.cpp
 		application/console_application_main.cpp
 		)

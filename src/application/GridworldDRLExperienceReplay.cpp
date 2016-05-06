@@ -151,7 +151,7 @@ std::string GridworldDRLExperienceReplay::streamNetworkResponseTable() {
 	for (size_t y=0; y<grid_env.getEnvironmentHeight(); y++){
 		for (size_t x=0; x<grid_env.getEnvironmentWidth(); x++) {
 			// Move the player to given state - disregarding whether it is valid or not.
-			grid_env.moveAgentToPositionForced(Position2D(x,y));
+			grid_env.moveAgentToPosition(Position2D(x,y));
 			// Encode the current state.
 			mic::types::MatrixXfPtr encoded_state = grid_env.encodeEnvironment();
 			// Add to batch.

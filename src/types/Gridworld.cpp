@@ -61,7 +61,7 @@ void Gridworld::initializePropertyDependentVariables() {
 
 
 void Gridworld::initExemplaryGrid() {
-	LOG(LINFO) << "Generating exemplary environment_grid";
+	LOG(LINFO) << "Generating exemplary gridworld";
 	// [[' ',' ',' ',' '],
 	//  ['S',-10,' ',' '],
 	//  [' ','','#',' '],
@@ -71,7 +71,7 @@ void Gridworld::initExemplaryGrid() {
 	width = 4;
 	height = 4;
 
-	// Set environment_grid size.
+	// Set gridworld size.
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
@@ -91,7 +91,7 @@ void Gridworld::initExemplaryGrid() {
 
 
 void Gridworld::initClassicCliffGrid() {
-	LOG(LINFO) << "Generating classic cliff environment_grid";
+	LOG(LINFO) << "Generating classic cliff gridworld";
 	// [[' ',' ',' ',' ',' '],
 	//  ['S',' ',' ',' ',10],
 	//  [-100,-100, -100, -100, -100]]
@@ -100,7 +100,7 @@ void Gridworld::initClassicCliffGrid() {
 	width = 5;
 	height = 3;
 
-	// Set environment_grid size.
+	// Set gridworld size.
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
@@ -117,7 +117,7 @@ void Gridworld::initClassicCliffGrid() {
 }
 
 void Gridworld::initDiscountGrid() {
-	LOG(LINFO) << "Generating classic discount environment_grid";
+	LOG(LINFO) << "Generating classic discount gridworld";
 	// [[' ',' ',' ',' ',' '],
 	//  [' ','#',' ',' ',' '],
 	//  [' ','#', 1,'#', 10],
@@ -128,7 +128,7 @@ void Gridworld::initDiscountGrid() {
 	width = 5;
 	height = 5;
 
-	// Set environment_grid size.
+	// Set gridworld size.
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
@@ -152,7 +152,7 @@ void Gridworld::initDiscountGrid() {
 
 
 void Gridworld::initBridgeGrid() {
-	LOG(LINFO) << "Generating classic bridge environment_grid";
+	LOG(LINFO) << "Generating classic bridge gridworld";
 	// [[ '#',-100, -100, -100, -100, -100, '#'],
 	//  [   1, 'S',  ' ',  ' ',  ' ',  ' ',  10],
 	//  [ '#',-100, -100, -100, -100, -100, '#']]
@@ -217,7 +217,7 @@ void Gridworld::initBookGrid() {
 
 
 void Gridworld::initMazeGrid() {
-	LOG(LINFO) << "Generating classic maze environment_grid";
+	LOG(LINFO) << "Generating classic maze gridworld";
 	// [[' ',' ',' ',+1],
 	//  ['#','#',' ','#'],
 	//  [' ','#',' ',' '],
@@ -608,18 +608,18 @@ std::string Gridworld::gridToString(mic::types::TensorXf & grid_) {
 			// Check object occupancy.
 			if (grid_({x,y, (size_t)GridworldChannels::Agent}) != 0) {
 				// Display agent.
-				s += " A ,";
+				s += "<A>";
 			} else if (grid_({x,y, (size_t)GridworldChannels::Walls}) != 0) {
 				// Display wall.
-				s += " # ,";
+				s += " # ";
 			} else if (grid_({x,y, (size_t)GridworldChannels::Pits}) < 0) {
 				// Display pit.
-				s +=  " - ,";
+				s +=  " - ";
 			} else if (grid_({x,y, (size_t)GridworldChannels::Goals}) > 0) {
 				// Display goal.
-				s += " + ,";
+				s += " + ";
 			} else
-				s += "   ,";
+				s += "   ";
 		}//: for x
 		s += "\n";
 	}//: for y
@@ -754,17 +754,6 @@ bool Gridworld::moveAgentToPosition(mic::types::Position2D pos_) {
 	environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Agent}) = 1;
 
 	return true;
-}
-
-
-void Gridworld::moveAgentToPositionForced(mic::types::Position2D pos_) {
-	LOG(LDEBUG) << "New agent position = " << pos_;
-
-	// Clear old.
-	mic::types::Position2D old = getAgentPosition();
-	environment_grid({(size_t)old.x, (size_t)old.y, (size_t)GridworldChannels::Agent}) = 0;
-	// Set new.
-	environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)GridworldChannels::Agent}) = 1;
 }
 
 

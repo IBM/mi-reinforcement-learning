@@ -29,7 +29,7 @@ enum class GridworldChannels : std::size_t
 
 
 /*!
- * \brief Class responsible for generation and presentation of gridworld environments.
+ * \brief Class emulating the gridworld environment.
  * \author tkornuta
  */
 class Gridworld : public mic::environments::Environment {
@@ -217,12 +217,6 @@ public:
 	 * @return True if position is valid and was reached, false otherwise.
 	 */
 	virtual bool moveAgentToPosition(mic::types::Position2D pos_);
-
-	/*!
-	 * Moves agent to the desired position, disregarding whether it is valid or not.
-	 * @param pos_ Desired position of the agent.
-	 */
-	void moveAgentToPositionForced(mic::types::Position2D pos_);
 
 	/*!
 	 * Returns the reward associated with the given state.

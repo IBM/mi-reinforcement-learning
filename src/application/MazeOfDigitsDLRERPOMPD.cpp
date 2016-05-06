@@ -78,7 +78,7 @@ void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
 
 void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
 	// Hardcode batchsize - for fastening the display!
-	batch_size = grid_env.getObservationWidth() * grid_env.getObservationHeight();
+	batch_size = env.getObservationWidth() * env.getObservationHeight();
 
 	// Try to load neural network from file.
 	if ((mlnn_load) && (neural_net.load(mlnn_filename))) {
@@ -86,7 +86,7 @@ void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
 	} else {
 		// Create a simple neural network.
 		// gridworld wxhx4 -> 100 -> 4 -> regression!.
-		neural_net.addLayer(new Linear((size_t) grid_env.getObservationSize(), 250, batch_size));
+		neural_net.addLayer(new Linear((size_t) env.getObservationSize(), 250, batch_size));
 		neural_net.addLayer(new ReLU(250, 250, batch_size));
 		neural_net.addLayer(new Linear(250, 100, batch_size));
 		neural_net.addLayer(new ReLU(100, 100, batch_size));
@@ -104,19 +104,19 @@ void MazeOfDigitsDLRERPOMPD::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
-	grid_env.initializePropertyDependentVariables();
+	env.initializePropertyDependentVariables();
 
 	LOG(LSTATUS) << "Network responses: \n" <<  streamNetworkResponseTable();
-	LOG(LSTATUS) << "Environment: \n" << grid_env.environmentToString();
-	LOG(LSTATUS) << "Observation: \n"  << grid_env.observationToString();
+	LOG(LSTATUS) << "Observation: \n"  << env.observationToString();
+	LOG(LSTATUS) << "Environment: \n" << env.environmentToString();
 }
 
 
 void MazeOfDigitsDLRERPOMPD::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
-	mic::types::Position2D current_position = grid_env.getAgentPosition();
-	float reward = grid_env.getStateReward(current_position);
+	mic::types::Position2D current_position = env.getAgentPosition();
+	float reward = env.getStateReward(current_position);
 	sum_of_iterations += iteration;
 	sum_of_rewards += reward;
 	if (reward > 0)
@@ -145,33 +145,33 @@ std::string MazeOfDigitsDLRERPOMPD::streamNetworkResponseTable() {
 	std::string actions_table;
 
 	// Remember the current state i.e. player position.
-	mic::types::Position2D current_player_pos_t = grid_env.getAgentPosition();
+	mic::types::Position2D current_player_pos_t = env.getAgentPosition();
 
 	// Create new matrices for batches of inputs and targets.
-	MatrixXfPtr inputs_batch(new MatrixXf(grid_env.getObservationSize(), batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf(env.getObservationSize(), batch_size));
 
 	// Assume that the batch_size = grid_env.getWidth() * grid_env.getHeight()
-	assert(grid_env.getObservationWidth()*grid_env.getObservationHeight() == batch_size);
+	assert(env.getObservationWidth()*env.getObservationHeight() == batch_size);
 
 
-	size_t dx = (grid_env.getObservationWidth()-1)/2;
-	size_t dy = (grid_env.getObservationHeight()-1)/2;
-	mic::types::Position2D p = grid_env.getAgentPosition();
+	size_t dx = (env.getObservationWidth()-1)/2;
+	size_t dy = (env.getObservationHeight()-1)/2;
+	mic::types::Position2D p = env.getAgentPosition();
 
 	// Copy data.
-	for (long oy=0, ey=(p.y-dy); oy<grid_env.getObservationHeight(); oy++, ey++){
-		for (long ox=0, ex=(p.x-dx); ox<grid_env.getObservationWidth(); ox++, ex++) {
+	for (long oy=0, ey=(p.y-dy); oy<env.getObservationHeight(); oy++, ey++){
+		for (long ox=0, ex=(p.x-dx); ox<env.getObservationWidth(); ox++, ex++) {
 
 	//for (size_t y=0; y<grid_env.getObservationHeight(); y++){
 //		for (size_t x=0; x<grid_env.getObservationWidth(); x++) {
 
 			// Move the player to given state - disregarding whether it was successful or not, answers for walls/positions outside of the gridworld do not interes us anyway...
-			if (!grid_env.moveAgentToPosition(Position2D(ex,ey)))
+			if (!env.moveAgentToPosition(Position2D(ex,ey)))
 				LOG(LDEBUG) << "Failed!";
 			// Encode the current state.
-			mic::types::MatrixXfPtr encoded_state = grid_env.encodeObservation();
+			mic::types::MatrixXfPtr encoded_state = env.encodeObservation();
 			// Add to batch.
-			inputs_batch->col(oy*grid_env.getObservationWidth()+ox) = encoded_state->col(0);
+			inputs_batch->col(oy*env.getObservationWidth()+ox) = encoded_state->col(0);
 		}//: for x
 	}//: for y
 
@@ -184,14 +184,14 @@ std::string MazeOfDigitsDLRERPOMPD::streamNetworkResponseTable() {
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
 	// Generate all possible states and all possible rewards.
-	for (long oy=0, ey=(p.y-dy); oy<grid_env.getObservationHeight(); oy++, ey++){
+	for (long oy=0, ey=(p.y-dy); oy<env.getObservationHeight(); oy++, ey++){
 		rewards_table += "| ";
 		actions_table += "| ";
-		for (long ox=0, ex=(p.x-dx); ox<grid_env.getObservationWidth(); ox++, ex++) {
+		for (long ox=0, ex=(p.x-dx); ox<env.getObservationWidth(); ox++, ex++) {
 			float bestqval = -std::numeric_limits<float>::infinity();
 			size_t best_action = -1;
 			for (size_t a=0; a<4; a++) {
-				float qval = (*predicted_batch)(a, oy*grid_env.getObservationWidth()+ox);
+				float qval = (*predicted_batch)(a, oy*env.getObservationWidth()+ox);
 
 				rewards_table += std::to_string(qval);
 				if (a==3)
@@ -200,7 +200,7 @@ std::string MazeOfDigitsDLRERPOMPD::streamNetworkResponseTable() {
 					rewards_table += " , ";
 
 				// Remember the best value.
-				if (grid_env.isStateAllowed(ex,ey) && (!grid_env.isStateTerminal(ex,ey)) && grid_env.isActionAllowed(ex,ey,a) && (qval > bestqval)){
+				if (env.isStateAllowed(ex,ey) && (!env.isStateTerminal(ex,ey)) && env.isActionAllowed(ex,ey,a) && (qval > bestqval)){
 					bestqval = qval;
 					best_action = a;
 				}//: if
@@ -220,7 +220,7 @@ std::string MazeOfDigitsDLRERPOMPD::streamNetworkResponseTable() {
 	}//: for y
 
 	// Move player to previous position.
-	grid_env.moveAgentToPosition(current_player_pos_t);
+	env.moveAgentToPosition(current_player_pos_t);
 
 	return rewards_table + actions_table;
 }
@@ -240,7 +240,7 @@ float MazeOfDigitsDLRERPOMPD::computeBestValueForGivenStateAndPredictions(mic::t
 
 	for(mic::types::NESWAction action : actions) {
 		// .. and find the value of teh best allowed action.
-		if(grid_env.isActionAllowed(player_position_, action)) {
+		if(env.isActionAllowed(player_position_, action)) {
 			float qvalue = predictions_[(size_t)action.getType()];
 			if (qvalue > best_qvalue)
 				best_qvalue = qvalue;
@@ -254,16 +254,16 @@ float MazeOfDigitsDLRERPOMPD::computeBestValueForGivenStateAndPredictions(mic::t
 mic::types::MatrixXfPtr MazeOfDigitsDLRERPOMPD::getPredictedRewardsForGivenState(mic::types::Position2D player_position_) {
 	LOG(LTRACE) << "getPredictedRewardsForGivenState()";
 	// Remember the current state i.e. player position.
-	mic::types::Position2D current_player_pos_t = grid_env.getAgentPosition();
+	mic::types::Position2D current_player_pos_t = env.getAgentPosition();
 
 	// Move the player to given state.
-	grid_env.moveAgentToPosition(player_position_);
+	env.moveAgentToPosition(player_position_);
 
 	// Encode the current state.
-	mic::types::MatrixXfPtr encoded_state = grid_env.encodeObservation();
+	mic::types::MatrixXfPtr encoded_state = env.encodeObservation();
 
 	// Create NEW matrix for the inputs batch.
-	MatrixXfPtr inputs_batch(new MatrixXf(grid_env.getObservationSize(), batch_size));
+	MatrixXfPtr inputs_batch(new MatrixXf(env.getObservationSize(), batch_size));
 	inputs_batch->setZero();
 
 	// Set the first input - only this one interests us.
@@ -285,7 +285,7 @@ mic::types::MatrixXfPtr MazeOfDigitsDLRERPOMPD::getPredictedRewardsForGivenState
 	//LOG(LERROR) << "Returned predictions sample:\n" << predictions_sample->transpose();
 
 	// Move player to previous position.
-	grid_env.moveAgentToPosition(current_player_pos_t);
+	env.moveAgentToPosition(current_player_pos_t);
 
 	// Return the predictions.
 	return predictions_sample;
@@ -312,7 +312,7 @@ mic::types::NESWAction MazeOfDigitsDLRERPOMPD::selectBestActionForGivenState(mic
 
 	for(size_t a=0; a<4; a++) {
 		// Find the best action allowed.
-		if(grid_env.isActionAllowed(player_position_, mic::types::NESWAction((mic::types::NESW)a))) {
+		if(env.isActionAllowed(player_position_, mic::types::NESWAction((mic::types::NESW)a))) {
 			float qvalue = pred[a];
 			if (qvalue > best_qvalue){
 				best_qvalue = qvalue;
@@ -331,7 +331,7 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 	double 	nn_weight_decay = 0;
 
 	// Get player pos at time t.
-	mic::types::Position2D player_pos_t= grid_env.getAgentPosition();
+	mic::types::Position2D player_pos_t= env.getAgentPosition();
 	LOG(LINFO) << "Agent position at state t: " << player_pos_t;
 
 	// Select the action.
@@ -356,10 +356,10 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 	}//: if
 
 	// Execute action - do not monitor the success.
-	grid_env.moveAgent(action);
+	env.moveAgent(action);
 
 	// Get new state s(t+1).
-	mic::types::Position2D player_pos_t_prim = grid_env.getAgentPosition();
+	mic::types::Position2D player_pos_t_prim = env.getAgentPosition();
 	LOG(LINFO) << "Agent position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 	// Collect the experience.
@@ -373,8 +373,8 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 	// Deep Q learning - train network with random sample from the experience memory.
 	if (experiences.size() >= 2*batch_size) {
 		// Create new matrices for batches of inputs and targets.
-		MatrixXfPtr inputs_t_batch(new MatrixXf(grid_env.getObservationSize(), batch_size));
-		MatrixXfPtr inputs_t_prim_batch(new MatrixXf(grid_env.getObservationSize(), batch_size));
+		MatrixXfPtr inputs_t_batch(new MatrixXf(env.getObservationSize(), batch_size));
+		MatrixXfPtr inputs_t_prim_batch(new MatrixXf(env.getObservationSize(), batch_size));
 		MatrixXfPtr targets_t_batch(new MatrixXf(4, batch_size));
 
 		// Get the random batch.
@@ -395,9 +395,9 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 
 			// Replay the experience.
 			// "Simulate" moving player to position from state/time (t).
-			grid_env.moveAgentToPosition(ge_ptr->s_t);
+			env.moveAgentToPosition(ge_ptr->s_t);
 			// Encode the state at time (t).
-			mic::types::MatrixXfPtr encoded_state_t = grid_env.encodeObservation();
+			mic::types::MatrixXfPtr encoded_state_t = env.encodeObservation();
 			//float* state = encoded_state_t->data();
 
 			// Copy the encoded state to inputs batch.
@@ -419,9 +419,9 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 
 			// Replay the experience.
 			// "Simulate" moving player to position from state/time (t+1).
-			grid_env.moveAgentToPosition(ge_ptr->s_t_prim);
+			env.moveAgentToPosition(ge_ptr->s_t_prim);
 			// Encode the state at time (t+1).
-			mic::types::MatrixXfPtr encoded_state_t = grid_env.encodeObservation();
+			mic::types::MatrixXfPtr encoded_state_t = env.encodeObservation();
 			//float* state = encoded_state_t->data();
 
 			// Copy the encoded state to inputs batch.
@@ -444,9 +444,9 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 			if (ge_ptr->s_t == ge_ptr->s_t_prim) {
 				// The move was not possible! Learn that as well.
 				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = 3*step_reward;
-			} else if(grid_env.isStateTerminal(ge_ptr->s_t_prim)) {
+			} else if(env.isStateTerminal(ge_ptr->s_t_prim)) {
 				// The position at (t+1) state appears to be terminal - learn the reward.
-				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = grid_env.getStateReward(ge_ptr->s_t_prim);
+				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = env.getStateReward(ge_ptr->s_t_prim);
 			} else {
 				MatrixXfPtr preds_t_prim (new MatrixXf(4, 1));
 				preds_t_prim->col(0) = predictions_t_prim_batch->col(i);
@@ -473,17 +473,17 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 		//LOG(LDEBUG) << "Network responses after training:" << std::endl << streamNetworkResponseTable();
 
 		// Finish the replay: move the player to REAL, CURRENT POSITION.
-		grid_env.moveAgentToPosition(player_pos_t_prim);
+		env.moveAgentToPosition(player_pos_t_prim);
 	}//: if enough experiences
 	else
 		LOG(LWARNING) << "Not enough samples in the experience replay memory!";
 
 	LOG(LSTATUS) << "Network responses: \n" << streamNetworkResponseTable();
-	LOG(LSTATUS) << "New observation: \n"  << grid_env.observationToString();
-	LOG(LSTATUS) << "Environment: \n"  << grid_env.environmentToString();
+	LOG(LSTATUS) << "New observation: \n"  << env.observationToString();
+	LOG(LSTATUS) << "Environment: \n"  << env.environmentToString();
 
 	// Check whether state t+1 is terminal - finish the episode.
-	if(grid_env.isStateTerminal(grid_env.getAgentPosition()))
+	if(env.isStateTerminal(env.getAgentPosition()))
 		return false;
 
 	// Check whether we reached maximum number of iterations.

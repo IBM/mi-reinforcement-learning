@@ -44,6 +44,17 @@ public:
 	 * @param max_y_ Max y cooridnate.
 	 */
 	Position2D(size_t min_x_, size_t max_x_, size_t min_y_, size_t max_y_) {
+		rand(min_x_, max_x_, min_y_, max_y_);
+	}
+
+	/*!
+	 * Random position.
+	 * @param min_x_ Min x cooridnate.
+	 * @param max_x_ Max x cooridnate.
+	 * @param min_y_ Min y cooridnate.
+	 * @param max_y_ Max y cooridnate.
+	 */
+	void rand(size_t min_x_, size_t max_x_, size_t min_y_, size_t max_y_) {
 		// Initialize device and generator.
 		std::random_device rd;
 		std::mt19937_64 rng_mt19937_64(rd());
