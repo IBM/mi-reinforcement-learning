@@ -657,7 +657,7 @@ mic::types::MatrixXfPtr Gridworld::encodeObservation() {
 	LOG(LDEBUG) << "encodeObservation()";
 	if (pomdp_flag) {
 		mic::types::Position2D p = getAgentPosition();
-		LOG(LERROR) << p;
+		LOG(LDEBUG) << p;
 
 		mic::types::TensorXf obs = getObservation();
 		obs.conservativeResize({1, roi_size * roi_size * channels});
@@ -679,7 +679,6 @@ mic::types::TensorXf Gridworld::getObservation() {
 
 	size_t delta = (roi_size-1)/2;
 	mic::types::Position2D p = getAgentPosition();
-	LOG(LERROR) << p;
 
 	// Copy data.
 	for (long oy=0, ey=(p.y-delta); oy<roi_size; oy++, ey++){
@@ -698,9 +697,7 @@ mic::types::TensorXf Gridworld::getObservation() {
 		}//: for x
 	}//: for y
 
-	LOG(LERROR) << observation;
-
-	LOG(LERROR) << std::endl << gridToString(observation);
+	LOG(LDEBUG) << std::endl << gridToString(observation);
 
 	return observation;
 }

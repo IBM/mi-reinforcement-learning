@@ -150,14 +150,26 @@ std::string GridworldDRLExperienceReplayPOMDP::streamNetworkResponseTable() {
 
 	// Assume that the batch_size = grid_env.getWidth() * grid_env.getHeight()
 	assert(grid_env.getObservationWidth()*grid_env.getObservationHeight() == batch_size);
-	for (size_t y=0; y<grid_env.getObservationHeight(); y++){
-		for (size_t x=0; x<grid_env.getObservationWidth(); x++) {
-			// Move the player to given state - disregarding whether it is valid or not.
-			grid_env.moveAgentToPositionForced(Position2D(x,y));
+
+
+	size_t dx = (grid_env.getObservationWidth()-1)/2;
+	size_t dy = (grid_env.getObservationHeight()-1)/2;
+	mic::types::Position2D p = grid_env.getAgentPosition();
+
+	// Copy data.
+	for (long oy=0, ey=(p.y-dy); oy<grid_env.getObservationHeight(); oy++, ey++){
+		for (long ox=0, ex=(p.x-dx); ox<grid_env.getObservationWidth(); ox++, ex++) {
+
+	//for (size_t y=0; y<grid_env.getObservationHeight(); y++){
+//		for (size_t x=0; x<grid_env.getObservationWidth(); x++) {
+
+			// Move the player to given state - disregarding whether it was successful or not, answers for walls/positions outside of the gridworld do not interes us anyway...
+			if (!grid_env.moveAgentToPosition(Position2D(ex,ey)))
+				LOG(LDEBUG) << "Failed!";
 			// Encode the current state.
 			mic::types::MatrixXfPtr encoded_state = grid_env.encodeObservation();
 			// Add to batch.
-			inputs_batch->col(y*grid_env.getObservationWidth()+x) = encoded_state->col(0);
+			inputs_batch->col(oy*grid_env.getObservationWidth()+ox) = encoded_state->col(0);
 		}//: for x
 	}//: for y
 
@@ -170,14 +182,14 @@ std::string GridworldDRLExperienceReplayPOMDP::streamNetworkResponseTable() {
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
 	// Generate all possible states and all possible rewards.
-	for (size_t y=0; y<grid_env.getObservationHeight(); y++){
+	for (long oy=0, ey=(p.y-dy); oy<grid_env.getObservationHeight(); oy++, ey++){
 		rewards_table += "| ";
 		actions_table += "| ";
-		for (size_t x=0; x<grid_env.getObservationWidth(); x++) {
+		for (long ox=0, ex=(p.x-dx); ox<grid_env.getObservationWidth(); ox++, ex++) {
 			float bestqval = -std::numeric_limits<float>::infinity();
 			size_t best_action = -1;
 			for (size_t a=0; a<4; a++) {
-				float qval = (*predicted_batch)(a, y*grid_env.getObservationWidth()+x);
+				float qval = (*predicted_batch)(a, oy*grid_env.getObservationWidth()+ox);
 
 				rewards_table += std::to_string(qval);
 				if (a==3)
@@ -186,7 +198,7 @@ std::string GridworldDRLExperienceReplayPOMDP::streamNetworkResponseTable() {
 					rewards_table += " , ";
 
 				// Remember the best value.
-				if (grid_env.isStateAllowed(x,y) && (!grid_env.isStateTerminal(x,y)) && grid_env.isActionAllowed(x,y,a) && (qval > bestqval)){
+				if (grid_env.isStateAllowed(ex,ey) && (!grid_env.isStateTerminal(ex,ey)) && grid_env.isActionAllowed(ex,ey,a) && (qval > bestqval)){
 					bestqval = qval;
 					best_action = a;
 				}//: if
@@ -464,8 +476,9 @@ bool GridworldDRLExperienceReplayPOMDP::performSingleStep() {
 	else
 		LOG(LWARNING) << "Not enough samples in the experience replay memory!";
 
-	LOG(LSTATUS) << "Network responses:" << std::endl << streamNetworkResponseTable();
+	LOG(LSTATUS) << "Network responses: \n" << streamNetworkResponseTable();
 	LOG(LSTATUS) << "New observation: \n"  << grid_env.observationToString();
+	LOG(LSTATUS) << "Environment: \n"  << grid_env.environmentToString();
 
 	// Check whether state t+1 is terminal - finish the episode.
 	if(grid_env.isStateTerminal(grid_env.getAgentPosition()))
