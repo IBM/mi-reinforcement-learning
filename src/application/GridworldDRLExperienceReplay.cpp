@@ -347,7 +347,7 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 	LOG(LINFO) << "Agent position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
 
 	// Collect the experience.
-	GridworldExperiencePtr exp(new GridworldExperience(player_pos_t, action, player_pos_t_prim));
+	SpatialExperiencePtr exp(new SpatialExperience(player_pos_t, action, player_pos_t_prim));
 	// Create an empty matrix for rewards - this will be recalculated each time the experience will be replayed anyway.
 	MatrixXfPtr rewards (new MatrixXf(4 , batch_size));
 	// Add experience to experience table.
@@ -362,20 +362,20 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 		MatrixXfPtr targets_t_batch(new MatrixXf(4, batch_size));
 
 		// Get the random batch.
-		GridworldExperienceBatch geb = experiences.getRandomBatch();
+		SpatialExperienceBatch geb = experiences.getRandomBatch();
 
 		// Debug purposes.
 		geb.setNextSampleIndex(0);
 		for (size_t i=0; i<batch_size; i++) {
-			GridworldExperienceSample ges = geb.getNextSample();
-			GridworldExperiencePtr ge_ptr = ges.data();
+			SpatialExperienceSample ges = geb.getNextSample();
+			SpatialExperiencePtr ge_ptr = ges.data();
 			LOG(LDEBUG) << "Training sample : " << ge_ptr->s_t << " -> " << ge_ptr->a_t << " -> " << ge_ptr->s_t_prim;
 		}//: for
 
 		// Iterate through samples and create inputs_t_batch.
 		for (size_t i=0; i<batch_size; i++) {
-			GridworldExperienceSample ges = geb.getNextSample();
-			GridworldExperiencePtr ge_ptr = ges.data();
+			SpatialExperienceSample ges = geb.getNextSample();
+			SpatialExperiencePtr ge_ptr = ges.data();
 
 			// Replay the experience.
 			// "Simulate" moving player to position from state/time (t).
@@ -398,8 +398,8 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 		// Iterate through samples and create inputs_t_prim_batch.
 		geb.setNextSampleIndex(0);
 		for (size_t i=0; i<batch_size; i++) {
-			GridworldExperienceSample ges = geb.getNextSample();
-			GridworldExperiencePtr ge_ptr = ges.data();
+			SpatialExperienceSample ges = geb.getNextSample();
+			SpatialExperiencePtr ge_ptr = ges.data();
 
 			// Replay the experience.
 			// "Simulate" moving player to position from state/time (t+1).
@@ -422,8 +422,8 @@ bool GridworldDRLExperienceReplay::performSingleStep() {
 		// Iterate through samples and create inputs_t_prim_batch.
 		geb.setNextSampleIndex(0);
 		for (size_t i=0; i<batch_size; i++) {
-			GridworldExperienceSample ges = geb.getNextSample();
-			GridworldExperiencePtr ge_ptr = ges.data();
+			SpatialExperienceSample ges = geb.getNextSample();
+			SpatialExperiencePtr ge_ptr = ges.data();
 
 			if (ge_ptr->s_t == ge_ptr->s_t_prim) {
 				// The move was not possible! Learn that as well.

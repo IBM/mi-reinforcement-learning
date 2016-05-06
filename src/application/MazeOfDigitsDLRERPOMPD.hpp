@@ -1,12 +1,12 @@
 /*!
- * \file GridworldDRLExperienceReplayPOMDP.hpp
+ * \file MazeOfDigitsDLRERPOMPD.hpp
  * \brief 
  * \author tkornut
- * \date May 5, 2016
+ * \date May 6, 2016
  */
 
-#ifndef SRC_APPLICATION_GRIDWORLDDRLEXPERIENCEREPLAYPOMDP_HPP_
-#define SRC_APPLICATION_GRIDWORLDDRLEXPERIENCEREPLAYPOMDP_HPP_
+#ifndef SRC_APPLICATION_MAZEOFDIGITSDLRERPOMPD_HPP_
+#define SRC_APPLICATION_MAZEOFDIGITSDLRERPOMPD_HPP_
 
 #include <vector>
 #include <string>
@@ -20,7 +20,7 @@ using namespace mic::opengl::visualization;
 using namespace mic::mlnn;
 using namespace mic::types;
 
-#include <types/Gridworld.hpp>
+#include <types/Gridworld.hpp> //MazeOfDigits.hpp>
 #include <types/SpatialExperienceMemory.hpp>
 
 namespace mic {
@@ -28,22 +28,22 @@ namespace application {
 
 
 /*!
- * \brief Class responsible for solving the gridworld problem with Q-learning, neural network used for approximation of the rewards and experience replay using for (batch) training of the neural network.
- * In this case there is an assumption that the agent observes only part of the environment (POMPD).
+ * \brief Application of Partially Observable Deep Q-learning with Experience Reply to the maze of digits problem.
+ * There is an assumption that the agent observes only part of the environment (POMPD).
  * \author tkornuta
  */
-class GridworldDRLExperienceReplayPOMDP: public mic::opengl::application::OpenGLEpisodicApplication {
+class MazeOfDigitsDLRERPOMPD: public mic::opengl::application::OpenGLEpisodicApplication {
 public:
 	/*!
 	 * Default Constructor. Sets the application/node name, default values of variables etc.
 	 * @param node_name_ Name of the application/node (in configuration file).
 	 */
-	GridworldDRLExperienceReplayPOMDP(std::string node_name_ = "application");
+	MazeOfDigitsDLRERPOMPD(std::string node_name_ = "application");
 
 	/*!
 	 * Destructor.
 	 */
-	virtual ~GridworldDRLExperienceReplayPOMDP();
+	virtual ~MazeOfDigitsDLRERPOMPD();
 
 protected:
 
@@ -182,4 +182,4 @@ private:
 } /* namespace application */
 } /* namespace mic */
 
-#endif /* SRC_APPLICATION_GRIDWORLDDRLEXPERIENCEREPLAYPOMDP_HPP_ */
+#endif /* SRC_APPLICATION_MAZEOFDIGITSDLRERPOMPD_HPP_ */

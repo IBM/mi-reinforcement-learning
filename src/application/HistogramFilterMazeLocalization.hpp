@@ -18,7 +18,7 @@
 #include <opengl/visualization/WindowChart.hpp>
 #include <opengl/visualization/WindowFloatCollectorChart.hpp>
 
-#include "../types/Action2D.hpp"
+#include <types/Action2D.hpp>
 using namespace mic::opengl::visualization;
 
 

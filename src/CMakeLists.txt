@@ -20,14 +20,14 @@ set(BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE ON CACHE BOOL "Build the ap
 
 if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 	# Create exeutable.
-	add_executable(maze_of_digits_histogram_filter_app 
+	add_executable(mazeofdigits_histogram_filter_app 
 		application/HistogramFilterMazeLocalization.cpp
 		application/console_application_main.cpp
 		algorithms/MazeHistogramFilter.cpp
 		data_io/MazeMatrixImporter.cpp
 		)
 	# Link it with shared libraries.
-	target_link_libraries(maze_of_digits_histogram_filter_app 
+	target_link_libraries(mazeofdigits_histogram_filter_app 
 		logger
 		configuration
 		application
@@ -40,7 +40,7 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 		)
 
 	# install test to bin directory
-	install(TARGETS maze_of_digits_histogram_filter_app RUNTIME DESTINATION bin)
+	install(TARGETS mazeofdigits_histogram_filter_app RUNTIME DESTINATION bin)
 	
 endif(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 
@@ -49,14 +49,14 @@ set(BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC ON CACHE BOOL "Build the 
 
 if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 	# Create exeutable.
-	add_executable(maze_of_digits_histogram_filter_episodic_app 
+	add_executable(mazeofdigits_histogram_filter_episodic_app 
 		application/EpisodicHistogramFilterMazeLocalization.cpp
 		application/console_application_main.cpp
 		algorithms/MazeHistogramFilter.cpp
 		data_io/MazeMatrixImporter.cpp
 		)
 	# Link it with shared libraries.
-	target_link_libraries(maze_of_digits_histogram_filter_episodic_app 
+	target_link_libraries(mazeofdigits_histogram_filter_episodic_app 
 		logger
 		configuration
 		application
@@ -69,7 +69,7 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 		)
 
 	# install test to bin directory
-	install(TARGETS maze_of_digits_histogram_filter_episodic_app RUNTIME DESTINATION bin)
+	install(TARGETS mazeofdigits_histogram_filter_episodic_app RUNTIME DESTINATION bin)
 	
 endif(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 
@@ -293,3 +293,29 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 endif(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 
 
+set(BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP ON CACHE BOOL "Build the application solving the maze of digits with partial observation and Deep Reinforcement Learning with Experience Replay.")
+
+if(${BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
+	# Create exeutable.
+	add_executable(mazeofdigits_drl_er_pomdp_app 
+		application/MazeOfDigitsDLRERPOMPD.cpp
+		types/Gridworld.cpp
+		types/Environment.cpp
+		application/console_application_main.cpp
+		)
+	# Link it with shared libraries.
+	target_link_libraries(mazeofdigits_drl_er_pomdp_app 
+		logger
+		configuration
+		application
+		types
+		data_utils
+		mlnn
+		visualization_opengl
+		${Boost_LIBRARIES}  
+		)
+
+	# install test to bin directory
+	install(TARGETS mazeofdigits_drl_er_pomdp_app RUNTIME DESTINATION bin)
+	
+endif(${BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})

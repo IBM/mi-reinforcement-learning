@@ -1,14 +1,14 @@
 /*!
- * \file GridworldDRLExperienceReplayPOMDP.cpp
+ * \file MazeOfDigitsDLRERPOMPD.cpp
  * \brief 
  * \author tkornut
- * \date May 5, 2016
+ * \date May 6, 2016
  */
 
 #include <limits>
 #include <data_utils/RandomGenerator.hpp>
 
-#include <application/GridworldDRLExperienceReplayPOMDP.hpp>
+#include <application/MazeOfDigitsDLRERPOMPD.hpp>
 
 namespace mic {
 namespace application {
@@ -18,11 +18,11 @@ namespace application {
  * \author tkornuta
  */
 void RegisterApplication (void) {
-	REGISTER_APPLICATION(mic::application::GridworldDRLExperienceReplayPOMDP);
+	REGISTER_APPLICATION(mic::application::MazeOfDigitsDLRERPOMPD);
 }
 
 
-GridworldDRLExperienceReplayPOMDP::GridworldDRLExperienceReplayPOMDP(std::string node_name_) : OpenGLEpisodicApplication(node_name_),
+MazeOfDigitsDLRERPOMPD::MazeOfDigitsDLRERPOMPD(std::string node_name_) : OpenGLEpisodicApplication(node_name_),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.005),
@@ -49,12 +49,12 @@ GridworldDRLExperienceReplayPOMDP::GridworldDRLExperienceReplayPOMDP(std::string
 }
 
 
-GridworldDRLExperienceReplayPOMDP::~GridworldDRLExperienceReplayPOMDP() {
+MazeOfDigitsDLRERPOMPD::~MazeOfDigitsDLRERPOMPD() {
 
 }
 
 
-void GridworldDRLExperienceReplayPOMDP::initialize(int argc, char* argv[]) {
+void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
@@ -71,12 +71,12 @@ void GridworldDRLExperienceReplayPOMDP::initialize(int argc, char* argv[]) {
 	number_of_successes = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("GridworldDRLExperienceReplayPOMDP", 256, 256, 0, 0);
+	w_chart = new WindowFloatCollectorChart("MazeOfDigitsDLRERPOMPD", 256, 256, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }
 
-void GridworldDRLExperienceReplayPOMDP::initializePropertyDependentVariables() {
+void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
 	// Hardcode batchsize - for fastening the display!
 	batch_size = grid_env.getObservationWidth() * grid_env.getObservationHeight();
 
@@ -100,7 +100,7 @@ void GridworldDRLExperienceReplayPOMDP::initializePropertyDependentVariables() {
 }
 
 
-void GridworldDRLExperienceReplayPOMDP::startNewEpisode() {
+void MazeOfDigitsDLRERPOMPD::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
@@ -112,7 +112,7 @@ void GridworldDRLExperienceReplayPOMDP::startNewEpisode() {
 }
 
 
-void GridworldDRLExperienceReplayPOMDP::finishCurrentEpisode() {
+void MazeOfDigitsDLRERPOMPD::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
 	mic::types::Position2D current_position = grid_env.getAgentPosition();
@@ -139,7 +139,7 @@ void GridworldDRLExperienceReplayPOMDP::finishCurrentEpisode() {
 }
 
 
-std::string GridworldDRLExperienceReplayPOMDP::streamNetworkResponseTable() {
+std::string MazeOfDigitsDLRERPOMPD::streamNetworkResponseTable() {
 	LOG(LTRACE) << "streamNetworkResponseTable()";
 	std::string rewards_table;
 	std::string actions_table;
@@ -227,7 +227,7 @@ std::string GridworldDRLExperienceReplayPOMDP::streamNetworkResponseTable() {
 
 
 
-float GridworldDRLExperienceReplayPOMDP::computeBestValueForGivenStateAndPredictions(mic::types::Position2D player_position_, float* predictions_){
+float MazeOfDigitsDLRERPOMPD::computeBestValueForGivenStateAndPredictions(mic::types::Position2D player_position_, float* predictions_){
 	LOG(LTRACE) << "computeBestValueForGivenState()";
 	float best_qvalue = -std::numeric_limits<float>::infinity();
 
@@ -251,7 +251,7 @@ float GridworldDRLExperienceReplayPOMDP::computeBestValueForGivenStateAndPredict
 }
 
 
-mic::types::MatrixXfPtr GridworldDRLExperienceReplayPOMDP::getPredictedRewardsForGivenState(mic::types::Position2D player_position_) {
+mic::types::MatrixXfPtr MazeOfDigitsDLRERPOMPD::getPredictedRewardsForGivenState(mic::types::Position2D player_position_) {
 	LOG(LTRACE) << "getPredictedRewardsForGivenState()";
 	// Remember the current state i.e. player position.
 	mic::types::Position2D current_player_pos_t = grid_env.getAgentPosition();
@@ -291,7 +291,7 @@ mic::types::MatrixXfPtr GridworldDRLExperienceReplayPOMDP::getPredictedRewardsFo
 	return predictions_sample;
 }
 
-mic::types::NESWAction GridworldDRLExperienceReplayPOMDP::selectBestActionForGivenState(mic::types::Position2D player_position_){
+mic::types::NESWAction MazeOfDigitsDLRERPOMPD::selectBestActionForGivenState(mic::types::Position2D player_position_){
 	LOG(LTRACE) << "selectBestAction";
 
 	// Greedy methods - returns the index of element with greatest value.
@@ -324,7 +324,7 @@ mic::types::NESWAction GridworldDRLExperienceReplayPOMDP::selectBestActionForGiv
 	return best_action;
 }
 
-bool GridworldDRLExperienceReplayPOMDP::performSingleStep() {
+bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
 	// TMP!

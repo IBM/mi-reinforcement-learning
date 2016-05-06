@@ -16,7 +16,11 @@
 namespace mic {
 namespace types {
 
-struct GridworldExperience {
+/*!
+ * \brief Structure storing a spatial experience - a triplet of position in time t, executed action and position in time t+1.
+ * \author tkornuta
+ */
+struct SpatialExperience {
 	/// State at time t.
 	mic::types::Position2D s_t;
 
@@ -32,7 +36,7 @@ struct GridworldExperience {
 	 * @param a_t_ Action at time t.
 	 * @param s_t_prim_ State at time t+1 (t prim).
 	 */
-	GridworldExperience(mic::types::Position2D s_t_, mic::types::NESWAction a_t_, mic::types::Position2D s_t_prim_) {
+	SpatialExperience(mic::types::Position2D s_t_, mic::types::NESWAction a_t_, mic::types::Position2D s_t_prim_) {
 		s_t = s_t_;
 		a_t = a_t_;
 		s_t_prim = s_t_prim_;
@@ -41,31 +45,31 @@ struct GridworldExperience {
 };
 
 /*!
- * \brief Shared pointer to gridworld experience object.
+ * \brief Shared pointer to spatial experience object.
  * \author tkornuta
  */
-typedef std::shared_ptr < mic::types::GridworldExperience> GridworldExperiencePtr;
+typedef std::shared_ptr < mic::types::SpatialExperience> SpatialExperiencePtr;
 
 /*!
- * \brief Gridworld experience replay sample.
+ * \brief Spatial experience replay sample.
  * \author tkornuta
  */
-typedef  mic::types::Sample<mic::types::GridworldExperience, mic::types::MatrixXf> GridworldExperienceSample;
+typedef  mic::types::Sample<mic::types::SpatialExperience, mic::types::MatrixXf> SpatialExperienceSample;
 
 /*!
- * \brief Gridworld experience replay batch.
+ * \brief Spatial experience replay batch.
  * \author tkornuta
  */
-typedef  mic::types::Batch<mic::types::GridworldExperience, mic::types::MatrixXf> GridworldExperienceBatch;
+typedef  mic::types::Batch<mic::types::SpatialExperience, mic::types::MatrixXf> SpatialExperienceBatch;
 
 
 /*!
- * \brief Class representing the experience replay memory.
+ * \brief Class representing the spatial experience memory - used in memory replay.
  * Derived from the Batch class.
  * \author tkornuta
  *
  */
-class GridworldExperienceMemory : public mic::types::GridworldExperienceBatch{
+class SpatialExperienceMemory : public mic::types::SpatialExperienceBatch{
 public:
 
 	/*!
@@ -73,14 +77,14 @@ public:
 	 * @param number_of_experiences_ The size of the experience table.
 	 * @param batch_size_ The batch size.
 	 */
-	GridworldExperienceMemory(size_t number_of_experiences_, size_t batch_size_) : Batch(batch_size_), number_of_experiences(number_of_experiences_) {
+	SpatialExperienceMemory(size_t number_of_experiences_, size_t batch_size_) : Batch(batch_size_), number_of_experiences(number_of_experiences_) {
 
 	}
 
 	/*!
 	 * Virtual destructor. Empty.
 	 */
-	virtual ~GridworldExperienceMemory() { }
+	virtual ~SpatialExperienceMemory() { }
 
 	/*!
 	 * Adds sample to the batch.
@@ -88,7 +92,7 @@ public:
 	 * @param input_ Sample input.
 	 * @param target_ Sample target.
 	 */
-	virtual void add(std::shared_ptr<mic::types::GridworldExperience> input_, std::shared_ptr<mic::types::MatrixXf> target_) {
+	virtual void add(std::shared_ptr<mic::types::SpatialExperience> input_, std::shared_ptr<mic::types::MatrixXf> target_) {
 
 		if (sample_data.size() == number_of_experiences) {
 			// Initialize uniform index distribution - integers.

@@ -21,7 +21,7 @@ using namespace mic::mlnn;
 using namespace mic::types;
 
 #include <types/Gridworld.hpp>
-#include <types/GridworldExperienceMemory.hpp>
+#include <types/SpatialExperienceMemory.hpp>
 
 namespace mic {
 namespace application {
@@ -170,7 +170,7 @@ private:
 	/*!
 	 * Table of past experiences.
 	 */
-	GridworldExperienceMemory experiences;
+	SpatialExperienceMemory experiences;
 };
 
 } /* namespace application */

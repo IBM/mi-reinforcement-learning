@@ -51,23 +51,7 @@ public:
 	mic::environments::Gridworld & operator=(const mic::environments::Gridworld & gw_);
 
 	/*!
-	 * Initializes all variables that are property-dependent - generates the gridworld of a given, predefined type.
-	 * @param gridworld_type_ Type of the generated gridworld.
-	 * Currently available types:
-	 * 0: the exemplary grid 4x3.
-	 * 1: the classic cliff grid 5x3.
-	 * 2: the classic discount grid 5x5.
-	 * 3: the classic bridge grid 7x3.
-	 * 4: the classic book grid 4x4.
-	 * 5: the classic maze grid 4x4.
-	 * 6: gridworld from DQL example 4x4.
-	 * 7: slightly modified gridworld from DQL example 4x4.
-	 * 8: debug grid 2x2.
-	 * 9: debug grid 3x3.
-	 * -1 (or else): random grid - all items (wall, goal and pit, agent) placed randomly
-	 * -2 (or else): random grid - all items (wall, goal and pit, agent) placed randomly with multiple pits and walls
-	 * @param width_ Grid width (used in the case of random grid generation).
-	 * @param height_ Grid height (used in the case of random grid generation).
+	 * Initializes all variables that are property-dependent - generates the gridworld of a required (defined by property) type.
 	 */
 	virtual void initializePropertyDependentVariables();
 
@@ -269,7 +253,23 @@ public:
 
 protected:
 
-	/// Property: type of gridworld. Please refer to Gridworld::generateGridworld() method for more details on types of gridworlds.
+	///
+	/*!
+	 * Property: type of the generated gridworld.
+	 * Currently available types:
+	 * 0: the exemplary grid 4x3.
+	 * 1: the classic cliff grid 5x3.
+	 * 2: the classic discount grid 5x5.
+	 * 3: the classic bridge grid 7x3.
+	 * 4: the classic book grid 4x4.
+	 * 5: the classic maze grid 4x4.
+	 * 6: gridworld from DQL example 4x4.
+	 * 7: slightly modified gridworld from DQL example 4x4.
+	 * 8: debug grid 2x2.
+	 * 9: debug grid 3x3.
+	 * -1 (or else): random grid - all items (wall, goal and pit, agent) placed randomly
+	 * -2 (or else): random grid - all items (wall, goal and pit, agent) placed randomly with multiple pits and walls
+	 */
 	mic::configuration::Property<short> type;
 
 	/*!
