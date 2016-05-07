@@ -15,8 +15,8 @@
 		"mlnn_load" : 1
 	},
 	"maze_of_digits": {
-		"type": -1,
-		"width": 10,
+		"type": -4,
+		"width": 20,
 		"height": 10,
 		"roi_size": 5
 	}

@@ -106,7 +106,7 @@ void MazeOfDigitsDLRERPOMPD::startNewEpisode() {
 	// Generate the gridworld (and move player to initial position).
 	env.initializePropertyDependentVariables();
 
-	LOG(LSTATUS) << "Network responses: \n" <<  streamNetworkResponseTable();
+	LOG(LNOTICE) << "Network responses: \n" <<  streamNetworkResponseTable();
 	LOG(LSTATUS) << "Observation: \n"  << env.observationToString();
 	LOG(LSTATUS) << "Environment: \n" << env.environmentToString();
 }
@@ -478,8 +478,8 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 	else
 		LOG(LWARNING) << "Not enough samples in the experience replay memory!";
 
-	LOG(LSTATUS) << "Network responses: \n" << streamNetworkResponseTable();
-	LOG(LSTATUS) << "New observation: \n"  << env.observationToString();
+	LOG(LNOTICE) << "Network responses: \n" << streamNetworkResponseTable();
+	LOG(LSTATUS) << "Observation: \n"  << env.observationToString();
 	LOG(LSTATUS) << "Environment: \n"  << env.environmentToString();
 
 	// Check whether state t+1 is terminal - finish the episode.

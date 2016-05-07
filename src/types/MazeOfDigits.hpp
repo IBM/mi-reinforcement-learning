@@ -66,9 +66,14 @@ public:
 	void initExemplaryMaze();
 
 	/*!
-	 * Generates a random maze of size (width x height), with spatially dependent values of digits.
+	 * Generates a fully random maze of size (width x height), with spatially independent values of digits.
 	 */
 	void initFullyRandomMaze();
+
+	/*!
+	 * Generates a random maze of size (width x height), with spatially dependent values of digits, creating a heat map around the goal (9).
+	 */
+	void initRandomStructuredMaze();
 
 	/*!
 	 * Returns the tensor being the observation.
@@ -150,18 +155,9 @@ protected:
 	/*!
 	 * Property: type of the generated gridworld.
 	 * Currently available types:
-	 * 0: the exemplary grid 4x3.
-	 * 1: the classic cliff grid 5x3.
-	 * 2: the classic discount grid 5x5.
-	 * 3: the classic bridge grid 7x3.
-	 * 4: the classic book grid 4x4.
-	 * 5: the classic maze grid 4x4.
-	 * 6: gridworld from DQL example 4x4.
-	 * 7: slightly modified gridworld from DQL example 4x4.
-	 * 8: debug grid 2x2.
-	 * 9: debug grid 3x3.
-	 * -1 (or else): random grid - all items (wall, goal and pit, agent) placed randomly
-	 * -2 (or else): random grid - all items (wall, goal and pit, agent) placed randomly with multiple pits and walls
+	 * 0: the exemplary maze 4x4.
+	 * -1 (or else): random maze - random maze generated, but generated only once, random initial agent position in each episode
+	 * -2 (or else): random maze - all randomly generated each time
 	 */
 	mic::configuration::Property<short> type;
 

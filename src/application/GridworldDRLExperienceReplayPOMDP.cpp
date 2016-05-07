@@ -479,7 +479,7 @@ bool GridworldDRLExperienceReplayPOMDP::performSingleStep() {
 		LOG(LWARNING) << "Not enough samples in the experience replay memory!";
 
 	LOG(LSTATUS) << "Network responses: \n" << streamNetworkResponseTable();
-	LOG(LSTATUS) << "New observation: \n"  << grid_env.observationToString();
+	LOG(LSTATUS) << "Observation: \n"  << grid_env.observationToString();
 	LOG(LSTATUS) << "Environment: \n"  << grid_env.environmentToString();
 
 	// Check whether state t+1 is terminal - finish the episode.

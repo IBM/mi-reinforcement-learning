@@ -41,6 +41,9 @@ void MazeOfDigits::initializePropertyDependentVariables() {
 	// Generate adequate gridworld.
 	switch(type) {
 		case 0 : initExemplaryMaze(); break;
+		case -3:
+		case -4: initRandomStructuredMaze(); break;
+		case -2:
 		case -1:
 		default: initFullyRandomMaze();
 	}//: switch
@@ -52,7 +55,7 @@ void MazeOfDigits::initializePropertyDependentVariables() {
 
 
 void MazeOfDigits::initExemplaryMaze() {
-	LOG(LINFO) << "Generating exemplary maze";
+	LOG(LNOTICE) << "Generating an exemplary maze of digits";
 	/*
 	 * [['2','4','7','7'],
 	 *  ['1','5','7','9'],
@@ -69,7 +72,7 @@ void MazeOfDigits::initExemplaryMaze() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,1);
 	moveAgentToPosition(initial_position);
 
@@ -97,16 +100,28 @@ void MazeOfDigits::initExemplaryMaze() {
 }
 
 void MazeOfDigits::initFullyRandomMaze() {
-	LOG(LINFO) << "Generating simple " << width << "x" << height<< " random maze";
+	LOG(LNOTICE) << "Generating a fully random " << width << "x" << height<< " maze of digits";
+
+	static bool maze_generated = false;
+
+	// It maze type = -1: do not generate new maze.
+	if (((short)type == -1) && (maze_generated)) {
+		// Generate only the new agent position.
+		mic::types::Position2D agent(0, width-1, 0, height-1);
+		initial_position = agent;
+		moveAgentToPosition(initial_position);
+		return;
+	}
 
 	// Set environment_grid size.
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
-	mic::types::Position2D player(0, width-1, 0, height-1);
-	initial_position = player;
+	// Place the agent.
+	mic::types::Position2D agent(0, width-1, 0, height-1);
+	initial_position = agent;
 	moveAgentToPosition(initial_position);
+
 
 	// Place goal.
 	mic::types::Position2D goal;
@@ -128,10 +143,6 @@ void MazeOfDigits::initFullyRandomMaze() {
 	std::random_device rd;
 	std::mt19937_64 rng_mt19937_64(rd());
 
-	// Initialize uniform integer distribution for x.
-//	std::uniform_int_distribution<size_t> x_dist(0, width-1);
-	// Initialize uniform integer distribution for y.
-//	std::uniform_int_distribution<size_t> y_dist(0, height-1);
 	// Initialize uniform integer distribution for digit.
 	std::uniform_int_distribution<size_t> d_dist(0, 8);
 
@@ -151,13 +162,99 @@ void MazeOfDigits::initFullyRandomMaze() {
 		}//:for
 	}//:for
 
+	maze_generated = true;
+}
 
+
+void MazeOfDigits::initRandomStructuredMaze() {
+	LOG(LNOTICE) << "Generating a structured random " << width << "x" << height<< " maze of digits";
+
+	static bool maze_generated = false;
+
+	// It maze type = -3: do not generate new maze.
+	if (((short)type == -3) && (maze_generated)) {
+		// Generate only the new agent position.
+		mic::types::Position2D agent(0, width-1, 0, height-1);
+		initial_position = agent;
+		moveAgentToPosition(initial_position);
+		return;
+	}
+
+	// Set environment_grid size.
+	environment_grid.resize({width, height, channels});
+	environment_grid.zeros();
+
+	// Place the agent.
+	mic::types::Position2D agent(0, width-1, 0, height-1);
+	initial_position = agent;
+	moveAgentToPosition(initial_position);
+
+
+	// Place goal.
+	mic::types::Position2D goal;
+	while(1) {
+		// Random position.
+		goal.rand(0, width-1, 0, height-1);
+
+		// Validate pose.
+		if (environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Agent}) != 0)
+			continue;
+
+		// Ok, add the goal.
+		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Goals}) = 10;
+		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
+		break;
+	}//: while
+
+	// Initialize random device and generator.
+	std::random_device rd;
+	std::mt19937_64 rng_mt19937_64(rd());
+
+
+	// Fill the "rest" with random digits.
+	for(size_t x=0; x<width; x++ ){
+		for(size_t y=0; y<height; y++ ){
+
+			// Skip the goal.
+			if ((x == goal.x) && (y == goal.y))
+				continue;
+
+			// Calculate the distance.
+			float dist = (float)sqrt((x-goal.x)*(x-goal.x) + (y-goal.y)*(y-goal.y));
+			// Take into account the scale - size of maze.
+			float scaled_dist = 10*dist/sqrt((width*height));
+			// Truncate it to 0-0.
+			size_t min, max;
+			if (scaled_dist<1.1) {
+				min = max = 8;
+			} else {
+				min = 9 - ((scaled_dist > 9) ? 9 : scaled_dist);
+				max = ((min + 1 > 9) ? 9 : min + 1);
+			}//: else
+
+			// Random variables.
+			std::uniform_int_distribution<size_t> d_dist(min, max);
+			size_t d = d_dist(rng_mt19937_64);
+			LOG(LDEBUG)<< " x = " << x << " goal.x = " << goal.x << " y = " << y << " goal.y = " << goal.y << " dist = " << dist << " scaled_dist = " << scaled_dist << " min = " << min << " max = " << max << " d = " << d;
+			environment_grid({(size_t)x, (size_t)y, (size_t)MazeOfDigitsChannels::Digits}) = d;
+
+		}//:for
+	}//:for
+
+	maze_generated = true;
 }
 
 
 std::string MazeOfDigits::gridToString(mic::types::TensorXf & grid_) {
 	std::string s;
+	// Add line.
+	s+= "+";
+	for (size_t x=0; x<grid_.dim(0); x++)
+		s+="---";
+	s+= "+\n";
+
 	for (size_t y=0; y<grid_.dim(1); y++){
+		s += "|";
 		for (size_t x=0; x<grid_.dim(0); x++) {
 			// Check object occupancy.
 			if (grid_({x,y, (size_t)MazeOfDigitsChannels::Agent}) != 0) {
@@ -173,8 +270,14 @@ std::string MazeOfDigits::gridToString(mic::types::TensorXf & grid_) {
 				// Display pit.
 				s +=  " " + std::to_string((unsigned short)grid_({x,y, (size_t)MazeOfDigitsChannels::Digits})) + " ";
 		}//: for x
-		s += "\n";
+		s += "|\n";
 	}//: for y
+
+	// Add line.
+	s+= "+";
+	for (size_t x=0; x<grid_.dim(0); x++)
+		s+="---";
+	s+= "+\n";
 
 	return s;
 }
@@ -256,7 +359,7 @@ mic::types::TensorXf MazeOfDigits::getObservation() {
 
 
 mic::types::MatrixXfPtr MazeOfDigits::encodeAgentGrid() {
-	// DEBUG - copy only player pose data, avoid goals etc.
+	// DEBUG - copy only agent pose data, avoid goals etc.
 	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(height, width));
 	encoded_grid->setZero();
 

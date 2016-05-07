@@ -75,7 +75,7 @@ void Gridworld::initExemplaryGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,1);
 	moveAgentToPosition(initial_position);
 
@@ -104,7 +104,7 @@ void Gridworld::initClassicCliffGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,1);
 	moveAgentToPosition(initial_position);
 
@@ -132,7 +132,7 @@ void Gridworld::initDiscountGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,3);
 	moveAgentToPosition(initial_position);
 
@@ -165,7 +165,7 @@ void Gridworld::initBridgeGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(1,1);
 	moveAgentToPosition(initial_position);
 
@@ -201,7 +201,7 @@ void Gridworld::initBookGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,2);
 	moveAgentToPosition(initial_position);
 
@@ -232,7 +232,7 @@ void Gridworld::initMazeGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,4);
 	moveAgentToPosition(initial_position);
 
@@ -266,7 +266,7 @@ void Gridworld::initExemplaryDQLGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,3);
 	moveAgentToPosition(initial_position);
 
@@ -297,7 +297,7 @@ void Gridworld::initModifiedDQLGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,3);
 	moveAgentToPosition(initial_position);
 
@@ -327,7 +327,7 @@ void Gridworld::initDebug2x2Grid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(0,0);
 	moveAgentToPosition(initial_position);
 
@@ -359,7 +359,7 @@ void Gridworld::initDebug3x3Grid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
+	// Place the agent.
 	initial_position.set(1,1);
 	moveAgentToPosition(initial_position);
 
@@ -384,9 +384,9 @@ void Gridworld::initSimpleRandomGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
-	mic::types::Position2D player(0, width-1, 0, height-1);
-	initial_position = player;
+	// Place the agent.
+	mic::types::Position2D agent(0, width-1, 0, height-1);
+	initial_position = agent;
 	moveAgentToPosition(initial_position);
 
 	// Initialize random device and generator.
@@ -497,9 +497,9 @@ void Gridworld::initHardRandomGrid() {
 	environment_grid.resize({width, height, channels});
 	environment_grid.zeros();
 
-	// Place the player.
-	mic::types::Position2D player(0, width-1, 0, height-1);
-	initial_position = player;
+	// Place the agent.
+	mic::types::Position2D agent(0, width-1, 0, height-1);
+	initial_position = agent;
 	moveAgentToPosition(initial_position);
 
 	// Place goal.
@@ -550,7 +550,7 @@ void Gridworld::initHardRandomGrid() {
 
 			// ... but additionally whether the path from agent to the goal is traversable!
 			visited.setZero();
-			if (!isGridTraversible(player.x, player.y, visited)) {
+			if (!isGridTraversible(agent.x, agent.y, visited)) {
 				// Sorry, we must remove this wall...
 				environment_grid({(size_t)wall.x, (size_t)wall.y, (size_t)GridworldChannels::Walls}) = 0;
 				// .. and try once again.
@@ -586,7 +586,7 @@ void Gridworld::initHardRandomGrid() {
 
 			// ... but additionally whether the path from agent to the goal is traversable!
 			visited.setZero();
-			if (!isGridTraversible(player.x, player.y, visited)) {
+			if (!isGridTraversible(agent.x, agent.y, visited)) {
 				// Sorry, we must remove this pit...
 				environment_grid({(size_t)pit.x, (size_t)pit.y, (size_t)GridworldChannels::Pits}) = 0;
 				// .. and try once again.
@@ -603,7 +603,14 @@ void Gridworld::initHardRandomGrid() {
 
 std::string Gridworld::gridToString(mic::types::TensorXf & grid_) {
 	std::string s;
+	// Add line.
+	s+= "+";
+	for (size_t x=0; x<grid_.dim(0); x++)
+		s+="---";
+	s+= "+\n";
+
 	for (size_t y=0; y<grid_.dim(1); y++){
+		s += "|";
 		for (size_t x=0; x<grid_.dim(0); x++) {
 			// Check object occupancy.
 			if (grid_({x,y, (size_t)GridworldChannels::Agent}) != 0) {
@@ -621,9 +628,14 @@ std::string Gridworld::gridToString(mic::types::TensorXf & grid_) {
 			} else
 				s += "   ";
 		}//: for x
-		s += "\n";
+		s += "|\n";
 	}//: for y
 
+	// Add line.
+	s+= "+";
+	for (size_t x=0; x<grid_.dim(0); x++)
+		s+="---";
+	s+= "+\n";
 	return s;
 }
 
@@ -704,7 +716,7 @@ mic::types::TensorXf Gridworld::getObservation() {
 
 
 mic::types::MatrixXfPtr Gridworld::encodeAgentGrid() {
-	// DEBUG - copy only player pose data, avoid goals etc.
+	// DEBUG - copy only agent pose data, avoid goals etc.
 	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(height, width));
 	encoded_grid->setZero();
 
