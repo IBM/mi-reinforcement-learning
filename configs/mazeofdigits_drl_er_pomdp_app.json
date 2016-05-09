@@ -1,6 +1,6 @@
 {
 	"app_state": {
-		"application_sleep_interval": "1",
+		"application_sleep_interval": "1000",
 		"single_step_mode": 1
 	},
 	"mazeofdigits_drl_er_pomdp_app": {
@@ -16,8 +16,8 @@
 	},
 	"maze_of_digits": {
 		"type": -4,
-		"width": 10,
-		"height": 10,
+		"width": 20,
+		"height": 20,
 		"roi_size": 5
 	}
 }

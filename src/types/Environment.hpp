@@ -40,7 +40,7 @@ public:
 	 * Returns the tensor storing the environment.
 	 * @return Tensor storing the environment.
 	 */
-	mic::types::TensorXfPtr & get() { return environment_grid; }
+	mic::types::TensorXfPtr & getEnvironment() { return environment_grid; }
 
 	/*!
 	 * Returns current width of the environment.
@@ -229,9 +229,13 @@ protected:
 	/// Property: initial position of the agent.
 	mic::types::Position2D initial_position;
 
-	/// Tensor storing the environment (x, y, "depth" channels, representing: 0 - goals + pits, 1 - walls, 2 - agent).
+	/// Tensor storing the environment.
 	mic::types::TensorXfPtr environment_grid;
 
+	/*!
+	 * Tensor storing the "observation".
+	 */
+	mic::types::TensorXfPtr observation_grid;
 
 };
 

@@ -15,7 +15,7 @@ namespace mic {
 namespace environments {
 
 /*!
- * \brief Gridworld channels
+ * \brief MazeOfDigits channels
  * \author tkornuta
  */
 enum class MazeOfDigitsChannels : std::size_t

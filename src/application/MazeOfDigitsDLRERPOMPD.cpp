@@ -74,6 +74,11 @@ void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
 	w_chart = new WindowFloatCollectorChart("MazeOfDigitsDLRERPOMPD", 256, 256, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
+	// Create windows for visualization of maze.
+	wmd_environment = new WindowMazeOfDigits("Environment", 256, 256, 0, 256);
+	wmd_observation = new WindowMazeOfDigits("Observation", 64, 64, 256, 256);
+
+
 }
 
 void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
@@ -97,6 +102,12 @@ void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
 
 	// Set batch size in experience replay memory.
 	experiences.setBatchSize(batch_size);
+
+
+	// Set displayed matrix pointers.
+	wmd_environment->setMazePointer(env.getEnvironment());
+	wmd_observation->setMazePointer(env.getObservation());
+
 }
 
 
@@ -106,9 +117,11 @@ void MazeOfDigitsDLRERPOMPD::startNewEpisode() {
 	// Generate the gridworld (and move player to initial position).
 	env.initializePropertyDependentVariables();
 
-	LOG(LNOTICE) << "Network responses: \n" <<  streamNetworkResponseTable();
-	LOG(LSTATUS) << "Observation: \n"  << env.observationToString();
-	LOG(LSTATUS) << "Environment: \n" << env.environmentToString();
+	/*LOG(LNOTICE) << "Network responses: \n" <<  streamNetworkResponseTable();
+	LOG(LNOTICE) << "Observation: \n"  << env.observationToString();
+	LOG(LNOTICE) << "Environment: \n" << env.environmentToString();*/
+	// Do not forget to get the current observation!
+	env.getObservation();
 }
 
 
@@ -478,9 +491,12 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 	else
 		LOG(LWARNING) << "Not enough samples in the experience replay memory!";
 
-	LOG(LNOTICE) << "Network responses: \n" << streamNetworkResponseTable();
-	LOG(LSTATUS) << "Observation: \n"  << env.observationToString();
-	LOG(LSTATUS) << "Environment: \n"  << env.environmentToString();
+	/*LOG(LNOTICE) << "Network responses: \n" << streamNetworkResponseTable();
+	LOG(LNOTICE) << "Observation: \n"  << env.observationToString();
+	LOG(LNOTICE) << "Environment: \n"  << env.environmentToString();*/
+	// Do not forget to get the current observation!
+	env.getObservation();
+
 
 	// Check whether state t+1 is terminal - finish the episode.
 	if(env.isStateTerminal(env.getAgentPosition()))

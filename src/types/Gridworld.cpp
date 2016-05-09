@@ -30,6 +30,7 @@ mic::environments::Gridworld & Gridworld::operator= (const mic::environments::Gr
 	channels = gw_.channels;
 	initial_position = gw_.initial_position;
 	environment_grid = gw_.environment_grid;
+	observation_grid = gw_.observation_grid;
 
 	return *this;
 }
@@ -55,8 +56,13 @@ void Gridworld::initializePropertyDependentVariables() {
 	}//: switch
 
 	// Check whether it is a POMDP or not.
-	if (roi_size >0)
+	if (roi_size >0) {
 		pomdp_flag = true;
+		observation_grid->resize({roi_size, roi_size, channels});
+	} else {
+		observation_grid->resize({width, height, channels});
+	}//: else
+
 }
 
 
@@ -671,10 +677,14 @@ mic::types::MatrixXfPtr Gridworld::encodeObservation() {
 		mic::types::Position2D p = getAgentPosition();
 		LOG(LDEBUG) << p;
 
+		// Get observation.
 		mic::types::TensorXfPtr obs = getObservation();
+		// Temporarily reshape the observation grid.
 		obs->conservativeResize({1, roi_size * roi_size * channels});
-
+		// Encode the observation.
 		mic::types::MatrixXfPtr encoded_obs (new mic::types::MatrixXf(*obs));
+		// Back to the original shape.
+		obs->conservativeResize({roi_size, roi_size, channels});
 
 		return encoded_obs;
 	}
@@ -685,9 +695,8 @@ mic::types::MatrixXfPtr Gridworld::encodeObservation() {
 
 mic::types::TensorXfPtr Gridworld::getObservation() {
 	LOG(LDEBUG) << "getObservation()";
-	// Set size.
-	mic::types::TensorXfPtr observation(new mic::types::TensorXf({roi_size, roi_size, channels}));
-	observation->zeros();
+	// Reset.
+	observation_grid->zeros();
 
 	size_t delta = (roi_size-1)/2;
 	mic::types::Position2D p = getAgentPosition();
@@ -698,20 +707,20 @@ mic::types::TensorXfPtr Gridworld::getObservation() {
 			// Check grid boundaries.
 			if ((ex < 0) || (ex >= width) || (ey < 0) || (ey >= height)){
 				// Place the wall only
-				(*observation)({(size_t)ox, (size_t)oy, (size_t)GridworldChannels::Walls}) = 1;
+				(*observation_grid)({(size_t)ox, (size_t)oy, (size_t)GridworldChannels::Walls}) = 1;
 				continue;
 			}//: if
 			// Else : copy data for all channels.
-			(*observation)({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Goals}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Goals});
-			(*observation)({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Pits}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Pits});
-			(*observation)({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Walls}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Walls});
-			(*observation)({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Agent}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Agent});
+			(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Goals}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Goals});
+			(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Pits}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Pits});
+			(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Walls}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Walls});
+			(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)GridworldChannels::Agent}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)GridworldChannels::Agent});
 		}//: for x
 	}//: for y
 
-	LOG(LDEBUG) << std::endl << gridToString(observation);
+	//LOG(LDEBUG) << std::endl << gridToString(observation_grid);
 
-	return observation;
+	return observation_grid;
 }
 
 

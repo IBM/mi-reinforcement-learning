@@ -13,6 +13,7 @@
 
 #include <opengl/application/OpenGLEpisodicApplication.hpp>
 #include <opengl/visualization/WindowFloatCollectorChart.hpp>
+#include <opengl/visualization/WindowMazeOfDigits.hpp>
 using namespace mic::opengl::visualization;
 
 #include <mlnn/MultiLayerNeuralNetwork.hpp>
@@ -82,6 +83,12 @@ private:
 
 	/// Data collector.
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
+
+	/// Window displaying the whole environment.
+	WindowMazeOfDigits* wmd_environment;
+	/// Window displaying the observation.
+	WindowMazeOfDigits* wmd_observation;
+
 
 	/// The maze of digits environment.
 	mic::environments::MazeOfDigits env;
