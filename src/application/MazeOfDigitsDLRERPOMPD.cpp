@@ -464,7 +464,7 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 		LOG(LDEBUG) <<"Targets batch:\n" << targets_t_batch->transpose();
 
 		// Perform the Deep-Q-learning.
-		LOG(LDEBUG) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
+		//LOG(LDEBUG) << "Network responses before training:" << std::endl << streamNetworkResponseTable();
 
 		// Train network with rewards.
 		float loss = neural_net.train (inputs_t_batch, targets_t_batch, learning_rate, nn_weight_decay);

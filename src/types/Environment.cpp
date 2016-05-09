@@ -13,7 +13,8 @@ namespace environments {
 Environment::Environment(std::string node_name_) : PropertyTree(node_name_),
 		width("width", 4),
 		height("height", 4),
-		roi_size("roi_size", 0)
+		roi_size("roi_size", 0),
+		environment_grid(new mic::types::TensorXf())
 {
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(width);

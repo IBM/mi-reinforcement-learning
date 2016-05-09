@@ -36,7 +36,7 @@ mic::environments::MazeOfDigits & MazeOfDigits::operator= (const mic::environmen
 }
 
 
-// Initialize environment_grid.
+// Initialize environment_grid->
 void MazeOfDigits::initializePropertyDependentVariables() {
 	// Generate adequate gridworld.
 	switch(type) {
@@ -69,34 +69,34 @@ void MazeOfDigits::initExemplaryMaze() {
 	height = 4;
 
 	// Set environment_grid size.
-	environment_grid.resize({width, height, channels});
-	environment_grid.zeros();
+	environment_grid->resize({width, height, channels});
+	environment_grid->zeros();
 
 	// Place the agent.
 	initial_position.set(0,1);
 	moveAgentToPosition(initial_position);
 
 	// Place digit
-	environment_grid({0,0, (size_t)MazeOfDigitsChannels::Digits}) = 2;
-	environment_grid({1,0, (size_t)MazeOfDigitsChannels::Digits}) = 4;
-	environment_grid({2,0, (size_t)MazeOfDigitsChannels::Digits}) = 7;
-	environment_grid({3,0, (size_t)MazeOfDigitsChannels::Digits}) = 7;
-	environment_grid({0,1, (size_t)MazeOfDigitsChannels::Digits}) = 1;
-	environment_grid({1,1, (size_t)MazeOfDigitsChannels::Digits}) = 5;
-	environment_grid({2,1, (size_t)MazeOfDigitsChannels::Digits}) = 7;
-	environment_grid({3,1, (size_t)MazeOfDigitsChannels::Digits}) = 9;
-	environment_grid({0,2, (size_t)MazeOfDigitsChannels::Digits}) = 2;
-	environment_grid({1,2, (size_t)MazeOfDigitsChannels::Digits}) = 3;
-	environment_grid({2,2, (size_t)MazeOfDigitsChannels::Digits}) = 6;
-	environment_grid({3,2, (size_t)MazeOfDigitsChannels::Digits}) = 8;
-	environment_grid({0,3, (size_t)MazeOfDigitsChannels::Digits}) = 1;
-	environment_grid({1,3, (size_t)MazeOfDigitsChannels::Digits}) = 2;
-	environment_grid({2,3, (size_t)MazeOfDigitsChannels::Digits}) = 5;
-	environment_grid({3,3, (size_t)MazeOfDigitsChannels::Digits}) = 6;
+	(*environment_grid)({0,0, (size_t)MazeOfDigitsChannels::Digits}) = 2;
+	(*environment_grid)({1,0, (size_t)MazeOfDigitsChannels::Digits}) = 4;
+	(*environment_grid)({2,0, (size_t)MazeOfDigitsChannels::Digits}) = 7;
+	(*environment_grid)({3,0, (size_t)MazeOfDigitsChannels::Digits}) = 7;
+	(*environment_grid)({0,1, (size_t)MazeOfDigitsChannels::Digits}) = 1;
+	(*environment_grid)({1,1, (size_t)MazeOfDigitsChannels::Digits}) = 5;
+	(*environment_grid)({2,1, (size_t)MazeOfDigitsChannels::Digits}) = 7;
+	(*environment_grid)({3,1, (size_t)MazeOfDigitsChannels::Digits}) = 9;
+	(*environment_grid)({0,2, (size_t)MazeOfDigitsChannels::Digits}) = 2;
+	(*environment_grid)({1,2, (size_t)MazeOfDigitsChannels::Digits}) = 3;
+	(*environment_grid)({2,2, (size_t)MazeOfDigitsChannels::Digits}) = 6;
+	(*environment_grid)({3,2, (size_t)MazeOfDigitsChannels::Digits}) = 8;
+	(*environment_grid)({0,3, (size_t)MazeOfDigitsChannels::Digits}) = 1;
+	(*environment_grid)({1,3, (size_t)MazeOfDigitsChannels::Digits}) = 2;
+	(*environment_grid)({2,3, (size_t)MazeOfDigitsChannels::Digits}) = 5;
+	(*environment_grid)({3,3, (size_t)MazeOfDigitsChannels::Digits}) = 6;
 
 
 	// Place goal(s).
-	environment_grid({3,0, (size_t)MazeOfDigitsChannels::Goals}) = 10;
+	(*environment_grid)({3,0, (size_t)MazeOfDigitsChannels::Goals}) = 10;
 }
 
 void MazeOfDigits::initFullyRandomMaze() {
@@ -114,8 +114,8 @@ void MazeOfDigits::initFullyRandomMaze() {
 	}
 
 	// Set environment_grid size.
-	environment_grid.resize({width, height, channels});
-	environment_grid.zeros();
+	environment_grid->resize({width, height, channels});
+	environment_grid->zeros();
 
 	// Place the agent.
 	mic::types::Position2D agent(0, width-1, 0, height-1);
@@ -130,12 +130,12 @@ void MazeOfDigits::initFullyRandomMaze() {
 		goal.rand(0, width-1, 0, height-1);
 
 		// Validate pose.
-		if (environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Agent}) != 0)
+		if ((*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Agent}) != 0)
 			continue;
 
 		// Ok, add the goal.
-		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Goals}) = 10;
-		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
+		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Goals}) = 10;
+		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
 		break;
 	}//: while
 
@@ -157,7 +157,7 @@ void MazeOfDigits::initFullyRandomMaze() {
 
 			// Random variables.
 			size_t d = d_dist(rng_mt19937_64);
-			environment_grid({(size_t)x, (size_t)y, (size_t)MazeOfDigitsChannels::Digits}) = d;
+			(*environment_grid)({(size_t)x, (size_t)y, (size_t)MazeOfDigitsChannels::Digits}) = d;
 
 		}//:for
 	}//:for
@@ -181,8 +181,8 @@ void MazeOfDigits::initRandomStructuredMaze() {
 	}
 
 	// Set environment_grid size.
-	environment_grid.resize({width, height, channels});
-	environment_grid.zeros();
+	environment_grid->resize({width, height, channels});
+	environment_grid->zeros();
 
 	// Place the agent.
 	mic::types::Position2D agent(0, width-1, 0, height-1);
@@ -197,12 +197,12 @@ void MazeOfDigits::initRandomStructuredMaze() {
 		goal.rand(0, width-1, 0, height-1);
 
 		// Validate pose.
-		if (environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Agent}) != 0)
+		if ((*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Agent}) != 0)
 			continue;
 
 		// Ok, add the goal.
-		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Goals}) = 10;
-		environment_grid({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
+		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Goals}) = 10;
+		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
 		break;
 	}//: while
 
@@ -236,7 +236,7 @@ void MazeOfDigits::initRandomStructuredMaze() {
 			std::uniform_int_distribution<size_t> d_dist(min, max);
 			size_t d = d_dist(rng_mt19937_64);
 			LOG(LDEBUG)<< " x = " << x << " goal.x = " << goal.x << " y = " << y << " goal.y = " << goal.y << " dist = " << dist << " scaled_dist = " << scaled_dist << " min = " << min << " max = " << max << " d = " << d;
-			environment_grid({(size_t)x, (size_t)y, (size_t)MazeOfDigitsChannels::Digits}) = d;
+			(*environment_grid)({(size_t)x, (size_t)y, (size_t)MazeOfDigitsChannels::Digits}) = d;
 
 		}//:for
 	}//:for
@@ -245,37 +245,37 @@ void MazeOfDigits::initRandomStructuredMaze() {
 }
 
 
-std::string MazeOfDigits::gridToString(mic::types::TensorXf & grid_) {
+std::string MazeOfDigits::gridToString(mic::types::TensorXfPtr & grid_) {
 	std::string s;
 	// Add line.
 	s+= "+";
-	for (size_t x=0; x<grid_.dim(0); x++)
+	for (size_t x=0; x<grid_->dim(0); x++)
 		s+="---";
 	s+= "+\n";
 
-	for (size_t y=0; y<grid_.dim(1); y++){
+	for (size_t y=0; y<grid_->dim(1); y++){
 		s += "|";
-		for (size_t x=0; x<grid_.dim(0); x++) {
+		for (size_t x=0; x<grid_->dim(0); x++) {
 			// Check object occupancy.
-			if (grid_({x,y, (size_t)MazeOfDigitsChannels::Agent}) != 0) {
+			if ((*grid_)({x,y, (size_t)MazeOfDigitsChannels::Agent}) != 0) {
 				// Display agent.
 				s += "<A>";
-			} else if (grid_({x,y, (size_t)MazeOfDigitsChannels::Walls}) != 0) {
+			} else if ((*grid_)({x,y, (size_t)MazeOfDigitsChannels::Walls}) != 0) {
 				// Display wall.
 				s += " # ";
-/*			} else if (grid_({x,y, (size_t)MazeOfDigitsChannels::Goals}) > 0) {
+/*			} else if ((*grid_)({x,y, (size_t)MazeOfDigitsChannels::Goals}) > 0) {
 				// Display goal.
 				s += " + ,";*/
 			} else
 				// Display pit.
-				s +=  " " + std::to_string((unsigned short)grid_({x,y, (size_t)MazeOfDigitsChannels::Digits})) + " ";
+				s +=  " " + std::to_string((unsigned short)(*grid_)({x,y, (size_t)MazeOfDigitsChannels::Digits})) + " ";
 		}//: for x
 		s += "|\n";
 	}//: for y
 
 	// Add line.
 	s+= "+";
-	for (size_t x=0; x<grid_.dim(0); x++)
+	for (size_t x=0; x<grid_->dim(0); x++)
 		s+="---";
 	s+= "+\n";
 
@@ -289,7 +289,7 @@ std::string MazeOfDigits::environmentToString() {
 std::string MazeOfDigits::observationToString() {
 	if (pomdp_flag) {
 		// Get observation.
-		mic::types::TensorXf obs = getObservation();
+		mic::types::TensorXfPtr obs = getObservation();
 		return gridToString(obs);
 	}
 	else
@@ -297,12 +297,12 @@ std::string MazeOfDigits::observationToString() {
 }
 
 mic::types::MatrixXfPtr MazeOfDigits::encodeEnvironment() {
-	// Temporarily reshape the environment_grid.
-	environment_grid.conservativeResize({1, width * height * channels});
+	// Temporarily reshape the environment grid.
+	environment_grid->conservativeResize({1, width * height * channels});
 	// Create a matrix pointer and copy data from grid into the matrix.
-	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(environment_grid));
+	mic::types::MatrixXfPtr encoded_grid (new mic::types::MatrixXf(*environment_grid));
 	// Back to the original shape.
-	environment_grid.resize({width, height, channels});
+	environment_grid->resize({width, height, channels});
 
 	// Return the matrix pointer.
 	return encoded_grid;
@@ -314,10 +314,10 @@ mic::types::MatrixXfPtr MazeOfDigits::encodeObservation() {
 		mic::types::Position2D p = getAgentPosition();
 		LOG(LDEBUG) << p;
 
-		mic::types::TensorXf obs = getObservation();
-		obs.conservativeResize({1, roi_size * roi_size * channels});
+		mic::types::TensorXfPtr obs = getObservation();
+		obs->conservativeResize({1, roi_size * roi_size * channels});
 
-		mic::types::MatrixXfPtr encoded_obs (new mic::types::MatrixXf(obs));
+		mic::types::MatrixXfPtr encoded_obs (new mic::types::MatrixXf(*obs));
 
 		return encoded_obs;
 	}
@@ -326,11 +326,11 @@ mic::types::MatrixXfPtr MazeOfDigits::encodeObservation() {
 }
 
 
-mic::types::TensorXf MazeOfDigits::getObservation() {
+mic::types::TensorXfPtr MazeOfDigits::getObservation() {
 	LOG(LDEBUG) << "getObservation()";
 	// Set size.
-	mic::types::TensorXf observation({roi_size, roi_size, channels});
-	observation.zeros();
+	mic::types::TensorXfPtr observation(new mic::types::TensorXf({roi_size, roi_size, channels}));
+	observation->zeros();
 
 	size_t delta = (roi_size-1)/2;
 	mic::types::Position2D p = getAgentPosition();
@@ -341,14 +341,14 @@ mic::types::TensorXf MazeOfDigits::getObservation() {
 			// Check grid boundaries.
 			if ((ex < 0) || (ex >= width) || (ey < 0) || (ey >= height)){
 				// Place the wall only
-				observation({(size_t)ox, (size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = 1;
+				(*observation)({(size_t)ox, (size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = 1;
 				continue;
 			}//: if
 			// Else : copy data for all channels.
-			observation({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Goals}) = environment_grid({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Goals});
-			observation({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Digits}) = environment_grid({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Digits});
-			observation({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = environment_grid({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Walls});
-			observation({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Agent}) = environment_grid({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Agent});
+			(*observation)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Goals}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Goals});
+			(*observation)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Digits}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Digits});
+			(*observation)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Walls});
+			(*observation)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Agent}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Agent});
 		}//: for x
 	}//: for y
 
@@ -366,7 +366,7 @@ mic::types::MatrixXfPtr MazeOfDigits::encodeAgentGrid() {
 	for (size_t y=0; y<height; y++){
 		for (size_t x=0; x<width; x++) {
 			// Check object occupancy.
-			if (environment_grid({x,y, (size_t)MazeOfDigitsChannels::Agent}) != 0) {
+			if ((*environment_grid)({x,y, (size_t)MazeOfDigitsChannels::Agent}) != 0) {
 				// Set one.
 				(*encoded_grid)(y,x) = 1;
 				break;
@@ -384,7 +384,7 @@ mic::types::Position2D MazeOfDigits::getAgentPosition() {
 	mic::types::Position2D position;
 	for (size_t y=0; y<height; y++){
 		for (size_t x=0; x<width; x++) {
-			if (environment_grid({x,y, (size_t)MazeOfDigitsChannels::Agent}) == 1) {
+			if ((*environment_grid)({x,y, (size_t)MazeOfDigitsChannels::Agent}) == 1) {
 				position.x = x;
 				position.y = y;
 				return position;
@@ -404,9 +404,9 @@ bool MazeOfDigits::moveAgentToPosition(mic::types::Position2D pos_) {
 
 	// Clear old.
 	mic::types::Position2D old = getAgentPosition();
-	environment_grid({(size_t)old.x, (size_t)old.y, (size_t)MazeOfDigitsChannels::Agent}) = 0;
+	(*environment_grid)({(size_t)old.x, (size_t)old.y, (size_t)MazeOfDigitsChannels::Agent}) = 0;
 	// Set new.
-	environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Agent}) = 1;
+	(*environment_grid)({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Agent}) = 1;
 
 	return true;
 }
@@ -414,8 +414,8 @@ bool MazeOfDigits::moveAgentToPosition(mic::types::Position2D pos_) {
 
 float MazeOfDigits::getStateReward(mic::types::Position2D pos_) {
 	// Check reward - goal.
-    if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Goals}) != 0)
-		return environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Goals});
+    if ((*environment_grid)({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Goals}) != 0)
+		return (*environment_grid)({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Goals});
 	else
         return 0;
 }
@@ -429,7 +429,7 @@ bool MazeOfDigits::isStateAllowed(mic::types::Position2D pos_) {
 			return false;
 
 	// Check walls!
-	if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Walls}) != 0)
+	if ((*environment_grid)({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Walls}) != 0)
 		return false;
 
 	return true;
@@ -444,7 +444,7 @@ bool MazeOfDigits::isStateTerminal(mic::types::Position2D pos_) {
 			return false;
 
 	// Check reward - goal or pit.
-	if (environment_grid({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Goals}) != 0)
+	if ((*environment_grid)({(size_t)pos_.x, (size_t)pos_.y, (size_t)MazeOfDigitsChannels::Goals}) != 0)
         return true;
     else
         return false;

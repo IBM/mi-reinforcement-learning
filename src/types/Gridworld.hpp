@@ -175,7 +175,7 @@ public:
 	 * Returns the tensor being the observation.
 	 * @return Observation tensor of size [roi_size, roi_size, channels].
 	 */
-	mic::types::TensorXf getObservation();
+	mic::types::TensorXfPtr getObservation();
 
 	/*!
 	 * Returns the current state of the gridworld in the form of a string.
@@ -271,7 +271,7 @@ protected:
 	 * @param grid_ Grid to be processed.
 	 * @return String with description of the grid.
 	 */
-	std::string gridToString(mic::types::TensorXf & grid_);
+	std::string gridToString(mic::types::TensorXfPtr grid_);
 
 };
 
