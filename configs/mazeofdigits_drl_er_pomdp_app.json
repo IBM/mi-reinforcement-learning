@@ -9,15 +9,15 @@
 		"learning_rate" : 0.01,
 		"epsilon": -0.1,
 		"step_limit": 200,
-		"statistics_filename" : "mazeofdigits_drl_er_pomdp-roi5x5-convergence.csv",
-		"mlnn_filename": "mazeofdigits_drl_el_pomdp-mlnn-roi5x5.txt",
+		"statistics_filename" : "mazeofdigits_drl_er_pomdp-roi7x7-convergence.csv",
+		"mlnn_filename": "mazeofdigits_drl_el_pomdp-mlnn-roi7x7.txt",
 		"mlnn_save" : 1,
 		"mlnn_load" : 1
 	},
 	"maze_of_digits": {
 		"type": -4,
-		"width": 20,
-		"height": 20,
-		"roi_size": 5
+		"width": 30,
+		"height": 30,
+		"roi_size": 7
 	}
 }

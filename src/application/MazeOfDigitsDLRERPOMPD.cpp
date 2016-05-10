@@ -71,17 +71,17 @@ void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
 	number_of_successes = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("MazeOfDigitsDLRERPOMPD", 256, 256, 0, 0);
+	w_chart = new WindowFloatCollectorChart("MazeOfDigitsDLRERPOMPD", 256, 512, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
-
-	// Create windows for visualization of maze.
-	wmd_environment = new WindowMazeOfDigits("Environment", 256, 256, 0, 256);
-	wmd_observation = new WindowMazeOfDigits("Observation", 64, 64, 256, 256);
-
 
 }
 
 void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
+	// Create windows for the visualization of the whole environment and a single observation.
+	wmd_environment = new WindowMazeOfDigits("Environment", env.getEnvironmentHeight()*20,env.getEnvironmentWidth()*20, 0, 316);
+	wmd_observation = new WindowMazeOfDigits("Observation", env.getObservationHeight()*20,env.getObservationWidth()*20, env.getEnvironmentWidth()*20, 316);
+
+
 	// Hardcode batchsize - for fastening the display!
 	batch_size = env.getObservationWidth() * env.getObservationHeight();
 
@@ -102,7 +102,6 @@ void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
 
 	// Set batch size in experience replay memory.
 	experiences.setBatchSize(batch_size);
-
 
 	// Set displayed matrix pointers.
 	wmd_environment->setMazePointer(env.getEnvironment());
