@@ -1,7 +1,7 @@
 {
 	"app_state": {
-		"application_sleep_interval": "1000",
-		"single_step_mode": 1
+		"application_sleep_interval": "100000",
+		"single_step_mode": 0
 	},
 	"mazeofdigits_drl_er_pomdp_app": {
 		"step_reward": -1.0,
@@ -9,15 +9,15 @@
 		"learning_rate" : 0.01,
 		"epsilon": -0.1,
 		"step_limit": 200,
-		"statistics_filename" : "mazeofdigits_drl_er_pomdp-roi7x7-convergence.csv",
-		"mlnn_filename": "mazeofdigits_drl_el_pomdp-mlnn-roi7x7.txt",
+		"statistics_filename" : "mazeofdigits_drl_er_pomdp-roi7x7-path-convergence.csv",
+		"mlnn_filename": "mazeofdigits_drl_el_pomdp-mlnn-roi7x7-path.txt",
 		"mlnn_save" : 1,
 		"mlnn_load" : 1
 	},
 	"maze_of_digits": {
-		"type": -4,
-		"width": 30,
-		"height": 30,
+		"type": -6,
+		"width": 15,
+		"height": 15,
 		"roi_size": 7
 	}
 }

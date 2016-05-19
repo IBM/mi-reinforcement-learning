@@ -44,6 +44,8 @@ void MazeOfDigits::initializePropertyDependentVariables() {
 		case 0 : initExemplaryMaze(); break;
 		case -3:
 		case -4: initRandomStructuredMaze(); break;
+		case -5:
+		case -6: initRandomPatchMaze(); break;
 		case -2:
 		case -1:
 		default: initFullyRandomMaze();
@@ -250,6 +252,214 @@ void MazeOfDigits::initRandomStructuredMaze() {
 	maze_generated = true;
 }
 
+void MazeOfDigits::initRandomPatchMaze() {
+
+	LOG(LNOTICE) << "Generating a random patch " << width << "x" << height<< " maze of digits";
+
+	static bool maze_generated = false;
+
+	// It maze type = -5: do not generate new maze.
+	if (((short)type == -5) && (maze_generated)) {
+		// Generate only the new agent position.
+		mic::types::Position2D agent(0, width-1, 0, height-1);
+		initial_position = agent;
+		moveAgentToPosition(initial_position);
+		return;
+	}
+
+	// Set environment size.
+	environment_grid->resize({width, height, channels});
+	environment_grid->zeros();
+//	environment_grid->setValue(-1);
+
+	// Place the agent.
+	mic::types::Position2D agent(0, width-1, 0, height-1);
+	initial_position = agent;
+	moveAgentToPosition(initial_position);
+
+
+	// Place goal.
+	mic::types::Position2D goal;
+	while(1) {
+		// Random position.
+		goal.rand(0, width-1, 0, height-1);
+
+		// Validate pose.
+		if ((*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Agent}) != 0)
+			continue;
+
+		// Ok, add the goal.
+		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Goals}) = 10;
+		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
+		break;
+	}//: while
+
+	// Initialize random device and generator.
+	std::random_device rd;
+	std::mt19937_64 rng_mt19937_64(rd());
+
+	// Check quarter and calculate "main path direction".
+	types::NESWAction dir_min, dir_max;
+	if ((goal.x < width/2) && (goal.y < height/2)) {
+		// First square -> go E, S or ES.
+		dir_min.dx = 0;
+		dir_max.dx = 1;
+		dir_min.dy = 0;
+		dir_max.dy = 1;
+
+	} else if ((goal.x >= width/2) && (goal.y < height/2)) {
+		// Second square -> go S or WS or W.
+		dir_min.dx = -1;
+		dir_max.dx = 0;
+		dir_min.dy = 0;
+		dir_max.dy = 1;
+
+	} else if ((goal.x >= width/2) && (goal.y >= height/2)) {
+		// Third square -> go N, W or NW
+		dir_min.dx = -1;
+		dir_max.dx = 0;
+		dir_min.dy = -1;
+		dir_max.dy = 0;
+
+	} else {
+		// Fourth square -> go N, E or NE
+		dir_min.dx = 0;
+		dir_max.dx = 1;
+		dir_min.dy = -1;
+		dir_max.dy = 0;
+	}
+
+	// Generate path direction distributions.
+	std::uniform_int_distribution<size_t> x_dist(dir_min.dx, dir_max.dx);
+	std::uniform_int_distribution<size_t> y_dist(dir_min.dy, dir_max.dy);
+
+	// Create a path starting in the goal and using the main direction.
+	mic::types::Position2D cur = goal;
+
+	std::vector<mic::types::Position2D> path;
+	path.push_back(goal);
+	while (1) {
+
+		// "Move" ;)
+		types::NESWAction action;
+		action.dx = x_dist(rng_mt19937_64);
+		action.dy = y_dist(rng_mt19937_64);
+		cur = cur + action;
+
+		if ((cur.x < 0) || (cur.y < 0) || (cur.x >= width) || (cur.y >= height))
+			break;
+
+		// Skip the goal.
+		if ((cur.x == goal.x) && (cur.y == goal.y))
+			continue;
+
+		// Add point to path.
+		path.push_back(cur);
+
+		// Calculate the distance from goal.
+		float dist = (float)sqrt((cur.x-goal.x)*(cur.x-goal.x) + (cur.y-goal.y)*(cur.y-goal.y));
+		// Take into account the scale - size of maze.
+		float scaled_dist = 5*dist/sqrt((width*height));
+		// Truncate it to 0-0.
+		size_t min, max;
+		if (scaled_dist<1.1) {
+			min = max = 8;
+		} else {
+			min = 9 - ((scaled_dist > 9) ? 9 : scaled_dist);
+			max = ((min + 1 > 9) ? 9 : min + 1);
+		}//: else
+
+		// Random variables.
+		std::uniform_int_distribution<size_t> d_dist(min, max);
+		size_t d = d_dist(rng_mt19937_64);
+		LOG(LDEBUG)<< " x = " << cur.x << " goal.x = " << goal.x << " y = " << cur.y << " goal.y = " << goal.y << " dist = " << dist << " scaled_dist = " << scaled_dist << " min = " << min << " max = " << max << " d = " << d;
+		(*environment_grid)({(size_t)cur.x, (size_t)cur.y, (size_t)MazeOfDigitsChannels::Digits}) = d;
+
+	};
+
+	// "Grow the path" by 1.
+	for (auto point : path) {
+		// Create distribution basing on patch point.
+		size_t min, max;
+		max = (*environment_grid)({(size_t)point.x, (size_t)point.y, (size_t)MazeOfDigitsChannels::Digits});
+		max = (max == 9) ? 8 : max;
+		min = ((max < 1) ? 1 : max - 1); // size_t truncates that to zero.
+		std::uniform_int_distribution<size_t> d_dist(min, max);
+
+		// Check 4 neighbours.
+		setBiggerDigit(point.x, point.y-1, d_dist(rng_mt19937_64));
+		setBiggerDigit(point.x-1, point.y, d_dist(rng_mt19937_64));
+		setBiggerDigit(point.x+1, point.y, d_dist(rng_mt19937_64));
+		setBiggerDigit(point.x, point.y+1, d_dist(rng_mt19937_64));
+	}//:for
+
+	// "Grow the path" by 2.
+	for (auto point : path) {
+		// Create distribution basing on patch point.
+		size_t min, max;
+		max = (*environment_grid)({(size_t)point.x, (size_t)point.y, (size_t)MazeOfDigitsChannels::Digits});
+		max = (max > 8) ? 7 : max;
+		min = ((max < 2) ? 1 : max - 2); // size_t truncates that to zero.
+		std::uniform_int_distribution<size_t> d2_dist(min, max);
+
+		// Check 8 neighbours.
+		setBiggerDigit(point.x, point.y-2, d2_dist(rng_mt19937_64));
+		setBiggerDigit(point.x-1, point.y-1, d2_dist(rng_mt19937_64));
+		setBiggerDigit(point.x+1, point.y-1, d2_dist(rng_mt19937_64));
+		setBiggerDigit(point.x-2, point.y, d2_dist(rng_mt19937_64));
+		setBiggerDigit(point.x+2, point.y, d2_dist(rng_mt19937_64));
+		setBiggerDigit(point.x-1, point.y+1, d2_dist(rng_mt19937_64));
+		setBiggerDigit(point.x+1, point.y+1, d2_dist(rng_mt19937_64));
+		setBiggerDigit(point.x, point.y+2, d2_dist(rng_mt19937_64));
+	}//:for
+
+	// "Grow the path" by 3.
+	for (auto point : path) {
+		// Create distribution basing on patch point.
+		size_t min, max;
+		max = (*environment_grid)({(size_t)point.x, (size_t)point.y, (size_t)MazeOfDigitsChannels::Digits});
+		max = (max > 7) ? 6 : max;
+		min = ((max < 2) ? 1 : max - 2); // size_t truncates that to zero.
+		std::uniform_int_distribution<size_t> d3_dist(min, max);
+
+		// Check 8 neighbours.
+		setBiggerDigit(point.x+2, point.y-1, d3_dist(rng_mt19937_64));
+		setBiggerDigit(point.x+2, point.y+1, d3_dist(rng_mt19937_64));
+		setBiggerDigit(point.x-2, point.y-1, d3_dist(rng_mt19937_64));
+		setBiggerDigit(point.x-2, point.y+1, d3_dist(rng_mt19937_64));
+		setBiggerDigit(point.x+1, point.y-2, d3_dist(rng_mt19937_64));
+		setBiggerDigit(point.x+1, point.y+2, d3_dist(rng_mt19937_64));
+		setBiggerDigit(point.x-1, point.y-2, d3_dist(rng_mt19937_64));
+		setBiggerDigit(point.x-1, point.y+2, d3_dist(rng_mt19937_64));
+	}//:for
+
+	// Fill the "rest" with random digits.
+	for(size_t x=0; x<width; x++ ){
+		for(size_t y=0; y<height; y++ ){
+
+			// Random variables.
+			std::uniform_int_distribution<size_t> d_dist(0, 1);
+			size_t d = d_dist(rng_mt19937_64);
+			if ((*environment_grid)({(size_t)x, (size_t)y, (size_t)MazeOfDigitsChannels::Digits}) == 0)
+				(*environment_grid)({(size_t)x, (size_t)y, (size_t)MazeOfDigitsChannels::Digits}) = d;
+
+		}//:for
+	}//:for
+
+	// Quick fix :]
+//	(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
+
+	maze_generated = true;
+}
+
+void MazeOfDigits::setBiggerDigit(size_t x_, size_t y_, size_t value_){
+	//if ((x_ < 0)  || (y_ < 0) || (x_ >= width) || (y_ >= height))
+	if ((x_ >= width) || (y_ >= height))
+		return;
+
+	if ((*environment_grid)({(size_t)x_, (size_t)y_, (size_t)MazeOfDigitsChannels::Digits}) < value_)
+		(*environment_grid)({(size_t)x_, (size_t)y_, (size_t)MazeOfDigitsChannels::Digits}) = value_;
+}
 
 std::string MazeOfDigits::gridToString(mic::types::TensorXfPtr & grid_) {
 	std::string s;

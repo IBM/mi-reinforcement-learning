@@ -76,6 +76,18 @@ public:
 	void initRandomStructuredMaze();
 
 	/*!
+	 * Generates a random maze of size (width x height), with spatially dependent values of digits, creating a patch leading to the goal (9).
+	 */
+	void initRandomPatchMaze();
+
+	/*!
+	 * Sets the digit.
+	 * @param point_
+	 * @param value_
+	 */
+	void setBiggerDigit(size_t x_, size_t y_, size_t value_);
+
+	/*!
 	 * Returns the tensor being the observation.
 	 * @return Observation tensor of size [roi_size, roi_size, channels].
 	 */

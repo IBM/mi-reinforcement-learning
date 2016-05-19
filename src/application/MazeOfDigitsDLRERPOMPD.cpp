@@ -129,13 +129,13 @@ void MazeOfDigitsDLRERPOMPD::finishCurrentEpisode() {
 
 	mic::types::Position2D current_position = env.getAgentPosition();
 	float reward = env.getStateReward(current_position);
-	sum_of_iterations += iteration;
+	sum_of_iterations += iteration -1; // -1 is the fix related to moving the terminal condition to the front of step!
 	sum_of_rewards += reward;
 	if (reward > 0)
 			number_of_successes++;
 
 	// Add variables to container.
-	collector_ptr->addDataToContainer("number_of_steps",iteration);
+	collector_ptr->addDataToContainer("number_of_steps",(iteration -1));
 	collector_ptr->addDataToContainer("number_of_steps_average",(float)sum_of_iterations/episode);
 	collector_ptr->addDataToContainer("collected_reward", reward);
 	collector_ptr->addDataToContainer("collected_reward_average", (float)sum_of_rewards/episode);
@@ -146,7 +146,7 @@ void MazeOfDigitsDLRERPOMPD::finishCurrentEpisode() {
 	collector_ptr->exportDataToCsv(statistics_filename);
 
 	// Save nn to file.
-	if (mlnn_save)
+	if (mlnn_save && (episode %10))
 		neural_net.save(mlnn_filename);
 }
 
@@ -339,6 +339,10 @@ mic::types::NESWAction MazeOfDigitsDLRERPOMPD::selectBestActionForGivenState(mic
 bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
+	// Check whether state t is terminal - finish the episode.
+	if(env.isStateTerminal(env.getAgentPosition()))
+		return false;
+
 	// TMP!
 	double 	nn_weight_decay = 0;
 
@@ -490,16 +494,11 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 	else
 		LOG(LWARNING) << "Not enough samples in the experience replay memory!";
 
-	/*LOG(LNOTICE) << "Network responses: \n" << streamNetworkResponseTable();
+	LOG(LNOTICE) << "Network responses: \n" << streamNetworkResponseTable();
 	LOG(LNOTICE) << "Observation: \n"  << env.observationToString();
-	LOG(LNOTICE) << "Environment: \n"  << env.environmentToString();*/
+	LOG(LNOTICE) << "Environment: \n"  << env.environmentToString();
 	// Do not forget to get the current observation!
 	env.getObservation();
-
-
-	// Check whether state t+1 is terminal - finish the episode.
-	if(env.isStateTerminal(env.getAgentPosition()))
-		return false;
 
 	// Check whether we reached maximum number of iterations.
 	if ((step_limit>0) && (iteration >= step_limit))
