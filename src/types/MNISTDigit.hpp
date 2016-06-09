@@ -51,10 +51,14 @@ public:
 	mic::environments::MNISTDigit & operator=(const mic::environments::MNISTDigit & md_);
 
 	/*!
-	 * Initializes all variables that are property-dependent - loads MNISTDigit digits and select the one set by the property.
+	 * Initializes all variables that are property-dependent - loads MNISTDigit digits.
 	 */
 	virtual void initializePropertyDependentVariables();
 
+	/*!
+	 * (Re)initializes the environment - gets given MNIST digit (sample number), sets agent, goal etc.
+	 */
+	virtual void initializeEnvironment();
 
 	/*!
 	 * Returns the tensor being the observation.
@@ -127,6 +131,14 @@ public:
 	 */
 	virtual bool isStateTerminal(mic::types::Position2D pos_);
 
+	/*!
+	 * Returns the length of optimal path from agent initial position to goal.
+	 * @return
+	 */
+	unsigned int optimalPathLength(){
+		return optimal_path_length;
+	}
+
 protected:
 
 	/// Importer responsible for loading MNIST dataset.
@@ -136,6 +148,32 @@ protected:
 	 * Property: MNISTDigit digit - number of sample.
 	 */
 	mic::configuration::Property<short> sample_number;
+
+	/*!
+	 * Property: initial agent x position.
+	 */
+	mic::configuration::Property<short> agent_x;
+
+	/*!
+	 * Property: initial agent y position.
+	 */
+	mic::configuration::Property<short> agent_y;
+
+	/*!
+	 * Property: initial goal x position.
+	 */
+	mic::configuration::Property<short> goal_x;
+
+	/*!
+	 * Property: initial goal y position.
+	 */
+	mic::configuration::Property<short> goal_y;
+
+	/*!
+	 * Optimal number of steps from initial agent position to goal.
+	 */
+	unsigned int optimal_path_length;
+
 
 	/*!
 	 * Returns the current state of the environment passed as an argument in the form of a string.

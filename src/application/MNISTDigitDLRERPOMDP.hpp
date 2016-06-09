@@ -171,16 +171,6 @@ private:
 	long long sum_of_iterations;
 
 	/*!
-	 * Sum of all rewards collected till now - used in statistics.
-	 */
-	long long sum_of_rewards;
-
-	/*!
-	 * Number of successes, i.e. how many times we reached goal till now - used in statistics.
-	 */
-	long long number_of_successes;
-
-	/*!
 	 * Table of past experiences.
 	 */
 	SpatialExperienceMemory experiences;

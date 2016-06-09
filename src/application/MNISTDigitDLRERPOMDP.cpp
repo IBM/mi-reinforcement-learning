@@ -61,15 +61,12 @@ void MNISTDigitDLRERPOMDP::initialize(int argc, char* argv[]) {
 
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
-	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
-	collector_ptr->createContainer("number_of_steps_average", mic::types::color_rgba(255, 255, 0, 180));
-	collector_ptr->createContainer("collected_reward", mic::types::color_rgba(0, 255, 0, 180));
-	collector_ptr->createContainer("collected_reward_average", mic::types::color_rgba(0, 255, 255, 180));
-	collector_ptr->createContainer("success_ratio",  mic::types::color_rgba(255, 255, 255, 180));
+	collector_ptr->createContainer("path_length_episode",  mic::types::color_rgba(0, 255, 0, 180));
+	collector_ptr->createContainer("path_length_average", mic::types::color_rgba(255, 255, 0, 180));
+	collector_ptr->createContainer("path_length_optimal", mic::types::color_rgba(255, 255, 255, 180));
+	collector_ptr->createContainer("path_length_diff", mic::types::color_rgba(255, 0, 0, 180));
 
 	sum_of_iterations = 0;
-	sum_of_rewards = 0;
-	number_of_successes = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_chart = new WindowFloatCollectorChart("MNISTDigitDLRERPOMDP", 256, 512, 0, 0);
@@ -115,7 +112,7 @@ void MNISTDigitDLRERPOMDP::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
-	env.initializePropertyDependentVariables();
+	env.initializeEnvironment();
 
 	/*LOG(LNOTICE) << "Network responses: \n" <<  streamNetworkResponseTable();
 	LOG(LNOTICE) << "Observation: \n"  << env.observationToString();
@@ -128,19 +125,13 @@ void MNISTDigitDLRERPOMDP::startNewEpisode() {
 void MNISTDigitDLRERPOMDP::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
-	mic::types::Position2D current_position = env.getAgentPosition();
-	float reward = env.getStateReward(current_position);
 	sum_of_iterations += iteration -1; // -1 is the fix related to moving the terminal condition to the front of step!
-	sum_of_rewards += reward;
-	if (reward > 0)
-			number_of_successes++;
 
 	// Add variables to container.
-	collector_ptr->addDataToContainer("number_of_steps",(iteration -1));
-	collector_ptr->addDataToContainer("number_of_steps_average",(float)sum_of_iterations/episode);
-	collector_ptr->addDataToContainer("collected_reward", reward);
-	collector_ptr->addDataToContainer("collected_reward_average", (float)sum_of_rewards/episode);
-	collector_ptr->addDataToContainer("success_ratio", (float)number_of_successes/episode);
+	collector_ptr->addDataToContainer("path_length_episode",(iteration -1));
+	collector_ptr->addDataToContainer("path_length_average",(float)sum_of_iterations/episode);
+	collector_ptr->addDataToContainer("path_length_optimal", (float)env.optimalPathLength());
+	collector_ptr->addDataToContainer("path_length_diff", (float)(iteration -1 - env.optimalPathLength()));
 
 
 	// Export reward "convergence" diagram.
@@ -498,7 +489,7 @@ bool MNISTDigitDLRERPOMDP::performSingleStep() {
 	env.getObservation();
 
 	// Check whether we reached maximum number of iterations.
-	if ((step_limit>0) && (iteration >= step_limit))
+	if ((step_limit>0) && (iteration > step_limit))
 		return false;
 
 	return true;

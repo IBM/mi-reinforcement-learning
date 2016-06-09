@@ -6,16 +6,25 @@
  */
 
 #include <types/MNISTDigit.hpp>
+#include  <data_utils/RandomGenerator.hpp>
 
 namespace mic {
 namespace environments {
 
 MNISTDigit::MNISTDigit(std::string node_name_) : Environment(node_name_),
 	mnist_importer("mnist_importer"),
-	sample_number("sample_number", 0)
+	sample_number("sample_number", 0),
+	agent_x("agent_x",-1),
+	agent_y("agent_y",-1),
+	goal_x("goal_x",-1),
+	goal_y("goal_y",-1)
 {
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(sample_number);
+	registerProperty(agent_x);
+	registerProperty(agent_y);
+	registerProperty(goal_x);
+	registerProperty(goal_y);
 
 	channels = (size_t)MNISTDigitChannels::Count;
 
@@ -39,37 +48,15 @@ mic::environments::MNISTDigit & MNISTDigit::operator= (const mic::environments::
 
 // Initialize environment_grid.
 void MNISTDigit::initializePropertyDependentVariables() {
-
-	width = height = 28;
-
 	// Load dataset.
 	if (!mnist_importer.importData()) {
 		//return;
-		// Set proper size.
-		environment_grid->resize({28,28,channels});
-		// Put goal and agent.
-		(*environment_grid)({10,10,(size_t)MNISTDigitChannels::Agent}) = (float)1;
-		(*environment_grid)({14,14,(size_t)MNISTDigitChannels::Goals}) = 10;
-
-	} else {
-		// Random select sample from dataset.
-		mic::types::MNISTSample sample = mnist_importer.getRandomSample();
-		// TODO: decide whether random, or n-th sample etc.
-
-		// Copy data from image to grid.
-		environment_grid->resize({width, height, channels});
-
-		for (size_t x=0; x<width; x++)
-			for (size_t y=0; y<width; y++)
-				(*environment_grid)({x,y,(size_t)MNISTDigitChannels::Pixels}) = (*sample.data())(y,x);
-		//(*environment_grid) = *(sample.data());
-		// Add "additional" channels.
-		//environment_grid->resize({28,28,channels});
-
-		// Put goal and agent.
-		(*environment_grid)({10,10,(size_t)MNISTDigitChannels::Agent}) = (float)1;
-		(*environment_grid)({14,14,(size_t)MNISTDigitChannels::Goals}) = 10;
 	}
+
+	// Set environment size.
+	width = height = 28;
+	environment_grid->resize({width, height, channels});
+
 	// Check whether it is a POMDP or not.
 	if (roi_size >0) {
 		pomdp_flag = true;
@@ -78,6 +65,46 @@ void MNISTDigit::initializePropertyDependentVariables() {
 		observation_grid->resize({width, height, channels});
 	}//: else
 
+}
+
+void MNISTDigit::initializeEnvironment() {
+	// Reset the grid.
+	environment_grid->zeros();
+
+	if (mnist_importer.size() > 0) {
+		mic::types::MNISTSample sample;
+//		LOG(LERROR) << "sample_number: " << sample_number;
+
+		if ((sample_number < 0) || (sample_number >= mnist_importer.size()))
+			// Random select sample from dataset.
+			sample = mnist_importer.getRandomSample();
+		else
+			// Get given sample.
+			sample = mnist_importer.getSample(sample_number);
+
+		for (size_t x=0; x<width; x++)
+			for (size_t y=0; y<height; y++)
+				(*environment_grid)({x,y,(size_t)MNISTDigitChannels::Pixels}) = (*sample.data())(y,x);
+		LOG(LINFO) << "Digit: " << (*sample.label());
+	}
+
+	// Put goal and agent.
+	size_t ax,ay,gx,gy;
+
+	// Set agent coordinates.
+	ax = (agent_x < 0) ? RAN_GEN->uniRandInt(0,width) : agent_x;
+	ay = (agent_y < 0) ? RAN_GEN->uniRandInt(0,height) : agent_y;
+	// Set initial position
+	initial_position.set(ax,ay);
+	moveAgentToInitialPosition();
+
+	// Set goal coordinates.
+	gx = (goal_x < 0) ? RAN_GEN->uniRandInt(0,width) : goal_x;
+	gy = (goal_y < 0) ? RAN_GEN->uniRandInt(0,height) : goal_y;
+	(*environment_grid)({gx,gy,(size_t)MNISTDigitChannels::Goals}) = 10;
+
+	// Calculate the optimal path length.
+	optimal_path_length = abs((int)ax-(int)gx) + abs((int)ay-(int)gy);
 }
 
 std::string MNISTDigit::toString(mic::types::TensorXfPtr env_) {
