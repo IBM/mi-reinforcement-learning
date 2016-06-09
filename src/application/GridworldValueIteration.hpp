@@ -47,7 +47,7 @@ protected:
 	virtual void initializePropertyDependentVariables();
 
 	/*!
-	 * Method initializes GLUT and OpenGL windows.
+	 * Method empty (not used).
 	 * @param argc Number of application parameters.
 	 * @param argv Array of application parameters.
 	 */

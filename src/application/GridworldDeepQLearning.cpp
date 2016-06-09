@@ -71,6 +71,9 @@ void GridworldDeepQLearning::initialize(int argc, char* argv[]) {
 }
 
 void GridworldDeepQLearning::initializePropertyDependentVariables() {
+	// Initialize the gridworld.
+	grid_env.initializeEnvironment();
+
 	// Try to load neural network from file.
 	if ((mlnn_load) && (neural_net.load(mlnn_filename))) {
 		// Do nothing ;)
@@ -92,7 +95,7 @@ void GridworldDeepQLearning::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
-	grid_env.initializePropertyDependentVariables();
+	grid_env.initializeEnvironment();
 
 	LOG(LSTATUS) << "Network responses: \n" <<  streamNetworkResponseTable();
 	LOG(LSTATUS) << "Environment: \n" << grid_env.environmentToString();

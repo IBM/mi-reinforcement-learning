@@ -93,6 +93,9 @@ private:
 	/// The maze of digits environment.
 	mic::environments::MazeOfDigits env;
 
+	/// Saccadic path - a sequence of consecutive agent positions.
+	std::shared_ptr<std::vector <mic::types::Position2D> > saccadic_path;
+
 	/// Size of the batch in experience replay - set to the size of maze (width*height).
 	size_t batch_size;
 
@@ -169,16 +172,6 @@ private:
 	 * Sum of all iterations made till now - used in statistics.
 	 */
 	long long sum_of_iterations;
-
-	/*!
-	 * Sum of all rewards collected till now - used in statistics.
-	 */
-	long long sum_of_rewards;
-
-	/*!
-	 * Number of successes, i.e. how many times we reached goal till now - used in statistics.
-	 */
-	long long number_of_successes;
 
 	/*!
 	 * Table of past experiences.

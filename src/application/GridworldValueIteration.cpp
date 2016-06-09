@@ -49,6 +49,8 @@ void GridworldValueIteration::initialize(int argc, char* argv[]) {
 }
 
 void GridworldValueIteration::initializePropertyDependentVariables() {
+	// Initialize the gridworld.
+	grid_env.initializeEnvironment();
 
 	// Resize and reset the action-value table.
 	state_value_table.resize(grid_env.getEnvironmentHeight(), grid_env.getEnvironmentWidth());

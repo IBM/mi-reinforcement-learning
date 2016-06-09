@@ -36,8 +36,11 @@ mic::environments::Gridworld & Gridworld::operator= (const mic::environments::Gr
 }
 
 
-// Initialize environment_grid.
 void Gridworld::initializePropertyDependentVariables() {
+	// Empty - everything will be initialized in environment initialization.
+}
+
+void Gridworld::initializeEnvironment() {
 	// Generate adequate gridworld.
 	switch(type) {
 		case 0 : initExemplaryGrid(); break;

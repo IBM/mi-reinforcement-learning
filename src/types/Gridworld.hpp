@@ -51,9 +51,14 @@ public:
 	mic::environments::Gridworld & operator=(const mic::environments::Gridworld & gw_);
 
 	/*!
-	 * Initializes all variables that are property-dependent - generates the gridworld of a required (defined by property) type.
+	 * Initializes all variables that are property-dependent.
 	 */
 	virtual void initializePropertyDependentVariables();
+
+	/*!
+	 * (Re)initializes the environment - generates the gridworld of a required (defined by property) type, sets agent, goal etc.
+	 */
+	virtual void initializeEnvironment();
 
 	/*!
 	 * 	Method initializes the exemplary grid.

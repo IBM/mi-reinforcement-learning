@@ -37,9 +37,12 @@ mic::environments::MazeOfDigits & MazeOfDigits::operator= (const mic::environmen
 }
 
 
-// Initialize environment_grid->
 void MazeOfDigits::initializePropertyDependentVariables() {
-	// Generate adequate gridworld.
+	// Empty - everything will be initialized in environment initialization.
+}
+
+void MazeOfDigits::initializeEnvironment() {
+	// Generate adequate maze.
 	switch(type) {
 		case 0 : initExemplaryMaze(); break;
 		case -3:
@@ -59,7 +62,6 @@ void MazeOfDigits::initializePropertyDependentVariables() {
 		observation_grid->resize({width, height, channels});
 	}//: else
 }
-
 
 void MazeOfDigits::initExemplaryMaze() {
 	LOG(LNOTICE) << "Generating an exemplary maze of digits";
@@ -104,6 +106,10 @@ void MazeOfDigits::initExemplaryMaze() {
 
 	// Place goal(s).
 	(*environment_grid)({3,0, (size_t)MazeOfDigitsChannels::Goals}) = 10;
+
+	// Calculate the optimal path length.
+	optimal_path_length = 4;
+
 }
 
 void MazeOfDigits::initFullyRandomMaze() {
@@ -145,6 +151,9 @@ void MazeOfDigits::initFullyRandomMaze() {
 		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
 		break;
 	}//: while
+
+	// Calculate the optimal path length.
+	optimal_path_length = abs((int)goal.x-(int)agent.x) + abs((int)goal.y-(int)agent.y);
 
 	// Initialize random device and generator.
 	std::random_device rd;
@@ -212,6 +221,9 @@ void MazeOfDigits::initRandomStructuredMaze() {
 		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
 		break;
 	}//: while
+
+	// Calculate the optimal path length.
+	optimal_path_length = abs((int)goal.x-(int)agent.x) + abs((int)goal.y-(int)agent.y);
 
 	// Initialize random device and generator.
 	std::random_device rd;
@@ -292,6 +304,9 @@ void MazeOfDigits::initRandomPatchMaze() {
 		(*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Digits}) = 9;
 		break;
 	}//: while
+
+	// Calculate the optimal path length.
+	optimal_path_length = abs((int)goal.x-(int)agent.x) + abs((int)goal.y-(int)agent.y);
 
 	// Initialize random device and generator.
 	std::random_device rd;

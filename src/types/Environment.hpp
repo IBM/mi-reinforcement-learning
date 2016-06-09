@@ -37,6 +37,11 @@ public:
 	virtual ~Environment();
 
 	/*!
+	 * (Re)initializes the environment - gets given MNIST digit (sample number), sets agent, goal etc.
+	 */
+	virtual void initializeEnvironment() = 0;
+
+	/*!
 	 * Returns the tensor storing the environment.
 	 * @return Tensor storing the environment.
 	 */

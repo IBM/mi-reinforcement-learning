@@ -51,9 +51,14 @@ public:
 	mic::environments::MazeOfDigits & operator=(const mic::environments::MazeOfDigits & gw_);
 
 	/*!
-	 * Initializes all variables that are property-dependent - generates the gridworld of a required (defined by property) type.
+	 * Initializes all variables that are property-dependent.
 	 */
 	virtual void initializePropertyDependentVariables();
+
+	/*!
+	 * (Re)initializes the environment - generates the maze of a required (defined by property) type, sets agent, goal etc.
+	 */
+	virtual void initializeEnvironment();
 
 	/*!
 	 * 	Method initializes the exemplary maze.
@@ -161,9 +166,17 @@ public:
 	 */
 	virtual bool isStateTerminal(mic::types::Position2D pos_);
 
+	/*!
+	 * Returns the length of optimal path from agent initial position to goal.
+	 * @return
+	 */
+	unsigned int optimalPathLength(){
+		return optimal_path_length;
+	}
+
+
 protected:
 
-	///
 	/*!
 	 * Property: type of the generated gridworld.
 	 * Currently available types:
@@ -179,6 +192,11 @@ protected:
 	 * @return String with description of the grid.
 	 */
 	std::string gridToString(mic::types::TensorXfPtr & grid_);
+
+	/*!
+	 * Optimal number of steps from initial agent position to goal.
+	 */
+	unsigned int optimal_path_length;
 
 
 };

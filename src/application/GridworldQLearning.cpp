@@ -70,6 +70,8 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 }
 
 void GridworldQLearning::initializePropertyDependentVariables() {
+	// Initialize the gridworld.
+	grid_env.initializeEnvironment();
 
 	// Resize and reset the action-value table.
 	qstate_table.resize({grid_env.getEnvironmentWidth(),grid_env.getEnvironmentHeight(),4});
@@ -84,7 +86,7 @@ void GridworldQLearning::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
-	grid_env.initializePropertyDependentVariables();
+	grid_env.initializeEnvironment();
 
 	LOG(LSTATUS) << std::endl << streamQStateTable();
 	LOG(LSTATUS) << std::endl << grid_env.environmentToString();

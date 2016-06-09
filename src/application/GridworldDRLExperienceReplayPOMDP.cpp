@@ -77,6 +77,9 @@ void GridworldDRLExperienceReplayPOMDP::initialize(int argc, char* argv[]) {
 }
 
 void GridworldDRLExperienceReplayPOMDP::initializePropertyDependentVariables() {
+	// Initialize the gridworld.
+	grid_env.initializeEnvironment();
+
 	// Hardcode batchsize - for fastening the display!
 	batch_size = grid_env.getObservationWidth() * grid_env.getObservationHeight();
 
@@ -104,7 +107,7 @@ void GridworldDRLExperienceReplayPOMDP::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
-	grid_env.initializePropertyDependentVariables();
+	grid_env.initializeEnvironment();
 
 	LOG(LSTATUS) << "Network responses: \n" <<  streamNetworkResponseTable();
 	LOG(LSTATUS) << "Observation: \n"  << grid_env.observationToString();
