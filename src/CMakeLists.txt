@@ -181,7 +181,6 @@ if(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 endif(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 
 
-
 set(BUILD_APP_GRIDWORLD_QLEARNING ON CACHE BOOL "Build the application solving the gridworld problem with Q-learning.")
 
 if(${BUILD_APP_GRIDWORLD_QLEARNING})
@@ -293,6 +292,10 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 endif(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 
 
+# =======================================================================
+# Build maze-of-digits related apps.
+# =======================================================================
+
 set(BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP ON CACHE BOOL "Build the application solving the maze of digits with partial observation and Deep Reinforcement Learning with Experience Replay.")
 
 if(${BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
@@ -319,3 +322,36 @@ if(${BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 	install(TARGETS mazeofdigits_drl_er_pomdp_app RUNTIME DESTINATION bin)
 	
 endif(${BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
+
+# =======================================================================
+# Build MNIST digit related apps.
+# =======================================================================
+
+set(BUILD_APP_MNIST_DIGIT_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP ON CACHE BOOL "Build the application solving the MNIST digit patch localization proble with partial observation and Deep Reinforcement Learning with Experience Replay.")
+
+if(${BUILD_APP_MNIST_DIGIT_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
+	# Create exeutable.
+	add_executable(mnist_digit_drl_er_pomdp_app 
+		application/MNISTDigitDLRERPOMDP.cpp
+		types/MNISTDigit.cpp
+		types/Environment.cpp
+		application/console_application_main.cpp
+		)
+	# Link it with shared libraries.
+	target_link_libraries(mnist_digit_drl_er_pomdp_app 
+		logger
+		configuration
+		application
+		types
+		data_io
+		data_utils
+		mlnn
+		visualization_opengl
+		${Boost_LIBRARIES}  
+		)
+
+	# install test to bin directory
+	install(TARGETS mnist_digit_drl_er_pomdp_app RUNTIME DESTINATION bin)
+	
+endif(${BUILD_APP_MNIST_DIGIT_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
+

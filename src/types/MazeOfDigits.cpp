@@ -52,7 +52,6 @@ void MazeOfDigits::initializePropertyDependentVariables() {
 	}//: switch
 
 	// Check whether it is a POMDP or not.
-	// Check whether it is a POMDP or not.
 	if (roi_size >0) {
 		pomdp_flag = true;
 		observation_grid->resize({roi_size, roi_size, channels});

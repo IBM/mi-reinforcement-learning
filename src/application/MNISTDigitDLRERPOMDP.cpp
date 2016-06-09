@@ -1,14 +1,15 @@
 /*!
- * \file MazeOfDigitsDLRERPOMPD.cpp
+ * \file MNISTDLREPPOMDP.cpp
  * \brief 
  * \author tkornut
- * \date May 6, 2016
+ * \date Jun 8, 2016
  */
+
+#include "MNISTDigitDLRERPOMDP.hpp"
 
 #include <limits>
 #include <data_utils/RandomGenerator.hpp>
 
-#include <application/MazeOfDigitsDLRERPOMPD.hpp>
 
 namespace mic {
 namespace application {
@@ -18,18 +19,18 @@ namespace application {
  * \author tkornuta
  */
 void RegisterApplication (void) {
-	REGISTER_APPLICATION(mic::application::MazeOfDigitsDLRERPOMPD);
+	REGISTER_APPLICATION(mic::application::MNISTDigitDLRERPOMDP);
 }
 
 
-MazeOfDigitsDLRERPOMPD::MazeOfDigitsDLRERPOMPD(std::string node_name_) : OpenGLEpisodicApplication(node_name_),
+MNISTDigitDLRERPOMDP::MNISTDigitDLRERPOMDP(std::string node_name_) : OpenGLEpisodicApplication(node_name_),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.005),
 		epsilon("epsilon", 0.1),
 		step_limit("step_limit",0),
-		statistics_filename("statistics_filename","maze_of_digits_drl_er_statistics.csv"),
-		mlnn_filename("mlnn_filename", "maze_of_digits_drl_er_mlnn.txt"),
+		statistics_filename("statistics_filename","mnist_digit_drl_er_statistics.csv"),
+		mlnn_filename("mlnn_filename", "mnist_digit_drl_er_mlnn.txt"),
 		mlnn_save("mlnn_save", false),
 		mlnn_load("mlnn_load", false),
 		experiences(10000,1)
@@ -49,12 +50,12 @@ MazeOfDigitsDLRERPOMPD::MazeOfDigitsDLRERPOMPD(std::string node_name_) : OpenGLE
 }
 
 
-MazeOfDigitsDLRERPOMPD::~MazeOfDigitsDLRERPOMPD() {
+MNISTDigitDLRERPOMDP::~MNISTDigitDLRERPOMDP() {
 
 }
 
 
-void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
+void MNISTDigitDLRERPOMDP::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
@@ -71,15 +72,15 @@ void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
 	number_of_successes = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("MazeOfDigitsDLRERPOMPD", 256, 512, 0, 0);
+	w_chart = new WindowFloatCollectorChart("MNISTDigitDLRERPOMDP", 256, 512, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }
 
-void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
+void MNISTDigitDLRERPOMDP::initializePropertyDependentVariables() {
 	// Create windows for the visualization of the whole environment and a single observation.
-	wmd_environment = new WindowMazeOfDigits("Environment", env.getEnvironmentHeight()*20,env.getEnvironmentWidth()*20, 0, 316);
-	wmd_observation = new WindowMazeOfDigits("Observation", env.getObservationHeight()*20,env.getObservationWidth()*20, env.getEnvironmentWidth()*20, 316);
+	wmd_environment = new WindowMNISTDigit("Environment", env.getEnvironmentHeight()*20,env.getEnvironmentWidth()*20, 0, 316);
+	wmd_observation = new WindowMNISTDigit("Observation", env.getObservationHeight()*20,env.getObservationWidth()*20, env.getEnvironmentWidth()*20, 316);
 
 
 	// Hardcode batchsize - for fastening the display!
@@ -104,13 +105,13 @@ void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
 	experiences.setBatchSize(batch_size);
 
 	// Set displayed matrix pointers.
-	wmd_environment->setMazePointer(env.getEnvironment());
-	wmd_observation->setMazePointer(env.getObservation());
+	wmd_environment->setDigitPointer(env.getEnvironment());
+	wmd_observation->setDigitPointer(env.getObservation());
 
 }
 
 
-void MazeOfDigitsDLRERPOMPD::startNewEpisode() {
+void MNISTDigitDLRERPOMDP::startNewEpisode() {
 	LOG(LSTATUS) << "Starting new episode " << episode;
 
 	// Generate the gridworld (and move player to initial position).
@@ -124,7 +125,7 @@ void MazeOfDigitsDLRERPOMPD::startNewEpisode() {
 }
 
 
-void MazeOfDigitsDLRERPOMPD::finishCurrentEpisode() {
+void MNISTDigitDLRERPOMDP::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
 	mic::types::Position2D current_position = env.getAgentPosition();
@@ -151,7 +152,7 @@ void MazeOfDigitsDLRERPOMPD::finishCurrentEpisode() {
 }
 
 
-std::string MazeOfDigitsDLRERPOMPD::streamNetworkResponseTable() {
+std::string MNISTDigitDLRERPOMDP::streamNetworkResponseTable() {
 	LOG(LTRACE) << "streamNetworkResponseTable()";
 	std::string rewards_table;
 	std::string actions_table;
@@ -236,7 +237,7 @@ std::string MazeOfDigitsDLRERPOMPD::streamNetworkResponseTable() {
 
 
 
-float MazeOfDigitsDLRERPOMPD::computeBestValueForGivenStateAndPredictions(mic::types::Position2D player_position_, float* predictions_){
+float MNISTDigitDLRERPOMDP::computeBestValueForGivenStateAndPredictions(mic::types::Position2D player_position_, float* predictions_){
 	LOG(LTRACE) << "computeBestValueForGivenState()";
 	float best_qvalue = -std::numeric_limits<float>::infinity();
 
@@ -260,7 +261,7 @@ float MazeOfDigitsDLRERPOMPD::computeBestValueForGivenStateAndPredictions(mic::t
 }
 
 
-mic::types::MatrixXfPtr MazeOfDigitsDLRERPOMPD::getPredictedRewardsForGivenState(mic::types::Position2D player_position_) {
+mic::types::MatrixXfPtr MNISTDigitDLRERPOMDP::getPredictedRewardsForGivenState(mic::types::Position2D player_position_) {
 	LOG(LTRACE) << "getPredictedRewardsForGivenState()";
 	// Remember the current state i.e. player position.
 	mic::types::Position2D current_player_pos_t = env.getAgentPosition();
@@ -300,7 +301,7 @@ mic::types::MatrixXfPtr MazeOfDigitsDLRERPOMPD::getPredictedRewardsForGivenState
 	return predictions_sample;
 }
 
-mic::types::NESWAction MazeOfDigitsDLRERPOMPD::selectBestActionForGivenState(mic::types::Position2D player_position_){
+mic::types::NESWAction MNISTDigitDLRERPOMDP::selectBestActionForGivenState(mic::types::Position2D player_position_){
 	LOG(LTRACE) << "selectBestAction";
 
 	// Greedy methods - returns the index of element with greatest value.
@@ -333,7 +334,7 @@ mic::types::NESWAction MazeOfDigitsDLRERPOMPD::selectBestActionForGivenState(mic
 	return best_action;
 }
 
-bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
+bool MNISTDigitDLRERPOMDP::performSingleStep() {
 	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
 	// Check whether state t is terminal - finish the episode.

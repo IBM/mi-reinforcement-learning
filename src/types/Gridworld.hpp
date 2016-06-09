@@ -247,7 +247,6 @@ public:
 
 protected:
 
-	///
 	/*!
 	 * Property: type of the generated gridworld.
 	 * Currently available types:

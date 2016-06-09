@@ -85,7 +85,7 @@ public:
 	size_t getChannels() { return channels; }
 
 	/*!
-	 * Returns size of the region of iterest.
+	 * Returns size of the region of interest.
 	 * @return ROI size.
 	 */
 	size_t getROISize() { return roi_size; }
