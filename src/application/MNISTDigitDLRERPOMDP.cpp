@@ -5,7 +5,7 @@
  * \date Jun 8, 2016
  */
 
-#include "MNISTDigitDLRERPOMDP.hpp"
+#include <application/MNISTDigitDLRERPOMDP.hpp>
 
 #include <limits>
 #include <data_utils/RandomGenerator.hpp>
@@ -24,6 +24,7 @@ void RegisterApplication (void) {
 
 
 MNISTDigitDLRERPOMDP::MNISTDigitDLRERPOMDP(std::string node_name_) : OpenGLEpisodicApplication(node_name_),
+		saccadic_path(new std::vector <mic::types::Position2D>()),
 		step_reward("step_reward", 0.0),
 		discount_rate("discount_rate", 0.9),
 		learning_rate("learning_rate", 0.005),
@@ -103,6 +104,7 @@ void MNISTDigitDLRERPOMDP::initializePropertyDependentVariables() {
 
 	// Set displayed matrix pointers.
 	wmd_environment->setDigitPointer(env.getEnvironment());
+	wmd_environment->setPathPointer(saccadic_path);
 	wmd_observation->setDigitPointer(env.getObservation());
 
 }
@@ -113,6 +115,9 @@ void MNISTDigitDLRERPOMDP::startNewEpisode() {
 
 	// Generate the gridworld (and move player to initial position).
 	env.initializeEnvironment();
+	saccadic_path->clear();
+	// Add first, initial position to  to saccadic path.
+	saccadic_path->push_back(env.getAgentPosition());
 
 	/*LOG(LNOTICE) << "Network responses: \n" <<  streamNetworkResponseTable();
 	LOG(LNOTICE) << "Observation: \n"  << env.observationToString();
@@ -328,16 +333,16 @@ mic::types::NESWAction MNISTDigitDLRERPOMDP::selectBestActionForGivenState(mic::
 bool MNISTDigitDLRERPOMDP::performSingleStep() {
 	LOG(LSTATUS) << "Episode "<< episode << ": step " << iteration << "";
 
+	// Get player pos at time t.
+	mic::types::Position2D player_pos_t= env.getAgentPosition();
+	LOG(LINFO) << "Agent position at state t: " << player_pos_t;
+
 	// Check whether state t is terminal - finish the episode.
-	if(env.isStateTerminal(env.getAgentPosition()))
+	if(env.isStateTerminal(player_pos_t))
 		return false;
 
 	// TMP!
 	double 	nn_weight_decay = 0;
-
-	// Get player pos at time t.
-	mic::types::Position2D player_pos_t= env.getAgentPosition();
-	LOG(LINFO) << "Agent position at state t: " << player_pos_t;
 
 	// Select the action.
 	mic::types::NESWAction action;
@@ -366,6 +371,9 @@ bool MNISTDigitDLRERPOMDP::performSingleStep() {
 	// Get new state s(t+1).
 	mic::types::Position2D player_pos_t_prim = env.getAgentPosition();
 	LOG(LINFO) << "Agent position at t+1: " << player_pos_t_prim << " after performing the action = " << action << ((random) ? " [Random]" : "");
+
+	// Add this position to  to saccadic path.
+	saccadic_path->push_back(player_pos_t_prim);
 
 	// Collect the experience.
 	SpatialExperiencePtr exp(new SpatialExperience(player_pos_t, action, player_pos_t_prim));

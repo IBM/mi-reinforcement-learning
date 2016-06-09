@@ -14,7 +14,7 @@
 #include<logger/Log.hpp>
 #include<data_utils/RandomGenerator.hpp>
 
-#include "../types/Action2D.hpp"
+#include <types/Action2D.hpp>
 
 
 namespace mic {

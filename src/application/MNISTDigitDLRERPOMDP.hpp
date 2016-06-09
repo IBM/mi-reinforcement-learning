@@ -93,6 +93,9 @@ private:
 	/// The maze of digits environment.
 	mic::environments::MNISTDigit env;
 
+	/// Saccadic path - a sequence of consecutive agent positions.
+	std::shared_ptr<std::vector <mic::types::Position2D> > saccadic_path;
+
 	/// Size of the batch in experience replay - set to the size of maze (width*height).
 	size_t batch_size;
 
