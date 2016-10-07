@@ -101,8 +101,8 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 	mic::data_io::DataCollector<std::string, int>::exportMatricesToCsv(statistics_filename, "mazes", importer.data());
 
 	std::vector<std::string> maze_pose_labels;
-	for (size_t y=0; y < importer.data(0)->rows(); y++)
-		for (size_t x=0; x < importer.data(0)->cols(); x++) {
+	for (size_t y=0; y < (size_t)importer.data(0)->rows(); y++)
+		for (size_t x=0; x < (size_t)importer.data(0)->cols(); x++) {
 			std::string label = "(" + std::to_string(y) + ";" + std::to_string(x) + ")";
 			maze_pose_labels.push_back(label);
 		}//: for
@@ -168,7 +168,7 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 	}//: for
 
 	// Create a single container for each x coordinate.
-	for (size_t x=0; x<importer.maze_width; x++) {
+	for (size_t x=0; x<(size_t)importer.maze_width; x++) {
 		std::string label = "P(x" + std::to_string(x) +")";
 		int r= color_dist(rng_mt19937_64);
 		int g= color_dist(rng_mt19937_64);
@@ -181,7 +181,7 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 
 
 	// Create a single container for each y coordinate.
-	for (size_t y=0; y<importer.maze_height; y++) {
+	for (size_t y=0; y<(size_t)importer.maze_height; y++) {
 		std::string label = "P(y" + std::to_string(y) +")";
 		int r= color_dist(rng_mt19937_64);
 		int g= color_dist(rng_mt19937_64);

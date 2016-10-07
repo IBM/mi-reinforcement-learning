@@ -72,7 +72,7 @@ private:
 	mic::types::VectorXi action_counts;
 
 	/// Property: number of bandits
-	mic::configuration::Property<short> number_of_bandits;
+	mic::configuration::Property<size_t> number_of_bandits;
 
 	/// Property: variable denoting epsilon in action selection (the probability "below" which a random action will be selected).
 	mic::configuration::Property<double> epsilon;
@@ -83,12 +83,12 @@ private:
 	/*!
 	 * The best arm (hidden state).
 	 */
-	short best_arm = -1;
+	size_t best_arm;
 
 	/*!
 	 * The best arm probability/"reward" (hidden state).
 	 */
-	float best_arm_prob = -1;
+	float best_arm_prob;
 
 	/*!
 	 * Calculates the reward.
@@ -99,7 +99,7 @@ private:
 	/*!
 	 * Greedy method that selects best arm based on historical action-value pairs.
 	 */
-	short selectBestArm();
+	size_t selectBestArm();
 
 };
 

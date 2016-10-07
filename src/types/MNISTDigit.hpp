@@ -147,7 +147,7 @@ protected:
 	/*!
 	 * Property: MNISTDigit digit - number of sample.
 	 */
-	mic::configuration::Property<short> sample_number;
+	mic::configuration::Property<size_t> sample_number;
 
 	/*!
 	 * Property: initial agent x position.

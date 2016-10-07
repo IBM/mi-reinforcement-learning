@@ -199,10 +199,10 @@ mic::types::TensorXfPtr MNISTDigit::getObservation() {
 	mic::types::Position2D p = getAgentPosition();
 
 	// Copy data.
-	for (long oy=0, ey=(p.y-delta); oy<roi_size; oy++, ey++){
-		for (long ox=0, ex=(p.x-delta); ox<roi_size; ox++, ex++) {
+	for (long oy=0, ey=(p.y-delta); oy<(long)roi_size; oy++, ey++){
+		for (long ox=0, ex=(p.x-delta); ox<(long)roi_size; ox++, ex++) {
 			// Check grid boundaries.
-			if ((ex < 0) || (ex >= width) || (ey < 0) || (ey >= height)){
+			if ((ex < 0) || ((size_t)ex >= width) || (ey < 0) || ((size_t)ey >= height)){
 				// Do nothing...
 				continue;
 			}//: if
@@ -263,10 +263,10 @@ float MNISTDigit::getStateReward(mic::types::Position2D pos_) {
 
 
 bool MNISTDigit::isStateAllowed(mic::types::Position2D pos_) {
-	if ((pos_.x < 0) || (pos_.x >= width))
+	if ((pos_.x < 0) || ((size_t)pos_.x >= width))
 		return false;
 
-	if ((pos_.y < 0) || (pos_.y >= height))
+	if ((pos_.y < 0) || ((size_t)pos_.y >= height))
 			return false;
 
 	return true;
@@ -274,10 +274,10 @@ bool MNISTDigit::isStateAllowed(mic::types::Position2D pos_) {
 
 
 bool MNISTDigit::isStateTerminal(mic::types::Position2D pos_) {
-	if ((pos_.x < 0) || (pos_.x >= width))
+	if ((pos_.x < 0) || ((size_t)pos_.x >= width))
 		return false;
 
-	if ((pos_.y < 0) || (pos_.y >= height))
+	if ((pos_.y < 0) || ((size_t)pos_.y >= height))
 			return false;
 
 	// Check reward - goal.

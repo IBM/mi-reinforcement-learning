@@ -59,7 +59,7 @@ void nArmedBanditsUnlimitedHistory::initialize(int argc, char* argv[]) {
 void nArmedBanditsUnlimitedHistory::initializePropertyDependentVariables() {
 	// Initialize random "arm" thresholds.
 	arms.resize(number_of_bandits);
-	for(int i=0; i<number_of_bandits; i++)
+	for(size_t i=0; i<number_of_bandits; i++)
 		arms[i] = RAN_GEN->uniRandReal();
 	//std::cout << arms << std:: endl;
 
@@ -88,11 +88,11 @@ short nArmedBanditsUnlimitedHistory::calculateReward(float prob_) {
 }
 
 
-short nArmedBanditsUnlimitedHistory::selectBestArm() {
+size_t nArmedBanditsUnlimitedHistory::selectBestArm() {
 
 	// greedy method to select best arm based on memory array (historical results)
-    short best_arm = 0;
-    float best_mean = -1;
+    size_t current_best_arm = 0;
+    float current_best_mean = -1;
     // For all possible arms.
 	for(size_t i=0; i<number_of_bandits; i++) {
 		long sum = 0;
@@ -107,14 +107,14 @@ short nArmedBanditsUnlimitedHistory::selectBestArm() {
 		float mean_reward = (float) sum/no_actions;
 		//std::cout<< "mean_reward ["<< i <<"] = " << mean_reward <<std::endl;
 		// Check if this one is better than the others.
-		if (mean_reward > best_mean) {
-			best_mean = mean_reward;
-			best_arm = i;
+		if (mean_reward > current_best_mean) {
+			current_best_mean = mean_reward;
+			current_best_arm = i;
 			//std::cout<< "found best reward = " << best_mean <<" for arm" << best_arm <<std::endl;
 		}//: if
 	}//: for
 	//std::cout<< "best arm = " << best_arm <<std::endl;
-    return best_arm;
+    return current_best_arm;
 }
 
 
@@ -140,7 +140,7 @@ bool nArmedBanditsUnlimitedHistory::performSingleStep() {
 
 	// Calculate the percentage the correct arm is chosen.
 //	std::cout<< "correct arm/choice=" << best_arm << std::endl;
-	long correct_arm =0;
+	size_t correct_arm =0;
 	for(auto av: action_values){
 		if (av.first == best_arm)
 			correct_arm++;

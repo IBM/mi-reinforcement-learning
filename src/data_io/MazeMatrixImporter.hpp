@@ -40,10 +40,10 @@ public:
 	virtual void initializePropertyDependentVariables() { };
 
 	/// Width of a maze.
-	int maze_width;
+	size_t maze_width;
 
 	/// Height of a maze.
-	int maze_height;
+	size_t maze_height;
 
 protected:
 	/*!

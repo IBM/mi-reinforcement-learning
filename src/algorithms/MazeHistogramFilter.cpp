@@ -15,7 +15,7 @@ namespace algorithms {
 
 MazeHistogramFilter::MazeHistogramFilter(){
 	// Reset variables.
-	hidden_maze_number = hidden_y = hidden_y = 0;
+	hidden_maze_number = hidden_x = hidden_y = 0;
 	number_of_mazes = maze_width = maze_height = problem_dimensions = number_of_distinctive_patches = 0;
 
 }

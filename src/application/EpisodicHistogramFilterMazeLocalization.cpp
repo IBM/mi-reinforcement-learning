@@ -121,16 +121,16 @@ void EpisodicHistogramFilterMazeLocalization::finishCurrentEpisode() {
 	collector_ptr->addDataToContainer("Iteration", iteration);
 	collector_ptr->addDataToContainer("Max(Pm)", max_pm);
 
-	if (iteration >= max_number_of_iterations)
+	if (iteration >= (size_t)max_number_of_iterations)
 		collector_ptr->addDataToContainer("Converged", 0);
 	else
 		collector_ptr->addDataToContainer("Converged", 1);
 
 	// Export collected data.
-	if ((long)number_of_episodes==0) {
+	if (number_of_episodes==(long)0) {
 		// If number of episodes are not limited
 		collector_ptr->exportDataToCsv(statistics_filename);
-	} else if ( episode >= (long) number_of_episodes)
+	} else if ( episode >= (size_t) number_of_episodes)
 		collector_ptr->exportDataToCsv(statistics_filename);
 
 }
@@ -176,7 +176,7 @@ bool EpisodicHistogramFilterMazeLocalization::performSingleStep() {
 	// Check terminal condition(s).
 
 	// 1. Check iteration number.
-	if (iteration >= max_number_of_iterations)
+	if (iteration >= (size_t)max_number_of_iterations)
 		return false;
 
 	// 2. Check max maze probability.

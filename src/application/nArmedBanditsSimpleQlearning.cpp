@@ -60,7 +60,7 @@ void nArmedBanditsSimpleQlearning::initialize(int argc, char* argv[]) {
 void nArmedBanditsSimpleQlearning::initializePropertyDependentVariables() {
 	// Initialize random "arm" thresholds.
 	arms.resize(number_of_bandits);
-	for(int i=0; i<number_of_bandits; i++)
+	for(size_t i=0; i<number_of_bandits; i++)
 		arms[i] = RAN_GEN->uniRandReal();
 	//std::cout << arms << std:: endl;
 
@@ -92,19 +92,19 @@ short nArmedBanditsSimpleQlearning::calculateReward(float prob_) {
 }
 
 
-short nArmedBanditsSimpleQlearning::selectBestArm() {
+size_t nArmedBanditsSimpleQlearning::selectBestArm() {
 	// Greedy methods - returns the index of element with greatest value.
-	short best_arm = 0;
-    float best_value = -1;
+	size_t current_best_arm = 0;
+    float current_best_value = -1;
     // For all possible arms.
 	for(size_t i=0; i<number_of_bandits; i++) {
 		// Check if this one is better than the others.
-		if (action_values(i) > best_value) {
-			best_value = action_values(i);
-			best_arm = i;
+		if (action_values(i) > current_best_value) {
+			current_best_value = action_values(i);
+			current_best_arm = i;
 		}//: if
 	}//: for
-    return best_arm;
+    return current_best_arm;
 }
 
 

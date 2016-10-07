@@ -705,10 +705,10 @@ mic::types::TensorXfPtr Gridworld::getObservation() {
 	mic::types::Position2D p = getAgentPosition();
 
 	// Copy data.
-	for (long oy=0, ey=(p.y-delta); oy<roi_size; oy++, ey++){
-		for (long ox=0, ex=(p.x-delta); ox<roi_size; ox++, ex++) {
+	for (long oy=0, ey=(p.y-delta); oy< (long)roi_size; oy++, ey++){
+		for (long ox=0, ex=(p.x-delta); ox< (long)roi_size; ox++, ex++) {
 			// Check grid boundaries.
-			if ((ex < 0) || (ex >= width) || (ey < 0) || (ey >= height)){
+			if ((ex < 0) || (ex >= (long)width) || (ey < 0) || (ey >= (long)height)){
 				// Place the wall only
 				(*observation_grid)({(size_t)ox, (size_t)oy, (size_t)GridworldChannels::Walls}) = 1;
 				continue;
@@ -794,10 +794,10 @@ float Gridworld::getStateReward(mic::types::Position2D pos_) {
 
 
 bool Gridworld::isStateAllowed(mic::types::Position2D pos_) {
-	if ((pos_.x < 0) || (pos_.x >= width))
+	if ((pos_.x < 0) || (pos_.x >= (long)width))
 		return false;
 
-	if ((pos_.y < 0) || (pos_.y >= height))
+	if ((pos_.y < 0) || (pos_.y >= (long)height))
 			return false;
 
 	// Check walls!
@@ -809,10 +809,10 @@ bool Gridworld::isStateAllowed(mic::types::Position2D pos_) {
 
 
 bool Gridworld::isStateTerminal(mic::types::Position2D pos_) {
-	if ((pos_.x < 0) || (pos_.x >= width))
+	if ((pos_.x < 0) || (pos_.x >= (long)width))
 		return false;
 
-	if ((pos_.y < 0) || (pos_.y >= height))
+	if ((pos_.y < 0) || (pos_.y >= (long)height))
 			return false;
 
 	// Check reward - goal or pit.

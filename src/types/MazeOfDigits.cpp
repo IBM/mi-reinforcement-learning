@@ -168,7 +168,7 @@ void MazeOfDigits::initFullyRandomMaze() {
 		for(size_t y=0; y<height; y++ ){
 
 			// Skip the goal.
-			if ((x == goal.x) && (y == goal.y))
+			if ((x == (size_t)goal.x) && (y == (size_t)goal.y))
 				continue;
 
 			// Random variables.
@@ -235,7 +235,7 @@ void MazeOfDigits::initRandomStructuredMaze() {
 		for(size_t y=0; y<height; y++ ){
 
 			// Skip the goal.
-			if ((x == goal.x) && (y == goal.y))
+			if ((x == (size_t)goal.x) && (y == (size_t)goal.y))
 				continue;
 
 			// Calculate the distance.
@@ -314,21 +314,21 @@ void MazeOfDigits::initRandomPatchMaze() {
 
 	// Check quarter and calculate "main path direction".
 	types::NESWAction dir_min, dir_max;
-	if ((goal.x < width/2) && (goal.y < height/2)) {
+	if (((size_t)goal.x < width/2) && ((size_t)goal.y < height/2)) {
 		// First square -> go E, S or ES.
 		dir_min.dx = 0;
 		dir_max.dx = 1;
 		dir_min.dy = 0;
 		dir_max.dy = 1;
 
-	} else if ((goal.x >= width/2) && (goal.y < height/2)) {
+	} else if (((size_t)goal.x >= width/2) && ((size_t)goal.y < height/2)) {
 		// Second square -> go S or WS or W.
 		dir_min.dx = -1;
 		dir_max.dx = 0;
 		dir_min.dy = 0;
 		dir_max.dy = 1;
 
-	} else if ((goal.x >= width/2) && (goal.y >= height/2)) {
+	} else if (((size_t)goal.x >= width/2) && ((size_t)goal.y >= height/2)) {
 		// Third square -> go N, W or NW
 		dir_min.dx = -1;
 		dir_max.dx = 0;
@@ -360,7 +360,7 @@ void MazeOfDigits::initRandomPatchMaze() {
 		action.dy = y_dist(rng_mt19937_64);
 		cur = cur + action;
 
-		if ((cur.x < 0) || (cur.y < 0) || (cur.x >= width) || (cur.y >= height))
+		if ((cur.x < 0) || (cur.y < 0) || ((size_t)cur.x >= width) || ((size_t)cur.y >= height))
 			break;
 
 		// Skip the goal.
@@ -570,10 +570,10 @@ mic::types::TensorXfPtr MazeOfDigits::getObservation() {
 	mic::types::Position2D p = getAgentPosition();
 
 	// Copy data.
-	for (long oy=0, ey=(p.y-delta); oy<roi_size; oy++, ey++){
-		for (long ox=0, ex=(p.x-delta); ox<roi_size; ox++, ex++) {
+	for (long oy=0, ey=(p.y-delta); oy<(long)roi_size; oy++, ey++){
+		for (long ox=0, ex=(p.x-delta); ox<(long)roi_size; ox++, ex++) {
 			// Check grid boundaries.
-			if ((ex < 0) || (ex >= width) || (ey < 0) || (ey >= height)){
+			if ((ex < 0) || (ex >= (long)width) || (ey < 0) || (ey >= (long)height)){
 				// Place the wall only
 				(*observation_grid)({(size_t)ox, (size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = 1;
 				continue;
@@ -656,10 +656,10 @@ float MazeOfDigits::getStateReward(mic::types::Position2D pos_) {
 
 
 bool MazeOfDigits::isStateAllowed(mic::types::Position2D pos_) {
-	if ((pos_.x < 0) || (pos_.x >= width))
+	if ((pos_.x < 0) || ((size_t)pos_.x >= width))
 		return false;
 
-	if ((pos_.y < 0) || (pos_.y >= height))
+	if ((pos_.y < 0) || ((size_t)pos_.y >= height))
 			return false;
 
 	// Check walls!
@@ -671,10 +671,10 @@ bool MazeOfDigits::isStateAllowed(mic::types::Position2D pos_) {
 
 
 bool MazeOfDigits::isStateTerminal(mic::types::Position2D pos_) {
-	if ((pos_.x < 0) || (pos_.x >= width))
+	if ((pos_.x < 0) || ((size_t)pos_.x >= width))
 		return false;
 
-	if ((pos_.y < 0) || (pos_.y >= height))
+	if ((pos_.y < 0) || ((size_t)pos_.y >= height))
 			return false;
 
 	// Check reward - goal or pit.

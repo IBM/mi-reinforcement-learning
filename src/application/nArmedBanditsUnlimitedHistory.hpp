@@ -65,11 +65,11 @@ private:
 	/// n Bandit arms.
 	mic::types::VectorXf arms;
 
-	/// Action values.
-	std::vector< std::pair<int, int> > action_values;
+	/// Action values - pairs of <arm_number, reward>.
+	std::vector< std::pair<size_t, size_t> > action_values;
 
-	/// Property: number of bandits
-	mic::configuration::Property<short> number_of_bandits;
+	/// Property: number of bandits.
+	mic::configuration::Property<size_t> number_of_bandits;
 
 	/// Property: variable denoting epsilon in action selection (the probability "below" which a random action will be selected).
 	mic::configuration::Property<double> epsilon;
@@ -80,24 +80,23 @@ private:
 	/*!
 	 * The best arm (hidden state).
 	 */
-	short best_arm = -1;
+	size_t best_arm;
 
 	/*!
 	 * The best arm probability/"reward" (hidden state).
 	 */
-	float best_arm_prob = -1;
+	float best_arm_prob;
 
 	/*!
 	 * Calculates the reward.
-	 * @param prob_  Probability.
+	 * @param prob_ Probability.
 	 */
 	short calculateReward(float prob_);
 
-	//
 	/*!
 	 * Greedy method that selects best arm based on historical action-value pairs.
 	 */
-	short selectBestArm();
+	size_t selectBestArm();
 
 
 };

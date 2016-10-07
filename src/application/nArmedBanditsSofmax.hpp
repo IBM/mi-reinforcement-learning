@@ -76,7 +76,7 @@ private:
 
 
 	/// Property: number of bandits
-	mic::configuration::Property<short> number_of_bandits;
+	mic::configuration::Property<size_t> number_of_bandits;
 
 	/// Property: the softmax "heat" parameter, scaling the probability distribution of all actions.
 	/// A high temperature will tend the probabilities to be very similar, whereas a low temperature will exaggerate differences in probabilities between actions.
@@ -88,12 +88,12 @@ private:
 	/*!
 	 * The best arm (hidden state).
 	 */
-	short best_arm = -1;
+	size_t best_arm;
 
 	/*!
 	 * The best arm probability/"reward" (hidden state).
 	 */
-	float best_arm_prob = -1;
+	float best_arm_prob;
 
 	/*!
 	 * Calculates the reward.

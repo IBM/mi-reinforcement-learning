@@ -168,8 +168,8 @@ std::string MNISTDigitDLRERPOMDP::streamNetworkResponseTable() {
 	mic::types::Position2D p = env.getAgentPosition();
 
 	// Copy data.
-	for (long oy=0, ey=(p.y-dy); oy<env.getObservationHeight(); oy++, ey++){
-		for (long ox=0, ex=(p.x-dx); ox<env.getObservationWidth(); ox++, ex++) {
+	for (long oy=0, ey=(p.y-dy); oy<(long)env.getObservationHeight(); oy++, ey++){
+		for (long ox=0, ex=(p.x-dx); ox<(long)env.getObservationWidth(); ox++, ex++) {
 
 			// Move the player to given state - disregarding whether it was successful or not, answers for walls/positions outside of the gridworld do not interes us anyway...
 			if (!env.moveAgentToPosition(Position2D(ex,ey)))
@@ -190,10 +190,10 @@ std::string MNISTDigitDLRERPOMDP::streamNetworkResponseTable() {
 	rewards_table += "Action values:\n";
 	actions_table += "Best actions:\n";
 	// Generate all possible states and all possible rewards.
-	for (long oy=0, ey=(p.y-dy); oy<env.getObservationHeight(); oy++, ey++){
+	for (long oy=0, ey=(p.y-dy); oy<(long)env.getObservationHeight(); oy++, ey++){
 		rewards_table += "| ";
 		actions_table += "| ";
-		for (long ox=0, ex=(p.x-dx); ox<env.getObservationWidth(); ox++, ex++) {
+		for (long ox=0, ex=(p.x-dx); ox<(long)env.getObservationWidth(); ox++, ex++) {
 			float bestqval = -std::numeric_limits<float>::infinity();
 			size_t best_action = -1;
 			for (size_t a=0; a<4; a++) {
@@ -497,7 +497,7 @@ bool MNISTDigitDLRERPOMDP::performSingleStep() {
 	env.getObservation();
 
 	// Check whether we reached maximum number of iterations.
-	if ((step_limit>0) && (iteration > step_limit))
+	if ((step_limit>0) && (iteration > (size_t)step_limit))
 		return false;
 
 	return true;
