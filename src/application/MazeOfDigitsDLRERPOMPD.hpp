@@ -174,6 +174,11 @@ private:
 	long long sum_of_iterations;
 
 	/*!
+	 * Sum of optimal to episodic path lengths.
+	 */
+	double sum_of_opt_to_episodic_lenghts;
+
+	/*!
 	 * Table of past experiences.
 	 */
 	SpatialExperienceMemory experiences;

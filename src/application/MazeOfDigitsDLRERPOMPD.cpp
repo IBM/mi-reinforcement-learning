@@ -62,11 +62,13 @@ void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	// Add containers to collector.
 	collector_ptr->createContainer("path_length_episode",  mic::types::color_rgba(0, 255, 0, 180));
-	collector_ptr->createContainer("path_length_average", mic::types::color_rgba(255, 255, 0, 180));
-	collector_ptr->createContainer("path_length_optimal", mic::types::color_rgba(255, 255, 255, 180));
-	collector_ptr->createContainer("path_length_diff", mic::types::color_rgba(255, 0, 0, 180));
+	collector_ptr->createContainer("path_length_average", mic::types::color_rgba(180, 255, 0, 180));
+	collector_ptr->createContainer("path_length_optimal", mic::types::color_rgba(0, 255, 180, 180));
+	collector_ptr->createContainer("path_opt_to_episodic", mic::types::color_rgba(255, 180, 180, 180));
+	collector_ptr->createContainer("path_opt_to_episodic_average",  mic::types::color_rgba(255, 255, 255, 180));
 
 	sum_of_iterations = 0;
+	sum_of_opt_to_episodic_lenghts = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_chart = new WindowFloatCollectorChart("MazeOfDigitsDLRERPOMPD", 256, 512, 0, 0);
@@ -133,12 +135,15 @@ void MazeOfDigitsDLRERPOMPD::finishCurrentEpisode() {
 	LOG(LTRACE) << "End current episode";
 
 	sum_of_iterations += iteration -1; // -1 is the fix related to moving the terminal condition to the front of step!
+	float opt_to_episodic = (float)env.optimalPathLength() / (iteration -1);
+	sum_of_opt_to_episodic_lenghts += opt_to_episodic;
 
 	// Add variables to container.
 	collector_ptr->addDataToContainer("path_length_episode",(iteration -1));
 	collector_ptr->addDataToContainer("path_length_average",(float)sum_of_iterations/episode);
 	collector_ptr->addDataToContainer("path_length_optimal", (float)env.optimalPathLength());
-	collector_ptr->addDataToContainer("path_length_diff", (float)(iteration -1 - env.optimalPathLength()));
+	collector_ptr->addDataToContainer("path_opt_to_episodic", opt_to_episodic);
+	collector_ptr->addDataToContainer("path_opt_to_episodic_average", sum_of_opt_to_episodic_lenghts/episode);
 
 
 	// Export reward "convergence" diagram.
@@ -455,10 +460,11 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 			SpatialExperienceSample ges = geb.getNextSample();
 			SpatialExperiencePtr ge_ptr = ges.data();
 
-			if (ge_ptr->s_t == ge_ptr->s_t_prim) {
+			/*if (ge_ptr->s_t == ge_ptr->s_t_prim) {
 				// The move was not possible! Learn that as well.
 				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = 3*step_reward;
-			} else if(env.isStateTerminal(ge_ptr->s_t_prim)) {
+			} else*/
+			if(env.isStateTerminal(ge_ptr->s_t_prim)) {
 				// The position at (t+1) state appears to be terminal - learn the reward.
 				(*targets_t_batch)((size_t)ge_ptr->a_t.getType(), i) = env.getStateReward(ge_ptr->s_t_prim);
 			} else {

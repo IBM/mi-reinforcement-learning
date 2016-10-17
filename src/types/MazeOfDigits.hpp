@@ -71,6 +71,11 @@ public:
 	void initExemplaryMaze();
 
 	/*!
+	 * Generates only the agent new position, leaving the maze unchanged. Recalculates optimal path length to (unchanged) goal.
+	 */
+	void reRandomAgentPosition();
+
+	/*!
 	 * Generates a fully random maze of size (width x height), with spatially independent values of digits.
 	 */
 	void initFullyRandomMaze();
@@ -81,9 +86,9 @@ public:
 	void initRandomStructuredMaze();
 
 	/*!
-	 * Generates a random maze of size (width x height), with spatially dependent values of digits, creating a patch leading to the goal (9).
+	 * Generates a random maze of size (width x height), with spatially dependent values of digits, creating a path leading to the goal (9).
 	 */
-	void initRandomPatchMaze();
+	void initRandomPathMaze();
 
 	/*!
 	 * Sets the digit.

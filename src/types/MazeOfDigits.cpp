@@ -48,7 +48,7 @@ void MazeOfDigits::initializeEnvironment() {
 		case -3:
 		case -4: initRandomStructuredMaze(); break;
 		case -5:
-		case -6: initRandomPatchMaze(); break;
+		case -6: initRandomPathMaze(); break;
 		case -2:
 		case -1:
 		default: initFullyRandomMaze();
@@ -112,6 +112,40 @@ void MazeOfDigits::initExemplaryMaze() {
 
 }
 
+void MazeOfDigits::reRandomAgentPosition() {
+	// Generate only the new agent position.
+
+	// Find the goal.
+	mic::types::Position2D goal;
+	for (size_t x = 0; x < width; x++)
+		for (size_t y = 0; y < height; y++)
+			if ((*environment_grid)({ x, y, (size_t)MazeOfDigitsChannels::Goals }) > 0) {
+				goal.x = x;
+				goal.y = y;
+				break;
+			} //: if
+
+	// Try to place the agent.
+	mic::types::Position2D agent;
+	while (1) {
+		// Random position.
+		agent.rand(0, width - 1, 0, height - 1);
+
+		// Validate pose.
+		if ((*environment_grid)({ (size_t)agent.x, (size_t)agent.y, (size_t)MazeOfDigitsChannels::Goals }) != 0)
+			continue;
+
+		// Ok, move agent to that position.
+		initial_position = agent;
+		moveAgentToPosition(initial_position);
+		break;
+	} //: while
+
+	// Recalculate the optimal path length.
+	optimal_path_length = abs((int) goal.x - (int) agent.x) + abs((int) goal.y - (int) agent.y);
+}
+
+
 void MazeOfDigits::initFullyRandomMaze() {
 	LOG(LNOTICE) << "Generating a fully random " << width << "x" << height<< " maze of digits";
 
@@ -119,10 +153,7 @@ void MazeOfDigits::initFullyRandomMaze() {
 
 	// It maze type = -1: do not generate new maze.
 	if (((short)type == -1) && (maze_generated)) {
-		// Generate only the new agent position.
-		mic::types::Position2D agent(0, width-1, 0, height-1);
-		initial_position = agent;
-		moveAgentToPosition(initial_position);
+		reRandomAgentPosition();
 		return;
 	}
 
@@ -189,10 +220,7 @@ void MazeOfDigits::initRandomStructuredMaze() {
 
 	// It maze type = -3: do not generate new maze.
 	if (((short)type == -3) && (maze_generated)) {
-		// Generate only the new agent position.
-		mic::types::Position2D agent(0, width-1, 0, height-1);
-		initial_position = agent;
-		moveAgentToPosition(initial_position);
+		reRandomAgentPosition();
 		return;
 	}
 
@@ -263,7 +291,7 @@ void MazeOfDigits::initRandomStructuredMaze() {
 	maze_generated = true;
 }
 
-void MazeOfDigits::initRandomPatchMaze() {
+void MazeOfDigits::initRandomPathMaze() {
 
 	LOG(LNOTICE) << "Generating a random patch " << width << "x" << height<< " maze of digits";
 
@@ -271,10 +299,7 @@ void MazeOfDigits::initRandomPatchMaze() {
 
 	// It maze type = -5: do not generate new maze.
 	if (((short)type == -5) && (maze_generated)) {
-		// Generate only the new agent position.
-		mic::types::Position2D agent(0, width-1, 0, height-1);
-		initial_position = agent;
-		moveAgentToPosition(initial_position);
+		reRandomAgentPosition();
 		return;
 	}
 
