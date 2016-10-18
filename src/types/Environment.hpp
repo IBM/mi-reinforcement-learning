@@ -81,7 +81,7 @@ public:
 	 * Returns the observation size, depending on the process type: FOMDP (width * height * channels) or POMDP (roi_size * roi_size * channels).
 	 * @return Size of the observation.
 	 */
-	size_t getObservationSize() { return ((!pomdp_flag) ? width * height * channels : roi_size * roi_size * channels); }
+	size_t getObservationSize() { return ((!pomdp_flag) ? width * height * channels : roi_size * roi_size * 1); }
 
 	/*!
 	 * Returns number of channels (depth) of the environment.

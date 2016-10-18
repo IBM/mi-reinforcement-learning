@@ -57,9 +57,9 @@ void MazeOfDigits::initializeEnvironment() {
 	// Check whether it is a POMDP or not.
 	if (roi_size >0) {
 		pomdp_flag = true;
-		observation_grid->resize({roi_size, roi_size, channels});
+		observation_grid->resize({roi_size, roi_size, 1});
 	} else {
-		observation_grid->resize({width, height, channels});
+		observation_grid->resize({width, height, 1});
 	}//: else
 }
 
@@ -572,11 +572,11 @@ mic::types::MatrixXfPtr MazeOfDigits::encodeObservation() {
 		// Get observation.
 		mic::types::TensorXfPtr obs = getObservation();
 		// Temporarily reshape the observation grid.
-		obs->conservativeResize({1, roi_size * roi_size * channels});
+		obs->conservativeResize({1, roi_size * roi_size * 1});
 		// Encode the observation.
 		mic::types::MatrixXfPtr encoded_obs (new mic::types::MatrixXf(*obs));
 		// Back to the original shape.
-		obs->conservativeResize({roi_size, roi_size, channels});
+		obs->conservativeResize({roi_size, roi_size, 1});
 
 		// Return encoded observation.
 		return encoded_obs;
@@ -600,14 +600,14 @@ mic::types::TensorXfPtr MazeOfDigits::getObservation() {
 			// Check grid boundaries.
 			if ((ex < 0) || (ex >= (long)width) || (ey < 0) || (ey >= (long)height)){
 				// Place the wall only
-				(*observation_grid)({(size_t)ox, (size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = 1;
+				//(*observation_grid)({(size_t)ox, (size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = 1;
 				continue;
 			}//: if
 			// Else : copy data for all channels.
-			(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Goals}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Goals});
+			//(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Goals}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Goals});
 			(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Digits}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Digits});
-			(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Walls});
-			(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Agent}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Agent});
+			//(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Walls}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Walls});
+			//(*observation_grid)({(size_t)ox,(size_t)oy, (size_t)MazeOfDigitsChannels::Agent}) = (*environment_grid)({(size_t)ex,(size_t)ey, (size_t)MazeOfDigitsChannels::Agent});
 		}//: for x
 	}//: for y
 

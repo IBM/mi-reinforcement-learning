@@ -20,8 +20,8 @@ namespace environments {
  */
 enum class MazeOfDigitsChannels : std::size_t
 {
-	Goals = 0, ///< Channel storing goal(s)
-	Digits = 1, ///< Channel storing digits
+	Digits = 0, ///< Channel storing digits
+	Goals = 1, ///< Channel storing goal(s)
 	Walls = 2, ///< Channel storing walls(s)
 	Agent = 3, ///< Channel storing the agent position
 	Count = 4 ///< Number of channels
@@ -104,19 +104,19 @@ public:
 	mic::types::TensorXfPtr getObservation();
 
 	/*!
-	 * Returns the current state of the gridworld in the form of a string.
-	 * @return String with description of the gridworld.
+	 * Returns the current state of the environment in the form of a string.
+	 * @return String with description of the environment.
 	 */
 	virtual std::string environmentToString();
 
 	/*!
-	 * Returns the current observation taken in the gridworld in the form of a string.
+	 * Returns the current observation taken in the environment in the form of a string.
 	 * @return String with description of the observation.
 	 */
 	virtual std::string observationToString();
 
 	/*!
-	 * Encodes the current state of the gridworld in as a matrix of size [1, width * height * channels].
+	 * Encodes the current state of the environment in as a matrix of size [1, width * height * channels].
 	 * @return Matrix of size [1, width * height * channels].
 	 */
 	virtual mic::types::MatrixXfPtr encodeEnvironment();
