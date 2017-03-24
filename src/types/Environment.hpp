@@ -51,43 +51,43 @@ public:
 	 * Returns current width of the environment.
 	 * @return Width.
 	 */
-	size_t getEnvironmentWidth() { return width; }
+	virtual size_t getEnvironmentWidth() { return width; }
 
 	/*!
 	 * Returns current height of the environment.
 	 * @return Height.
 	 */
-	size_t getEnvironmentHeight() { return height; }
+	virtual size_t getEnvironmentHeight() { return height; }
 
 	/*!
 	 * Returns the environment size (width * height * channels).
 	 * @return Size of the environment.
 	 */
-	size_t getEnvironmentSize() { return width * height * channels; }
+	virtual size_t getEnvironmentSize() { return width * height * channels; }
 
 	/*!
 	 * Returns the width of the observation.
 	 * @return Width.
 	 */
-	size_t getObservationWidth() { return ((!pomdp_flag) ? width : roi_size); }
+	virtual size_t getObservationWidth() { return ((!pomdp_flag) ? width : roi_size); }
 
 	/*!
 	 * Returns the height of the observation.
 	 * @return Height.
 	 */
-	size_t getObservationHeight() { return ((!pomdp_flag) ?height : roi_size); }
+	virtual size_t getObservationHeight() { return ((!pomdp_flag) ?height : roi_size); }
 
 	/*!
 	 * Returns the observation size, depending on the process type: FOMDP (width * height * channels) or POMDP (roi_size * roi_size * channels).
 	 * @return Size of the observation.
 	 */
-	size_t getObservationSize() { return ((!pomdp_flag) ? width * height * channels : roi_size * roi_size * 1); }
+	virtual size_t getObservationSize() { return ((!pomdp_flag) ? width * height * channels : roi_size * roi_size * channels); }
 
 	/*!
 	 * Returns number of channels (depth) of the environment.
 	 * @return Height.
 	 */
-	size_t getChannels() { return channels; }
+	virtual size_t getChannels() { return channels; }
 
 	/*!
 	 * Returns size of the region of interest.

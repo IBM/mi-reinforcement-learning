@@ -318,7 +318,7 @@ void MazeOfDigits::initRandomPathMaze() {
 	mic::types::Position2D goal;
 	while(1) {
 		// Random position.
-		goal.rand(0, width-1, 0, height-1);
+		goal.rand(2, width-3, 2, height-3);
 
 		// Validate pose.
 		if ((*environment_grid)({(size_t)goal.x, (size_t)goal.y, (size_t)MazeOfDigitsChannels::Agent}) != 0)

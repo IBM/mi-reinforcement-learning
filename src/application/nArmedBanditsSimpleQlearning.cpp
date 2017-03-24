@@ -17,11 +17,11 @@ namespace application {
  * \author tkornuta
  */
 void RegisterApplication (void) {
-	REGISTER_APPLICATION(mic::application::nArmedBanditsSimpleQlearning);
+	REGISTER_APPLICATION(mic::application::TestApp);
 }
 
 
-nArmedBanditsSimpleQlearning::nArmedBanditsSimpleQlearning(std::string node_name_) : OpenGLApplication(node_name_),
+TestApp::TestApp(std::string node_name_) : OpenGLApplication(node_name_),
 		number_of_bandits("number_of_bandits", 10),
 		epsilon("epsilon", 0.1),
 		statistics_filename("statistics_filename","statistics_filename.csv")
@@ -36,12 +36,12 @@ nArmedBanditsSimpleQlearning::nArmedBanditsSimpleQlearning(std::string node_name
 }
 
 
-nArmedBanditsSimpleQlearning::~nArmedBanditsSimpleQlearning() {
+TestApp::~TestApp() {
 
 }
 
 
-void nArmedBanditsSimpleQlearning::initialize(int argc, char* argv[]) {
+void TestApp::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
@@ -57,7 +57,7 @@ void nArmedBanditsSimpleQlearning::initialize(int argc, char* argv[]) {
 
 }
 
-void nArmedBanditsSimpleQlearning::initializePropertyDependentVariables() {
+void TestApp::initializePropertyDependentVariables() {
 	// Initialize random "arm" thresholds.
 	arms.resize(number_of_bandits);
 	for(size_t i=0; i<number_of_bandits; i++)
@@ -82,7 +82,7 @@ void nArmedBanditsSimpleQlearning::initializePropertyDependentVariables() {
 	action_counts.setZero();
 }
 
-short nArmedBanditsSimpleQlearning::calculateReward(float prob_) {
+short TestApp::calculateReward(float prob_) {
     short reward = 0;
 	for(size_t i=0; i<number_of_bandits; i++) {
         if (RAN_GEN->uniRandReal() < prob_)
@@ -92,7 +92,7 @@ short nArmedBanditsSimpleQlearning::calculateReward(float prob_) {
 }
 
 
-size_t nArmedBanditsSimpleQlearning::selectBestArm() {
+size_t TestApp::selectBestArm() {
 	// Greedy methods - returns the index of element with greatest value.
 	size_t current_best_arm = 0;
     float current_best_value = -1;
@@ -108,7 +108,7 @@ size_t nArmedBanditsSimpleQlearning::selectBestArm() {
 }
 
 
-bool nArmedBanditsSimpleQlearning::performSingleStep() {
+bool TestApp::performSingleStep() {
 	LOG(LTRACE) << "Performing a single step (" << iteration << ")";
 
 	std::cout<< "hidden state (arms)=";

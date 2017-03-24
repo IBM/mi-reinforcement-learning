@@ -23,18 +23,18 @@ namespace application {
  * \brief Class implementing a n-Armed Bandits problem solving the n armed bandits problem using simple Q-learning rule.
  * \author tkornuta
  */
-class nArmedBanditsSimpleQlearning: public mic::opengl::application::OpenGLApplication {
+class TestApp: public mic::opengl::application::OpenGLApplication {
 public:
 	/*!
 	 * Default Constructor. Sets the application/node name, default values of variables, initializes classifier etc.
 	 * @param node_name_ Name of the application/node (in configuration file).
 	 */
-	nArmedBanditsSimpleQlearning(std::string node_name_ = "application");
+	TestApp(std::string node_name_ = "application");
 
 	/*!
 	 * Destructor.
 	 */
-	virtual ~nArmedBanditsSimpleQlearning();
+	virtual ~TestApp();
 
 protected:
 	/*!

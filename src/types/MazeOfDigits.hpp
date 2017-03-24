@@ -51,6 +51,12 @@ public:
 	mic::environments::MazeOfDigits & operator=(const mic::environments::MazeOfDigits & gw_);
 
 	/*!
+	 * Returns the observation size, depending on the process type: FOMDP (width * height * channels) or POMDP (roi_size * roi_size * 1!) (an overridden method)
+	 * @return Size of the observation.
+	 */
+	virtual size_t getObservationSize() { return ((!pomdp_flag) ? width * height * channels : roi_size * roi_size * 1); }
+
+	/*!
 	 * Initializes all variables that are property-dependent.
 	 */
 	virtual void initializePropertyDependentVariables();

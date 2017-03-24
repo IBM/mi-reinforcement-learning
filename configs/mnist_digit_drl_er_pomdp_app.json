@@ -23,7 +23,7 @@
 		"goal_y": 17		
 	},
 	"mnist_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/machine-intelligence-core/data/mnist/t10k-images-idx3-ubyte",
-		"labels_filename": "/Users/tkornut/Documents/workspace/machine-intelligence-core/data/mnist/t10k-labels-idx1-ubyte"
+		"data_filename": "../data/mnist/t10k-images.idx3-ubyte",
+		"labels_filename": "../Documents/workspace/machine-intelligence-core/data/mnist/t10k-labels.idx1-ubyte"
 	}
 }
