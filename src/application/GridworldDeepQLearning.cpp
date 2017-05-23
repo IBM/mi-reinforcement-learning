@@ -80,12 +80,19 @@ void GridworldDeepQLearning::initializePropertyDependentVariables() {
 	} else {
 		// Create a simple neural network.
 		// gridworld wxhx4 -> 100 -> 4 -> regression!; batch size is set to one.
-		neural_net.addLayer(new Linear((size_t) grid_env.getEnvironmentWidth() * grid_env.getEnvironmentHeight(), 250, 1));
-		neural_net.addLayer(new ReLU(250, 250, 1));
-		neural_net.addLayer(new Linear(250, 100, 1));
-		neural_net.addLayer(new ReLU(100, 100, 1));
-		neural_net.addLayer(new Linear(100, 4, 1));
-		neural_net.addLayer(new Regression(4, 4, 1));
+		neural_net.pushLayer(new Linear<float>((size_t) grid_env.getEnvironmentWidth() * grid_env.getEnvironmentHeight(), 250));
+		neural_net.pushLayer(new ReLU<float>(250));
+		neural_net.pushLayer(new Linear<float>(250, 100));
+		neural_net.pushLayer(new ReLU<float>(100));
+		neural_net.pushLayer(new Linear<float>(100, 4));
+
+		// Set batch size to 1.
+		//neural_net.resizeBatch(1);
+		// Change optimization function from default GradientDescent to Adam.
+		neural_net.setOptimization<mic::neural_nets::optimization::Adam<float> >();
+		// Set loss function -> regression!
+		neural_net.setLoss <mic::neural_nets::loss::SquaredErrorLoss<float> >();
+
 		LOG(LINFO) << "Generated new neural network";
 	}//: else
 }
@@ -148,7 +155,7 @@ std::string GridworldDeepQLearning::streamNetworkResponseTable() {
 			mic::types::MatrixXfPtr tmp_state = grid_env.encodeAgentGrid();
 			//std::cout<< "tmp_state = " << tmp_state->transpose() << std::endl;
 			// Pass the data and get predictions.
-			neural_net.forward(*tmp_state);
+			neural_net.forward(tmp_state);
 			mic::types::MatrixXfPtr tmp_predicted_rewards = neural_net.getPredictions();
 			float*  qstate = tmp_predicted_rewards->data();
 
@@ -223,7 +230,7 @@ mic::types::MatrixXfPtr GridworldDeepQLearning::getPredictedRewardsForCurrentSta
 	// Encode the current state.
 	mic::types::MatrixXfPtr encoded_state = grid_env.encodeAgentGrid();
 	// Pass the data and get predictions.
-	neural_net.forward(*encoded_state);
+	neural_net.forward(encoded_state);
 	// Return the predictions.
 	return neural_net.getPredictions();
 }

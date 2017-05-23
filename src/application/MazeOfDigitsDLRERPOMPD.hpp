@@ -16,7 +16,7 @@
 #include <opengl/visualization/WindowMazeOfDigits.hpp>
 using namespace mic::opengl::visualization;
 
-#include <mlnn/MultiLayerNeuralNetwork.hpp>
+#include <mlnn/BackpropagationNeuralNetwork.hpp>
 // Using multi layer neural networks
 using namespace mic::mlnn;
 using namespace mic::types;
@@ -138,7 +138,7 @@ private:
 	mic::configuration::Property<bool> mlnn_load;
 
 	/// Multi-layer neural network used for approximation of the Qstate rewards.
-	MultiLayerNeuralNetwork neural_net;
+	BackpropagationNeuralNetwork<float> neural_net;
 
 	/*!
 	 * Calculates the best value for the current state and predictions.

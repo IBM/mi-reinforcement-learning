@@ -94,12 +94,19 @@ void MazeOfDigitsDLRERPOMPD::initializePropertyDependentVariables() {
 	} else {
 		// Create a simple neural network.
 		// gridworld wxhx4 -> 100 -> 4 -> regression!.
-		neural_net.addLayer(new Linear((size_t) env.getObservationSize(), 250, batch_size));
-		neural_net.addLayer(new ReLU(250, 250, batch_size));
-		neural_net.addLayer(new Linear(250, 100, batch_size));
-		neural_net.addLayer(new ReLU(100, 100, batch_size));
-		neural_net.addLayer(new Linear(100, 4, batch_size));
-		neural_net.addLayer(new Regression(4, 4, batch_size));
+		neural_net.pushLayer(new Linear<float>((size_t) env.getObservationSize(), 250));
+		neural_net.pushLayer(new ReLU<float>(250));
+		neural_net.pushLayer(new Linear<float>(250, 100));
+		neural_net.pushLayer(new ReLU<float>(100));
+		neural_net.pushLayer(new Linear<float>(100, 4));
+
+		// Set batch size.
+		neural_net.resizeBatch(batch_size);
+		// Change optimization function from default GradientDescent to Adam.
+		neural_net.setOptimization<mic::neural_nets::optimization::Adam<float> >();
+		// Set loss function -> regression!
+		neural_net.setLoss <mic::neural_nets::loss::SquaredErrorLoss<float> >();
+
 		LOG(LINFO) << "Generated new neural network";
 	}//: else
 
@@ -189,7 +196,7 @@ std::string MazeOfDigitsDLRERPOMPD::streamNetworkResponseTable() {
 	}//: for y
 
 	// Get rewards for the whole batch.
-	neural_net.forward(*inputs_batch);
+	neural_net.forward(inputs_batch);
 	// Get predictions for all those states - there is no need to create a copy.
 	MatrixXfPtr predicted_batch = neural_net.getPredictions();
 
@@ -285,7 +292,7 @@ mic::types::MatrixXfPtr MazeOfDigitsDLRERPOMPD::getPredictedRewardsForGivenState
 	//LOG(LERROR) << "Getting predictions for input batch:\n" <<inputs_batch->transpose();
 
 	// Pass the data and get predictions.
-	neural_net.forward(*inputs_batch);
+	neural_net.forward(inputs_batch);
 
 	MatrixXfPtr predictions_batch = neural_net.getPredictions();
 
@@ -425,7 +432,7 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 		}// for samples.
 
 		// Get network responses.
-		neural_net.forward(*inputs_t_batch);
+		neural_net.forward(inputs_t_batch);
 		// Get predictions for all those states...
 		MatrixXfPtr predictions_t_batch = neural_net.getPredictions();
 		// ... and copy them to reward pointer - a container which we will modify.
@@ -449,7 +456,7 @@ bool MazeOfDigitsDLRERPOMPD::performSingleStep() {
 		}// for samples.
 
 		// Get network responses.
-		neural_net.forward(*inputs_t_prim_batch);
+		neural_net.forward(inputs_t_prim_batch);
 		// Get predictions for all those states...
 		MatrixXfPtr predictions_t_prim_batch = neural_net.getPredictions();
 

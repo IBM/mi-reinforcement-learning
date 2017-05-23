@@ -1,6 +1,6 @@
 {
 	"app_state": {
-		"application_sleep_interval": "1",
+		"application_sleep_interval": "10",
 		"single_step_mode": 0
 	},
 	"maze_of_digits_histogram_filter_app": {
@@ -17,6 +17,6 @@
 		"statistics_filename": "statistics-10mazes-28x28-action-unique.csv"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/10mazes-28x28.csv"
+		"data_filename": "../datasets/elementary/10mazes-28x28.csv"
 	}
 }

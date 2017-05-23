@@ -1,6 +1,6 @@
 {
 	"app_state": {
-		"application_sleep_interval": "1",
+		"application_sleep_interval": "10",
 		"single_step_mode": 0
 	},
 	"maze_of_digits_histogram_filter_episodic_app": {
@@ -17,9 +17,9 @@
 		"min_maze_confidence" : "0.9",
 		"max_number_of_iterations" : 50,
 		"number_of_episodes" : 20,
-		"statistics_filename": "convergence-1000mazes-28x28-action-unique-20iters.csv"
+		"statistics_filename": "convergence-10mazes-28x28-action-unique-20iters.csv"
 	},
 	"maze_importer" : {
-		"data_filename": "/Users/tkornut/Documents/workspace/mi-rl/datasets/elementary/1000mazes-28x28.csv"
+		"data_filename": "../datasets/elementary/10mazes-28x28.csv"
 	}
 }
