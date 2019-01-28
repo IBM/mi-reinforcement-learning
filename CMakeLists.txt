@@ -11,7 +11,8 @@ set (MIReinforcementLearning_VERSION ${MIReinforcementLearning_VERSION_MAJOR}.${
 cmake_minimum_required(VERSION 3.2)
 
 # Add C++11 dependency.
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -fopenmp -Wall")
+# - fopenmp
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -Wall")
 
 
 # =======================================================================
@@ -21,7 +22,8 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -fopenmp -Wall")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Find Boost package
-find_package(Boost 1.54 REQUIRED COMPONENTS system thread random  serialization)
+#find_package(Boost 1.54 REQUIRED COMPONENTS system thread random)
+find_package(Boost 1.54 REQUIRED COMPONENTS system thread random serialization)
 # Try to include Boost as system directory to suppress it's warnings
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
