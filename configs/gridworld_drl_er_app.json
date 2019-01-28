@@ -1,0 +1,22 @@
+{
+	"app_state": {
+		"application_sleep_interval": "1",
+		"single_step_mode": 0
+	},
+	"gridworld_drl_er_app": {
+		"step_reward": -1.0,
+		"discount_rate" : 0.9,
+		"learning_rate" : 0.01,
+		"epsilon": -0.1,
+		"statistics_filename" : "gridworld_drl_er_app-convergence.csv",
+		"mlnn_filename": "gridworld_dlr_el-mlnn-maze-complex-random-6x6.txt",
+		"mlnn_save" : 0,
+		"mlnn_load" : 1
+	},
+	"gridworld": {
+		"type": -2,
+		"width": 6,
+		"height": 6,
+		"roi_size": 3
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"app_state": {
+		"application_sleep_interval": "10",
+		"single_step_mode": 0
+	},
+	"maze_of_digits_histogram_filter_app": {
+		"hidden_maze": "-1",
+		"hidden_x": "-1",
+		"hidden_y": "-1",
+		"epsilon": "0.0",
+		"action": "-1",
+		"hit_factor": "0.5",
+		"miss_factor": "0.1",
+		"exact_move_probability": "1.0",
+		"overshoot_move_probability": "0.0",
+		"undershoot_move_probability": "0.0",
+		"statistics_filename": "statistics-10mazes-28x28-action-unique.csv"
+	},
+	"maze_importer" : {
+		"data_filename": "../datasets/elementary/10mazes-28x28.csv"
+	}
+}

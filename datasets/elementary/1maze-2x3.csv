@@ -1,0 +1,4 @@
+maze width,maze height
+2,3
+mazes,1,distribution,manual random(1-9)
+1,4,6,2,5,6

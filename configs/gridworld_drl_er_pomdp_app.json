@@ -1,0 +1,23 @@
+{
+	"app_state": {
+		"application_sleep_interval": "1",
+		"single_step_mode": 1
+	},
+	"gridworld_drl_er_pomdp_app": {
+		"step_reward": -1.0,
+		"discount_rate" : 0.9,
+		"learning_rate" : 0.01,
+		"epsilon": -0.1,
+		"step_limit": 200,
+		"statistics_filename" : "gridworld_drl_er_pomdp-roi5x5-convergence.csv",
+		"mlnn_filename": "gridworld_dlr_el_pomdp-mlnn-roi5x5.txt",
+		"mlnn_save" : 0,
+		"mlnn_load" : 0
+	},
+	"gridworld": {
+		"type": -2,
+		"width": 7,
+		"height": 7,
+		"roi_size": 5
+	}
+}
