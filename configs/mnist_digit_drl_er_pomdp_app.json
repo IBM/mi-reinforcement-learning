@@ -12,7 +12,7 @@
 		"statistics_filename" : "mnist_digit_drl_er_pomdp-roi7x7-path-convergence.csv",
 		"mlnn_filename": "mnist_digit_drl_el_pomdp-mlnn-roi7x7-path.txt",
 		"mlnn_save" : 1,
-		"mlnn_load" : 1
+		"mlnn_load" : 0
 	},
 	"mnist_digit" : {
 		"roi_size": 7,		
@@ -23,7 +23,7 @@
 		"goal_y": 17		
 	},
 	"mnist_importer" : {
-		"data_filename": "../data/mnist/t10k-images.idx3-ubyte",
-		"labels_filename": "../data/mnist/t10k-labels.idx1-ubyte"
+		"data_filename": "../../../data/mnist/raw/t10k-images-idx3-ubyte",
+		"labels_filename": "../../../data/mnist/raw/t10k-labels-idx1-ubyte"
 	}
 }

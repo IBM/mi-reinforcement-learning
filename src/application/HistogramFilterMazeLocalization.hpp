@@ -16,7 +16,7 @@
 
 #include <opengl/application/OpenGLApplication.hpp>
 #include <opengl/visualization/WindowChart.hpp>
-#include <opengl/visualization/WindowFloatCollectorChart.hpp>
+#include <opengl/visualization/WindowCollectorChart.hpp>
 
 #include <types/Action2D.hpp>
 using namespace mic::opengl::visualization;
@@ -87,7 +87,7 @@ private:
 	mic::data_io::DataCollectorPtr<std::string, float> max_probabilities_collector_ptr;
 
 	/// Window for displaying chart with maximal maze/x/y/ probabilities.
-	WindowFloatCollectorChart * w_max_probabilities_chart;
+	WindowCollectorChart<float> * w_max_probabilities_chart;
 
 	/// Importer responsible for loading mazes from file.
 	mic::data_io::MazeMatrixImporter importer;

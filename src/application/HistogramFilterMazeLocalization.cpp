@@ -55,7 +55,7 @@ HistogramFilterMazeLocalization::HistogramFilterMazeLocalization(std::string nod
 
 
 HistogramFilterMazeLocalization::~HistogramFilterMazeLocalization() {
-
+	delete(w_max_probabilities_chart);
 }
 
 
@@ -68,7 +68,7 @@ void HistogramFilterMazeLocalization::initialize(int argc, char* argv[]) {
 	w_current_coordinate_x = new WindowChart("Current_x", 256, 256, 0, 326);
 	w_current_coordinate_y = new WindowChart("Current_y", 256, 256, 326, 326);
 
-	w_max_probabilities_chart = new WindowFloatCollectorChart("Max_probabilities", 256, 256, 326, 0);
+	w_max_probabilities_chart = new WindowCollectorChart<float>("Max_probabilities", 256, 256, 326, 0);
 	max_probabilities_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
 	w_max_probabilities_chart->setDataCollectorPtr(max_probabilities_collector_ptr);
 

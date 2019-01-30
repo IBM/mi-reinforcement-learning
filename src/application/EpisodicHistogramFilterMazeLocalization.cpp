@@ -58,7 +58,7 @@ EpisodicHistogramFilterMazeLocalization::EpisodicHistogramFilterMazeLocalization
 
 
 EpisodicHistogramFilterMazeLocalization::~EpisodicHistogramFilterMazeLocalization() {
-
+	delete(w_localization_time_chart);
 }
 
 
@@ -67,7 +67,7 @@ void EpisodicHistogramFilterMazeLocalization::initialize(int argc, char* argv[])
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_localization_time_chart = new WindowFloatCollectorChart("Current_maze", 256, 256, 0, 0);
+	w_localization_time_chart = new WindowCollectorChart<float>("Current_maze", 256, 256, 0, 0);
 	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );//new mic::data_io::DataCollector<std::string, float>() );
 	w_localization_time_chart->setDataCollectorPtr(collector_ptr);
 

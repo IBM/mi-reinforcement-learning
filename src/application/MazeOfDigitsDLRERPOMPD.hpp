@@ -12,7 +12,7 @@
 #include <string>
 
 #include <opengl/application/OpenGLEpisodicApplication.hpp>
-#include <opengl/visualization/WindowFloatCollectorChart.hpp>
+#include <opengl/visualization/WindowCollectorChart.hpp>
 #include <opengl/visualization/WindowMazeOfDigits.hpp>
 using namespace mic::opengl::visualization;
 
