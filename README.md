@@ -1,4 +1,4 @@
-Machine Intelligence Core: Reinforcement Learnig
+Machine Intelligence Core: Reinforcement Learning
 =========================================
 
 Description

@@ -142,7 +142,7 @@ public:
 protected:
 
 	/// Importer responsible for loading MNIST dataset.
-	mic::data_io::MNISTMatrixImporter mnist_importer;
+	mic::data_io::MNISTMatrixImporter<float> mnist_importer;
 
 	/*!
 	 * Property: MNISTDigit digit - number of sample.

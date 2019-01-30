@@ -70,7 +70,7 @@ void MNISTDigitDLRERPOMDP::initialize(int argc, char* argv[]) {
 	sum_of_iterations = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("MNISTDigitDLRERPOMDP", 256, 512, 0, 0);
+	w_chart = new WindowCollectorChart<float>("MNISTDigitDLRERPOMDP", 256, 512, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }

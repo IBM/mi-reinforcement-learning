@@ -79,7 +79,7 @@ protected:
 private:
 
 	/// Window for displaying statistics.
-	WindowFloatCollectorChart* w_chart;
+	WindowCollectorChart<float>* w_chart;
 
 	/// Data collector.
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;

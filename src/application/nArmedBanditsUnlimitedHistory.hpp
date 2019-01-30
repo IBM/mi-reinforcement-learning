@@ -13,7 +13,7 @@
 #include <types/MatrixTypes.hpp>
 
 #include <opengl/application/OpenGLApplication.hpp>
-#include <opengl/visualization/WindowFloatCollectorChart.hpp>
+#include <opengl/visualization/WindowCollectorChart.hpp>
 using namespace mic::opengl::visualization;
 
 namespace mic {
@@ -57,7 +57,7 @@ protected:
 private:
 
 	/// Window for displaying average reward.
-	WindowFloatCollectorChart* w_reward;
+	WindowCollectorChart<float>* w_reward;
 
 	/// Reward collector.
 	mic::data_io::DataCollectorPtr<std::string, float> reward_collector_ptr;

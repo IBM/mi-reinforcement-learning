@@ -72,7 +72,7 @@ void MNISTDigit::initializeEnvironment() {
 	environment_grid->zeros();
 
 	if (mnist_importer.size() > 0) {
-		mic::types::MNISTSample sample;
+		mic::types::MNISTSample<> sample;
 //		LOG(LERROR) << "sample_number: " << sample_number;
 
 		if ((sample_number < 0) || (sample_number >= mnist_importer.size()))

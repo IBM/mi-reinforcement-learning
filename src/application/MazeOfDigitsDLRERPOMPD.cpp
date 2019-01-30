@@ -71,7 +71,7 @@ void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
 	sum_of_opt_to_episodic_lenghts = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("MazeOfDigitsDLRERPOMPD", 256, 512, 0, 0);
+	w_chart = new WindowCollectorChart<float>("MazeOfDigitsDLRERPOMPD", 256, 512, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }

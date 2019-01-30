@@ -38,6 +38,8 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 		encoders
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -68,6 +70,8 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 		encoders
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -97,6 +101,8 @@ if(${BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY})
 		types
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -123,6 +129,8 @@ if(${BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING})
 		types
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -149,6 +157,8 @@ if(${BUILD_APP_N_ARMED_BANDITS_SOFTMAX})
 		types
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -206,6 +216,8 @@ if(${BUILD_APP_GRIDWORLD_QLEARNING})
 		data_utils
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -234,6 +246,8 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING})
 		data_utils
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -262,6 +276,8 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY})
 		data_utils
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -290,6 +306,8 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 		data_utils
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -322,6 +340,8 @@ if(${BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 		data_utils
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 
@@ -354,6 +374,8 @@ if(${BUILD_APP_MNIST_DIGIT_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 		data_utils
 		opengl_visualization
 		opengl_application
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY} 
 		${Boost_LIBRARIES}  
 		)
 

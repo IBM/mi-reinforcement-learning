@@ -36,7 +36,7 @@ nArmedBanditsUnlimitedHistory::nArmedBanditsUnlimitedHistory(std::string node_na
 
 
 nArmedBanditsUnlimitedHistory::~nArmedBanditsUnlimitedHistory() {
-
+	delete(w_reward);
 }
 
 
@@ -51,7 +51,7 @@ void nArmedBanditsUnlimitedHistory::initialize(int argc, char* argv[]) {
 	reward_collector_ptr->createContainer("best_possible_reward", 0, 10, mic::types::color_rgba(0, 0, 255, 180));
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_reward = new WindowFloatCollectorChart("nBandits", 256, 256, 0, 0);
+	w_reward = new WindowCollectorChart<float>("nBandits", 256, 256, 0, 0);
 	w_reward->setDataCollectorPtr(reward_collector_ptr);
 
 }
