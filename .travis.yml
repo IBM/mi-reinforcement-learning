@@ -1,0 +1,127 @@
+# Copyright (C) tkornuta, IBM Corporation 2015-2019
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+language: cpp
+
+# Safelist: focus Travis' attention on the master branch.
+branches:
+  only:
+    - master
+
+# Define matrix of build environments.
+jobs:
+  include:
+
+    # 1. Ubuntu 14.04 g++-4.8 (WORKING, BUT COMMENTED FOR SPEED-UP)
+    - stage: "Compilation"
+      os: linux
+      dist: trusty
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libboost-all-dev
+            - libeigen3-dev
+            - g++-4.8
+            - freeglut3-dev
+            - libxmu-dev
+            - libxi-dev
+      env:
+        - OS=Ubuntu-14.04
+        - COMPILER=g++-4.8
+      before_script:
+        # Install MI-* dependencies.
+        - ./scripts/install_mi_deps.sh
+      script:
+        - ./scripts/build_mi_module.sh
+
+    # 2. Ubuntu 14.04 g++5 (WORKING, BUT COMMENTED FOR SPEED-UP)
+    #- os: linux
+    #  dist: trusty
+    #  compiler: gcc
+    #  addons:
+    #    apt:
+    #      sources:
+    #        - ubuntu-toolchain-r-test
+    #      packages:
+    #        - libboost-all-dev
+    #        - 'libeigen3-dev'
+    #        - g++-5
+    #  env:
+    #    - OS=Ubuntu-14.04
+    #    - COMPILER=g++-5
+    #    - CC=gcc-5
+    #    - CXX=g++-5
+    #  before_script:
+    #    - ./scripts/install_mi_deps.sh
+    #  script:
+    #    - ./scripts/build_mi_module.sh
+
+    # 3. Ubuntu 14.04 clang++ (WORKING, BUT COMMENTED FOR SPEED-UP)
+    # - os: linux
+    #  dist: trusty
+    #  compiler: clang
+    #  env:
+    #    - OS=Ubuntu-14.04
+    #    - COMPILER=clang++
+    #  addons:
+    #    apt:
+    #      sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5']
+    #      packages:
+    #        - libboost-all-dev
+    #        - 'libeigen3-dev'
+    #  before_script:
+    #    - ./scripts/install_mi_deps.sh
+    #  script:
+    #    - ./scripts/build_mi_module.sh
+
+    # 4. OSX clang
+    - os: osx
+      osx_image: xcode10.1
+      compiler: clang
+      env:
+        - OS=MacOS 10.13
+        - COMPILER=clang++
+      addons:
+        homebrew:
+          packages:   
+            - boost 
+            - eigen 
+            - glfw3
+      before_script:
+        - ./scripts/install_mi_deps.sh
+      script:
+        - ./scripts/build_mi_module.sh
+
+    # 6. Deploy
+    - stage: "Deploy"
+      name: "GitHub Pages"
+      addons:
+        apt:
+          packages:
+            - doxygen
+            - doxygen-doc
+            - doxygen-latex
+            - doxygen-gui
+            - graphviz
+      script: 
+        - doxygen mi-neural-nets.doxyfile
+      # Deploy using travis builtin GitHub Pages support
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        local_dir: $TRAVIS_BUILD_DIR/html
+        github_token: $GITHUB_TOKEN
