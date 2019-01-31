@@ -15,7 +15,6 @@
 #include <algorithms/MazeHistogramFilter.hpp>
 
 #include <opengl/application/OpenGLApplication.hpp>
-#include <opengl/visualization/WindowChart.hpp>
 #include <opengl/visualization/WindowCollectorChart.hpp>
 
 #include <types/Action2D.hpp>
@@ -75,16 +74,20 @@ protected:
 private:
 
 	/// Window for displaying chart with statistics on current maze number.
-	WindowChart* w_current_maze_chart;
+	WindowCollectorChart<float>* w_current_maze_chart;
 
 	/// Window for displaying chart with statistics on current x coordinate.
-	WindowChart* w_current_coordinate_x;
+	WindowCollectorChart<float>* w_current_coordinate_x;
 
 	/// Window for displaying chart with statistics on current y coordinate.
-	WindowChart* w_current_coordinate_y;
+	WindowCollectorChart<float>* w_current_coordinate_y;
 
 	/// Data collector with maximal maze/x/y/ probabilities.
 	mic::data_io::DataCollectorPtr<std::string, float> max_probabilities_collector_ptr;
+
+	mic::data_io::DataCollectorPtr<std::string, float> maze_collector_ptr;
+	mic::data_io::DataCollectorPtr<std::string, float> coordinate_x_collector_ptr;
+	mic::data_io::DataCollectorPtr<std::string, float> coordinate_y_collector_ptr;
 
 	/// Window for displaying chart with maximal maze/x/y/ probabilities.
 	WindowCollectorChart<float> * w_max_probabilities_chart;

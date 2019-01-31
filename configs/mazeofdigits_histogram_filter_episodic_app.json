@@ -17,9 +17,9 @@
 		"min_maze_confidence" : "0.9",
 		"max_number_of_iterations" : 50,
 		"number_of_episodes" : 20,
-		"statistics_filename": "convergence-10mazes-28x28-action-unique-20iters.csv"
+		"statistics_filename": "convergence-3mazes-3x3-action-unique-20iters.csv"
 	},
 	"maze_importer" : {
-		"data_filename": "../datasets/elementary/10mazes-28x28.csv"
+		"data_filename": "../../../data//elementary/3mazes-3x3.csv"
 	}
 }

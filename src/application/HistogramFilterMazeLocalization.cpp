@@ -64,9 +64,17 @@ void HistogramFilterMazeLocalization::initialize(int argc, char* argv[]) {
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_current_maze_chart = new WindowChart("Current_maze", 256, 256, 0, 0);
-	w_current_coordinate_x = new WindowChart("Current_x", 256, 256, 0, 326);
-	w_current_coordinate_y = new WindowChart("Current_y", 256, 256, 326, 326);
+	w_current_maze_chart = new WindowCollectorChart<float>("Current_maze", 256, 256, 0, 0);
+	maze_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	w_current_maze_chart->setDataCollectorPtr(maze_collector_ptr);
+
+	w_current_coordinate_x = new WindowCollectorChart<float>("Current_x", 256, 256, 0, 326);
+	coordinate_x_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	w_current_coordinate_x->setDataCollectorPtr(coordinate_x_collector_ptr);
+
+	w_current_coordinate_y = new WindowCollectorChart<float>("Current_y", 256, 256, 326, 326);
+	coordinate_y_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	w_current_coordinate_y->setDataCollectorPtr(coordinate_y_collector_ptr);
 
 	w_max_probabilities_chart = new WindowCollectorChart<float>("Max_probabilities", 256, 256, 326, 0);
 	max_probabilities_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
@@ -163,7 +171,7 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 		//std::cout << label << " g=" << r<< " g=" << r<< " b=" << b;
 
 		// Add container to chart.
-		w_current_maze_chart->createDataContainer(label, mic::types::color_rgba(r, g, b, 180));
+		maze_collector_ptr->createContainer(label, mic::types::color_rgba(r, g, b, 180));
 
 	}//: for
 
@@ -175,7 +183,7 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 		int b= color_dist(rng_mt19937_64);
 
 		// Add container to chart.
-		w_current_coordinate_x->createDataContainer(label, mic::types::color_rgba(r, g, b, 180));
+		coordinate_x_collector_ptr->createContainer(label, mic::types::color_rgba(r, g, b, 180));
 
 	}//: for
 
@@ -188,7 +196,7 @@ void HistogramFilterMazeLocalization::createDataContainers() {
 		int b= color_dist(rng_mt19937_64);
 
 		// Add container to chart.
-		w_current_coordinate_y->createDataContainer(label, mic::types::color_rgba(r, g, b, 180));
+		coordinate_y_collector_ptr->createContainer(label, mic::types::color_rgba(r, g, b, 180));
 	}//: for
 
 	// Create containers for three max probabilites.
@@ -211,19 +219,19 @@ void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool syn
 		// Add data to chart windows.
 		for (size_t m=0; m<importer.size(); m++) {
 			std::string label = "P(m" + std::to_string(m) +")";
-			w_current_maze_chart->addDataToContainer(label, hf.maze_probabilities[m]);
+			maze_collector_ptr->addDataToContainer(label, hf.maze_probabilities[m]);
 			max_pm = ( hf.maze_probabilities[m] > max_pm ) ? hf.maze_probabilities[m] : max_pm;
 		}//: for
 
 		for (size_t x=0; x<importer.maze_width; x++) {
 			std::string label = "P(x" + std::to_string(x) +")";
-			w_current_coordinate_x->addDataToContainer(label, hf.maze_x_coordinate_probilities[x]);
+			coordinate_x_collector_ptr->addDataToContainer(label, hf.maze_x_coordinate_probilities[x]);
 			max_px = ( hf.maze_x_coordinate_probilities[x] > max_px ) ? hf.maze_x_coordinate_probilities[x] : max_px;
 		}//: for
 
 		for (size_t y=0; y<importer.maze_height; y++) {
 			std::string label = "P(y" + std::to_string(y) +")";
-			w_current_coordinate_y->addDataToContainer(label, hf.maze_y_coordinate_probilities[y]);
+			coordinate_y_collector_ptr->addDataToContainer(label, hf.maze_y_coordinate_probilities[y]);
 			max_py = ( hf.maze_y_coordinate_probilities[y] > max_py ) ? hf.maze_y_coordinate_probilities[y] : max_py;
 		}//: for
 
@@ -236,19 +244,19 @@ void HistogramFilterMazeLocalization::storeCurrentStateInDataContainers(bool syn
 		// Add data to chart windows.
 		for (size_t m=0; m<importer.size(); m++) {
 			std::string label = "P(m" + std::to_string(m) +")";
-			w_current_maze_chart->addDataToContainer(label, hf.maze_probabilities[m]);
+			maze_collector_ptr->addDataToContainer(label, hf.maze_probabilities[m]);
 			max_pm = ( hf.maze_probabilities[m] > max_pm ) ? hf.maze_probabilities[m] : max_pm;
 		}//: for
 
 		for (size_t x=0; x<importer.maze_width; x++) {
 			std::string label = "P(x" + std::to_string(x) +")";
-			w_current_coordinate_x->addDataToContainer(label, hf.maze_x_coordinate_probilities[x]);
+			coordinate_x_collector_ptr->addDataToContainer(label, hf.maze_x_coordinate_probilities[x]);
 			max_px = ( hf.maze_x_coordinate_probilities[x] > max_px ) ? hf.maze_x_coordinate_probilities[x] : max_px;
 		}//: for
 
 		for (size_t y=0; y<importer.maze_height; y++) {
 			std::string label = "P(y" + std::to_string(y) +")";
-			w_current_coordinate_y->addDataToContainer(label, hf.maze_y_coordinate_probilities[y]);
+			coordinate_y_collector_ptr->addDataToContainer(label, hf.maze_y_coordinate_probilities[y]);
 			max_py = ( hf.maze_y_coordinate_probilities[y] > max_py ) ? hf.maze_y_coordinate_probilities[y] : max_py;
 		}//: for
 
