@@ -20,6 +20,6 @@
 		"statistics_filename": "convergence-3mazes-3x3-action-unique-20iters.csv"
 	},
 	"maze_importer" : {
-		"data_filename": "../../../data//elementary/3mazes-3x3.csv"
+		"data_filename": "../../../data/mazes/3mazes-3x3.csv"
 	}
 }
