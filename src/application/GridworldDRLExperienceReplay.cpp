@@ -47,7 +47,7 @@ GridworldDRLExperienceReplay::GridworldDRLExperienceReplay(std::string node_name
 
 
 GridworldDRLExperienceReplay::~GridworldDRLExperienceReplay() {
-
+	delete(w_chart);
 }
 
 
@@ -68,7 +68,7 @@ void GridworldDRLExperienceReplay::initialize(int argc, char* argv[]) {
 	number_of_successes = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("GridworldDRLExperienceReplay", 256, 256, 0, 0);
+	w_chart = new WindowCollectorChart<float>("GridworldDRLExperienceReplay", 256, 256, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }

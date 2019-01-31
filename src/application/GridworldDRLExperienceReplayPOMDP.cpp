@@ -50,7 +50,7 @@ GridworldDRLExperienceReplayPOMDP::GridworldDRLExperienceReplayPOMDP(std::string
 
 
 GridworldDRLExperienceReplayPOMDP::~GridworldDRLExperienceReplayPOMDP() {
-
+	delete(w_chart);
 }
 
 
@@ -71,7 +71,7 @@ void GridworldDRLExperienceReplayPOMDP::initialize(int argc, char* argv[]) {
 	number_of_successes = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("GridworldDRLExperienceReplayPOMDP", 256, 256, 0, 0);
+	w_chart = new WindowCollectorChart<float>("GridworldDRLExperienceReplayPOMDP", 256, 256, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }

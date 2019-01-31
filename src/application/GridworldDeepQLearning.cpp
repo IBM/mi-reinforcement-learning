@@ -46,7 +46,7 @@ GridworldDeepQLearning::GridworldDeepQLearning(std::string node_name_) : OpenGLE
 
 
 GridworldDeepQLearning::~GridworldDeepQLearning() {
-
+	delete(w_chart);
 }
 
 
@@ -65,7 +65,7 @@ void GridworldDeepQLearning::initialize(int argc, char* argv[]) {
 	sum_of_rewards = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("GridworldDeepQLearning", 256, 256, 0, 0);
+	w_chart = new WindowCollectorChart<float>("GridworldDeepQLearning", 256, 256, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }

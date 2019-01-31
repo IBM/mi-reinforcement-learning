@@ -45,7 +45,7 @@ GridworldQLearning::GridworldQLearning(std::string node_name_) : OpenGLEpisodicA
 
 
 GridworldQLearning::~GridworldQLearning() {
-
+	delete(w_chart);
 }
 
 
@@ -64,7 +64,7 @@ void GridworldQLearning::initialize(int argc, char* argv[]) {
 	sum_of_rewards = 0;
 
 	// Create the visualization windows - must be created in the same, main thread :]
-	w_chart = new WindowFloatCollectorChart("GridworldQLearning", 256, 256, 0, 0);
+	w_chart = new WindowCollectorChart<float>("GridworldQLearning", 256, 256, 0, 0);
 	w_chart->setDataCollectorPtr(collector_ptr);
 
 }

@@ -12,7 +12,7 @@
 #include <string>
 
 #include <opengl/application/OpenGLEpisodicApplication.hpp>
-#include <opengl/visualization/WindowFloatCollectorChart.hpp>
+#include <opengl/visualization/WindowCollectorChart.hpp>
 using namespace mic::opengl::visualization;
 
 #include <mlnn/BackpropagationNeuralNetwork.hpp>
@@ -75,8 +75,8 @@ protected:
 
 private:
 
-	/// Window for displaying ???.
-	WindowFloatCollectorChart* w_chart;
+	/// Window for displaying statistics.
+	WindowCollectorChart<float>* w_chart;
 
 	/// Data collector.
 	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
