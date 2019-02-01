@@ -35,18 +35,41 @@ Gridworld::Gridworld(std::string node_name_) : Environment(node_name_),
 
 }
 
+Gridworld::Gridworld (const mic::environments::Gridworld & gw_) : Environment(gw_.getNodeName()+"_copy"),
+	type("type", 0)
+{
+	// Register properties - so their values can be overridden (read from the configuration file).
+	registerProperty(type);
+	// Not used, but still let's copy it.
+	type = gw_.type;
+	// Copy size.
+	width = gw_.width;
+	height = gw_.height;
+	channels = gw_.channels;
+	// Copy the environment.
+	initial_position = gw_.initial_position;
+	environment_grid = gw_.environment_grid;
+	observation_grid = gw_.observation_grid;
+}
+
+
+
 Gridworld::~Gridworld() {
 	// TODO Auto-generated destructor stub
 }
 
 mic::environments::Gridworld & Gridworld::operator= (const mic::environments::Gridworld & gw_) {
+	// Not used, but still let's copy it.
+	type = gw_.type;
+	// Copy size.
 	width = gw_.width;
 	height = gw_.height;
 	channels = gw_.channels;
+	// Copy the environment.
 	initial_position = gw_.initial_position;
 	environment_grid = gw_.environment_grid;
 	observation_grid = gw_.observation_grid;
-
+	// Return pointer to updated instance.
 	return *this;
 }
 
