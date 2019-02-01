@@ -66,7 +66,9 @@ MazeOfDigitsDLRERPOMPD::MazeOfDigitsDLRERPOMPD(std::string node_name_) : OpenGLE
 
 
 MazeOfDigitsDLRERPOMPD::~MazeOfDigitsDLRERPOMPD() {
-
+	delete(w_chart);
+	delete(wmd_environment);
+	delete(wmd_observation);
 }
 
 
