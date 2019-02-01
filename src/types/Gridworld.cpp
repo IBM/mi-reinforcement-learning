@@ -36,7 +36,7 @@ Gridworld::Gridworld(std::string node_name_) : Environment(node_name_),
 }
 
 Gridworld::Gridworld (const mic::environments::Gridworld & gw_) : Environment(gw_.getNodeName()+"_copy"),
-	type("type", 0)
+	type("type", gw_.type)
 {
 	// Register properties - so their values can be overridden (read from the configuration file).
 	registerProperty(type);

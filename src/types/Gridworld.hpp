@@ -57,7 +57,7 @@ public:
 
 	/*!
 	 * Copying constructor.
-	 * @param gw_ Gridworld object that values/properties will be copied.
+	 * @param gw_ Gridworld object to be cloned.
 	 */
 	Gridworld (const mic::environments::Gridworld & gw_);
 

@@ -35,18 +35,32 @@ MazeOfDigits::MazeOfDigits(std::string node_name_) : Environment(node_name_),
 	channels = (size_t)MazeOfDigitsChannels::Count;
 }
 
+MazeOfDigits::MazeOfDigits (const mic::environments::MazeOfDigits & md_) : Environment(md_.getNodeName()+"_copy"),
+	type("type", md_.type)
+{
+	// Register properties - so their values can be overridden (read from the configuration file).
+	registerProperty(type);
+	// Not used, but still let's copy it.
+	width = md_.width;
+	height = md_.height;
+	channels = md_.channels;
+	initial_position = md_.initial_position;
+	environment_grid = md_.environment_grid;
+	observation_grid = md_.observation_grid;
+}
+
 
 MazeOfDigits::~MazeOfDigits() {
 	// TODO Auto-generated destructor stub
 }
 
-mic::environments::MazeOfDigits & MazeOfDigits::operator= (const mic::environments::MazeOfDigits & gw_) {
-	width = gw_.width;
-	height = gw_.height;
-	channels = gw_.channels;
-	initial_position = gw_.initial_position;
-	environment_grid = gw_.environment_grid;
-	observation_grid = gw_.observation_grid;
+mic::environments::MazeOfDigits & MazeOfDigits::operator= (const mic::environments::MazeOfDigits & md_) {
+	width = md_.width;
+	height = md_.height;
+	channels = md_.channels;
+	initial_position = md_.initial_position;
+	environment_grid = md_.environment_grid;
+	observation_grid = md_.observation_grid;
 
 	return *this;
 }
