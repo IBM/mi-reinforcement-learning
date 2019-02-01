@@ -71,6 +71,9 @@ HistogramFilterMazeLocalization::HistogramFilterMazeLocalization(std::string nod
 
 HistogramFilterMazeLocalization::~HistogramFilterMazeLocalization() {
 	delete(w_max_probabilities_chart);
+	delete(w_current_maze_chart);
+	delete(w_current_coordinate_x);
+	delete(w_current_coordinate_y);
 }
 
 
