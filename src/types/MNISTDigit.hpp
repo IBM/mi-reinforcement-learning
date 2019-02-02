@@ -56,6 +56,12 @@ public:
 	MNISTDigit(std::string node_name_ = "mnist_digit");
 
 	/*!
+	 * Copying constructor.
+	 * @param md_ MNIST digit to be cloned.
+	 */
+	MNISTDigit (const mic::environments::MNISTDigit & md_);
+
+	/*!
 	 * Destructor. Empty for now.
 	 */
 	virtual ~MNISTDigit();

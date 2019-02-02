@@ -101,4 +101,4 @@ add_subdirectory(src)
 
 add_subdirectory(configs)
 
-#add_subdirectory(datasets)
+add_subdirectory(datasets)
