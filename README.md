@@ -107,6 +107,6 @@ https://ibm.github.io/mi-reinforcement-learning/
 
 ## Maintainer
 
-[tkornuta](github.com/tkornut)
+[tkornuta](http://github.com/tkornut)
 
 [![HitCount](http://hits.dwyl.io/tkornut/ibm/mi-reinforcement-learning.svg)](http://hits.dwyl.io/tkornut/ibm/mi-reinforcement-learning)
