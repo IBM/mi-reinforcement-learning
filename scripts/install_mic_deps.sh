@@ -52,7 +52,7 @@ for ((i=0;i<${#modules[@]};++i)); do
 
     # Build module.
     cd ${module}
-    ./../../scripts/build_mi_module.sh ../../${TARGET_DIR}
+    ./../../scripts/build_mic_module.sh ../../${TARGET_DIR}
     echo "${module} installed"
     cd ..
 done

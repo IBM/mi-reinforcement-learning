@@ -44,9 +44,9 @@ jobs:
         - COMPILER=g++-4.8
       before_script:
         # Install MI-* dependencies.
-        - ./scripts/install_mi_deps.sh
+        - ./scripts/install_mic_deps.sh
       script:
-        - ./scripts/build_mi_module.sh
+        - ./scripts/build_mic_module.sh
 
     # 2. Ubuntu 14.04 g++5 (WORKING, BUT COMMENTED FOR SPEED-UP)
     #- os: linux
@@ -66,9 +66,9 @@ jobs:
     #    - CC=gcc-5
     #    - CXX=g++-5
     #  before_script:
-    #    - ./scripts/install_mi_deps.sh
+    #    - ./scripts/install_mic_deps.sh
     #  script:
-    #    - ./scripts/build_mi_module.sh
+    #    - ./scripts/build_mic_module.sh
 
     # 3. Ubuntu 14.04 clang++ (WORKING, BUT COMMENTED FOR SPEED-UP)
     # - os: linux
@@ -84,9 +84,9 @@ jobs:
     #        - libboost-all-dev
     #        - 'libeigen3-dev'
     #  before_script:
-    #    - ./scripts/install_mi_deps.sh
+    #    - ./scripts/install_mic_deps.sh
     #  script:
-    #    - ./scripts/build_mi_module.sh
+    #    - ./scripts/build_mic_module.sh
 
     # 4. OSX clang
     - os: osx
@@ -102,9 +102,9 @@ jobs:
             - eigen 
             - glfw3
       before_script:
-        - ./scripts/install_mi_deps.sh
+        - ./scripts/install_mic_deps.sh
       script:
-        - ./scripts/build_mi_module.sh
+        - ./scripts/build_mic_module.sh
 
     # 6. Deploy
     - stage: "Deploy"
