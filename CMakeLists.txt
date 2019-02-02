@@ -17,8 +17,8 @@ project(MIReinforcementLearning CXX)
 
 #  Set current version number.
 set (MIReinforcementLearning_VERSION_MAJOR 1)
-set (MIReinforcementLearning_VERSION_MINOR 0)
-set (MIReinforcementLearning_VERSION_PATCH 1)
+set (MIReinforcementLearning_VERSION_MINOR 1)
+set (MIReinforcementLearning_VERSION_PATCH 0)
 set (MIReinforcementLearning_VERSION ${MIReinforcementLearning_VERSION_MAJOR}.${MIReinforcementLearning_VERSION_MINOR}.${MIReinforcementLearning_VERSION_PATCH})
 
 # CMake required version.
