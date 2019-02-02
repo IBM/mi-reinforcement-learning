@@ -15,14 +15,14 @@ The repository contains solutions and applications related to (deep) reinforceme
 In particular, it contains several classical problems (N-armed bandits, several variations of Gridworld), POMDP environments (Gridworld, Maze of Digits, MNIST digit) and algorithms (from simple Value Iteartion and Q-learning to DQN with Experience Replay).
 
 
-## Classic RL Applications
+### Classic RL Applications
    * narmed_bandits_unlimited_history_app - application solving the n armed bandits problem based on unlimited history action selection (storing all action-value pairs).
    * narmed_bandits_simple_qlearning_app - application solving the n armed bandits problem using simple Q-learning rule.
    * narmed_bandits_softmax_app - application solving the n armed bandits problem using Softmax Action Selection.
    * gridworld_value_iteration_app - application solving the gridworld problem by applying the reinforcement learning value iteration method.
    * gridworld_qlearning_app - application solving the gridworld problem with Q-learning.
 
-## Other RL & DRL POMDP Applications
+### Other RL & DRL POMDP Applications
    * gridworld_drl_app - application solving the gridworld problem with Q-learning and (not that) deep neural networks.
    * gridworld_drl_er_app - application solving the gridworld problem with Q-learning, neural network used for approximation of the rewards and experience replay using for (batch) training of the neural network.
    * gridworld_drl_er_pomdp_app - application solving the gridworld with partial observation and Deep Reinforcement Learning with Experience Replay.
@@ -44,6 +44,7 @@ In particular, it contains several classical problems (N-armed bandits, several 
 Additionally it depends on the following external libraries:
    * Boost - library of free (open source) peer-reviewed portable C++ source libraries.
    * Eigen - a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.
+   * OpenGL/GLUT - a cross-language, cross-platform application programming interface for rendering 2D and 3D vector graphics.
    * OpenBlas (optional) - An optimized library implementing BLAS routines. If present - used for fastening operation on matrices.
    * Doxygen (optional) - Tool for generation of documentation.
    * GTest (optional) - Framework for unit testing.
@@ -70,26 +71,24 @@ To install GTest on Mac OS X:
 
 This step is required only when not downloaded/installed the listed MIC dependencies earlier.
 
-In directory scripts one can find script that will download and install all requirede MI modules.
-This step is not required 
-```
-git git@github.com:IBM/mi-reinforcement-learning.git
-cd mi-reinforcement-learning
-./scripts/build_mic_module.sh ../mic
-```
+In directory scripts one can find script that will download and install all required MIC modules.
+
+    git clone git@github.com:IBM/mi-reinforcement-learning.git
+    cd mi-reinforcement-learning
+    ./scripts/build_mic_module.sh ../mic
+
 Please note that it will create a directory 'deps' and download all sources into that directory.
 After compilation all dependencies will be installed in the directory '../mic'.
 
 ### Installation of MI-reinforcement-learning
 The following assumes that all MIC dependencies are installed in the directory '../mic'.
 
-```
-git git@github.com:IBM/mi-reinforcement-learning.git
-cd mi-reinforcement-learning
-./scripts/build_mic_module.sh ../mic
-```
+    git clone git@github.com:IBM/mi-reinforcement-learning.git
+    cd mi-reinforcement-learning
+    ./scripts/build_mic_module.sh ../mic
 
 ### Make commands
+
    * make install - install applications to ../mic/bin, headers to ../mic/include, libraries to ../mic/lib, cmake files to ../mic/share
    * make configs - install config files to ../mic/bin
    * make datasets - install config files to ../mic/datasets
@@ -106,8 +105,8 @@ The current documentation (generated straight from the code and automatically up
 
 https://ibm.github.io/mi-reinforcement-learning/
 
-Maintainer
-----------
+## Maintainer
+
 [tkornuta][github.com/tkornut]
 
-
+[![HitCount](http://hits.dwyl.io/tkornut/ibm/mi-reinforcement-learning.svg)](http://hits.dwyl.io/tkornut/ibm/mi-reinforcement-learning)

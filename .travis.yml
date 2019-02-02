@@ -118,7 +118,7 @@ jobs:
             - doxygen-gui
             - graphviz
       script: 
-        - doxygen mi-rl.doxyfile
+        - doxygen mi-reinforcement-learning.doxyfile
       # Deploy using travis builtin GitHub Pages support
       deploy:
         provider: pages
