@@ -90,7 +90,7 @@ void MNISTDigit::initializeEnvironment() {
 		mic::types::MNISTSample<> sample;
 //		LOG(LERROR) << "sample_number: " << sample_number;
 
-		if ((sample_number < 0) || (sample_number >= mnist_importer.size()))
+		if (sample_number >= mnist_importer.size())
 			// Random select sample from dataset.
 			sample = mnist_importer.getRandomSample();
 		else

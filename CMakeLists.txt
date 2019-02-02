@@ -18,7 +18,7 @@ project(MIReinforcementLearning CXX)
 #  Set current version number.
 set (MIReinforcementLearning_VERSION_MAJOR 1)
 set (MIReinforcementLearning_VERSION_MINOR 0)
-set (MIReinforcementLearning_VERSION_PATCH 0)
+set (MIReinforcementLearning_VERSION_PATCH 1)
 set (MIReinforcementLearning_VERSION ${MIReinforcementLearning_VERSION_MAJOR}.${MIReinforcementLearning_VERSION_MINOR}.${MIReinforcementLearning_VERSION_PATCH})
 
 # CMake required version.
@@ -66,7 +66,7 @@ find_package( Eigen3 REQUIRED )
 include_directories( ${EIGEN3_INCLUDE_DIR} )
 
 # Find MIC Toolchain
-find_package(MIToolchain 1.1 REQUIRED)
+find_package(MIToolchain 1.3 REQUIRED)
 
 # Find MIC Algorithms
 find_package(MIAlgorithms 1.2 REQUIRED)
@@ -101,4 +101,4 @@ add_subdirectory(src)
 
 add_subdirectory(configs)
 
-#add_subdirectory(datasets)
+add_subdirectory(datasets)

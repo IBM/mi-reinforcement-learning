@@ -67,7 +67,9 @@ MNISTDigitDLRERPOMDP::MNISTDigitDLRERPOMDP(std::string node_name_) : OpenGLEpiso
 
 
 MNISTDigitDLRERPOMDP::~MNISTDigitDLRERPOMDP() {
-
+	delete(w_chart);
+	delete(wmd_environment);
+	delete(wmd_observation);	
 }
 
 

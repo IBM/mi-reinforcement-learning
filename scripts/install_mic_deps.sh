@@ -25,7 +25,7 @@ set -e
 
 # List of MI modules with versions.
 modules=( "mi-toolchain" "mi-algorithms" "mi-visualization" "mi-neural-nets" )
-versions=( "v1.1.1" "v1.2.2" "v1.2.2" "v1.2.2" )
+versions=( "v1.3.0" "v1.2.2" "v1.2.2" "v1.2.2" )
 
 # Prepare dir for dependencies.
 rm -Rf deps # Always fresh-and-clean!
@@ -52,7 +52,7 @@ for ((i=0;i<${#modules[@]};++i)); do
 
     # Build module.
     cd ${module}
-    ./../../scripts/build_mi_module.sh ../../${TARGET_DIR}
+    ./../../scripts/build_mic_module.sh ../../${TARGET_DIR}
     echo "${module} installed"
     cd ..
 done

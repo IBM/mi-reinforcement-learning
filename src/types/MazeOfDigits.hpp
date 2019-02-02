@@ -56,6 +56,12 @@ public:
 	MazeOfDigits(std::string node_name_ = "maze_of_digits");
 
 	/*!
+	 * Copying constructor.
+	 * @param md_ Maze of digits to be cloned.
+	 */
+	MazeOfDigits (const mic::environments::MazeOfDigits & md_);
+
+	/*!
 	 * Destructor. Empty for now.
 	 */
 	virtual ~MazeOfDigits();
@@ -63,7 +69,7 @@ public:
 	/*!
 	 * Assign operator. Copies the gridworld state along with its properties.
 	 */
-	mic::environments::MazeOfDigits & operator=(const mic::environments::MazeOfDigits & gw_);
+	mic::environments::MazeOfDigits & operator=(const mic::environments::MazeOfDigits & md);
 
 	/*!
 	 * Returns the observation size, depending on the process type: FOMDP (width * height * channels) or POMDP (roi_size * roi_size * 1!) (an overridden method)

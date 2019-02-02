@@ -56,12 +56,20 @@ public:
 	Gridworld(std::string node_name_ = "gridworld");
 
 	/*!
+	 * Copying constructor.
+	 * @param gw_ Gridworld object to be cloned.
+	 */
+	Gridworld (const mic::environments::Gridworld & gw_);
+
+
+	/*!
 	 * Destructor. Empty for now.
 	 */
 	virtual ~Gridworld();
 
 	/*!
 	 * Assign operator. Copies the gridworld state along with its properties.
+	 * @param gw_ Gridworld object that values/properties will be copied.
 	 */
 	mic::environments::Gridworld & operator=(const mic::environments::Gridworld & gw_);
 
