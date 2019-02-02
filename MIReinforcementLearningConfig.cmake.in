@@ -27,5 +27,5 @@ LINK_DIRECTORIES(${MIReinforcementLearning_LIB_DIR})
 # Provide the variable containing list of libraries to the caller
 SET(MIReinforcementLearning_LIBRARIES "@MIReinforcementLearning_LIBRARIES@")
 
-message("-- MI Algorithms version: ${MIToolchain_VERSION}")
+message("-- MI Algorithms version: ${MIReinforcementLearning_VERSION}")
 message("-- Found the following MI Algorithms libraries:\n--   ${MIReinforcementLearning_LIBRARIES} ")
