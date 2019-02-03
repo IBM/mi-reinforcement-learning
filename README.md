@@ -75,7 +75,7 @@ In directory scripts one can find script that will download and install all requ
 
     git clone git@github.com:IBM/mi-reinforcement-learning.git
     cd mi-reinforcement-learning
-    ./scripts/build_mic_module.sh ../mic
+    ./scripts/install_mic_deps.sh ../mic
 
 Please note that it will create a directory 'deps' and download all sources into that directory.
 After compilation all dependencies will be installed in the directory '../mic'.
