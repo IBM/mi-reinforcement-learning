@@ -305,7 +305,8 @@ void MazeOfDigits::initRandomStructuredMaze() {
 				min = max = 8;
 			} else {
 				min = 9 - ((scaled_dist >= 9) ? 9 : scaled_dist);
-				max = ((min +1 >= 9) ? 9 : min + 1);
+				//max = ((min +1 >= 9) ? 9 : min + 1);
+				max = min + 1;
 			}//: else
 
 			// Random variables.
@@ -434,7 +435,8 @@ void MazeOfDigits::initRandomPathMaze() {
 			min = max = 8;
 		} else {
 			min = 9 - ((scaled_dist >= 9) ? 9 : scaled_dist);
-			max = ((min +1 >= 9) ? 9 : min + 1);
+			//max = ((min +1 >= 9) ? 9 : min + 1);
+			max = min + 1;
 		}//: else
 
 		// Random variables.
