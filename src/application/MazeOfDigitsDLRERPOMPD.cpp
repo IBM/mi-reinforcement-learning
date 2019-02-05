@@ -21,7 +21,7 @@
  */
 
 #include <limits>
-#include <data_utils/RandomGenerator.hpp>
+#include <utils/RandomGenerator.hpp>
 
 #include <application/MazeOfDigitsDLRERPOMPD.hpp>
 
@@ -76,7 +76,7 @@ void MazeOfDigitsDLRERPOMPD::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
-	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	collector_ptr = std::make_shared < mic::utils::DataCollector<std::string, float> >( );
 	// Add containers to collector.
 	collector_ptr->createContainer("path_length_episode",  mic::types::color_rgba(0, 255, 0, 180));
 	collector_ptr->createContainer("path_length_average", mic::types::color_rgba(180, 255, 0, 180));

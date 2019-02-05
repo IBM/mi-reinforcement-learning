@@ -39,7 +39,7 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 		application/HistogramFilterMazeLocalization.cpp
 		application/console_application_main.cpp
 		algorithms/MazeHistogramFilter.cpp
-		data_io/MazeMatrixImporter.cpp
+		importers/MazeMatrixImporter.cpp
 		)
 	# Link it with shared libraries.
 	target_link_libraries(mazeofdigits_histogram_filter_app 
@@ -47,7 +47,7 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 		configuration
 		application
 		data_utils
-		data_io
+		importers
 		encoders
 		opengl_visualization
 		opengl_application
@@ -70,7 +70,7 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 		application/EpisodicHistogramFilterMazeLocalization.cpp
 		application/console_application_main.cpp
 		algorithms/MazeHistogramFilter.cpp
-		data_io/MazeMatrixImporter.cpp
+		importers/MazeMatrixImporter.cpp
 		)
 	# Link it with shared libraries.
 	target_link_libraries(mazeofdigits_histogram_filter_episodic_app 
@@ -78,7 +78,7 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 		configuration
 		application
 		data_utils
-		data_io
+		importers
 		encoders
 		opengl_visualization
 		opengl_application
@@ -372,7 +372,7 @@ if(${BUILD_APP_MNIST_DIGIT_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 		logger
 		configuration
 		application
-		data_io
+		importers
 		data_utils
 		opengl_visualization
 		opengl_application

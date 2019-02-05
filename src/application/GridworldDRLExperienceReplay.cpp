@@ -21,7 +21,7 @@
  */
 
 #include <limits>
-#include <data_utils/RandomGenerator.hpp>
+#include <utils/RandomGenerator.hpp>
 #include <application/GridworldDRLExperienceReplay.hpp>
 
 namespace mic {
@@ -70,7 +70,7 @@ void GridworldDRLExperienceReplay::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
-	collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	collector_ptr = std::make_shared < mic::utils::DataCollector<std::string, float> >( );
 	// Add containers to collector.
 	collector_ptr->createContainer("number_of_steps",  mic::types::color_rgba(255, 0, 0, 180));
 	collector_ptr->createContainer("number_of_steps_average", mic::types::color_rgba(255, 255, 0, 180));

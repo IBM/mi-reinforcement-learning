@@ -75,7 +75,7 @@ private:
 	WindowCollectorChart<float>* w_reward;
 
 	/// Reward collector.
-	mic::data_io::DataCollectorPtr<std::string, float> reward_collector_ptr;
+	mic::utils::DataCollectorPtr<std::string, float> reward_collector_ptr;
 
 	/// n Bandit arms.
 	mic::types::VectorXf arms;

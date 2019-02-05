@@ -21,7 +21,7 @@
  */
 
 #include <types/MNISTDigit.hpp>
-#include  <data_utils/RandomGenerator.hpp>
+#include  <utils/RandomGenerator.hpp>
 
 namespace mic {
 namespace environments {
