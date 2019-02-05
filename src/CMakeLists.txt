@@ -46,7 +46,6 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_SIMPLE})
 		logger
 		configuration
 		application
-		types
 		data_utils
 		data_io
 		encoders
@@ -78,7 +77,6 @@ if(${BUILD_APP_HISTOGRAM_FILTER_MAZE_OF_DIGITS_EPISODIC})
 		logger
 		configuration
 		application
-		types
 		data_utils
 		data_io
 		encoders
@@ -112,7 +110,6 @@ if(${BUILD_APP_N_ARMED_BANDITS_UNLIMITED_HISTORY})
 		configuration
 		application
 		data_utils
-		types
 		opengl_visualization
 		opengl_application
 		${OPENGL_LIBRARIES}
@@ -140,7 +137,6 @@ if(${BUILD_APP_N_ARMED_BANDITS_SIMPLE_QLEARNING})
 		configuration
 		application
 		data_utils
-		types
 		opengl_visualization
 		opengl_application
 		${OPENGL_LIBRARIES}
@@ -168,7 +164,6 @@ if(${BUILD_APP_N_ARMED_BANDITS_SOFTMAX})
 		configuration
 		application
 		data_utils
-		types
 		opengl_visualization
 		opengl_application
 		${OPENGL_LIBRARIES}
@@ -200,7 +195,6 @@ if(${BUILD_APP_GRIDWORLD_VALUE_ITERATION})
 		logger
 		configuration
 		application
-		types
 		data_utils
 		${Boost_LIBRARIES}  
 		)
@@ -226,7 +220,6 @@ if(${BUILD_APP_GRIDWORLD_QLEARNING})
 		logger
 		configuration
 		application
-		types
 		data_utils
 		opengl_visualization
 		opengl_application
@@ -256,7 +249,6 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING})
 		logger
 		configuration
 		application
-		types
 		data_utils
 		opengl_visualization
 		opengl_application
@@ -286,7 +278,6 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY})
 		logger
 		configuration
 		application
-		types
 		data_utils
 		opengl_visualization
 		opengl_application
@@ -316,7 +307,6 @@ if(${BUILD_APP_GRIDWORLD_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 		logger
 		configuration
 		application
-		types
 		data_utils
 		opengl_visualization
 		opengl_application
@@ -350,7 +340,6 @@ if(${BUILD_APP_MAZEOFDIGITS_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 		logger
 		configuration
 		application
-		types
 		data_utils
 		opengl_visualization
 		opengl_application
@@ -383,7 +372,6 @@ if(${BUILD_APP_MNIST_DIGIT_DEEPQLEARNING_EXPERIENCEREPLAY_POMDP})
 		logger
 		configuration
 		application
-		types
 		data_io
 		data_utils
 		opengl_visualization
