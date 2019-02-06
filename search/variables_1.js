@@ -1,0 +1,6 @@
+var searchData=
+[
+  ['batch_5fsize',['batch_size',['../a00005.html#a7c8dd3a06853ddc2beba1aa330a683e6',1,'mic::application::GridworldDRLExperienceReplay::batch_size()'],['../a00006.html#a7f24cc72647737f5e8fc0e6316f39eff',1,'mic::application::GridworldDRLExperienceReplayPOMDP::batch_size()'],['../a00013.html#a40adbc66427c3adedf9da3bac0103bed',1,'mic::application::MazeOfDigitsDLRERPOMPD::batch_size()'],['../a00015.html#ab830e83ba39a535bdfa9e9cc53821167',1,'mic::application::MNISTDigitDLRERPOMDP::batch_size()']]],
+  ['best_5farm',['best_arm',['../a00020.html#a323ff83a7e4443a3b5fa490b4b179226',1,'mic::application::TestApp::best_arm()'],['../a00016.html#ab8c63e59ef1c5081ddcb690ea35ddcd0',1,'mic::application::nArmedBanditsSofmax::best_arm()'],['../a00017.html#a176be8ad4111671572b8ac47b3caa3cc',1,'mic::application::nArmedBanditsUnlimitedHistory::best_arm()']]],
+  ['best_5farm_5fprob',['best_arm_prob',['../a00020.html#a8a75e0a71b93de14e31b5d1c4cdb8dbc',1,'mic::application::TestApp::best_arm_prob()'],['../a00016.html#a39f3340b5fba90896f76506dbe6cb9e5',1,'mic::application::nArmedBanditsSofmax::best_arm_prob()'],['../a00017.html#aa4214b40bd2016a52c44acdc1f33b791',1,'mic::application::nArmedBanditsUnlimitedHistory::best_arm_prob()']]]
+];

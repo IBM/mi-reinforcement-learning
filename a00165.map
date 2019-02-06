@@ -1,0 +1,5 @@
+<map id="mic::environments::Environment" name="mic::environments::Environment">
+<area shape="rect" id="node3" href="$a00003.html" title="Class emulating the gridworld environment. " alt="" coords="366,5,503,46"/>
+<area shape="rect" id="node4" href="$a00012.html" title="Class emulating the maze of digits environment. " alt="" coords="366,70,503,111"/>
+<area shape="rect" id="node5" href="$a00014.html" title="Class emulating the MNISTDigit digit environment. " alt="" coords="366,135,503,177"/>
+</map>
