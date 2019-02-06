@@ -32,13 +32,6 @@ In particular, it contains several classical problems (N-armed bandits, several 
    * mnist_digit_drl_er_pomdp_app - application solving the MNIST digit patch localization proble with partial observation and Deep Reinforcement Learning with Experience Replay.
 
 
-## MIC dependencies
-   * [MI-toolchain](https://github.com/IBM/mi-toolchain) - the core of MIC framework.
-   * [MI-algorithms](https://github.com/IBM/mi-algorithms) - contains basic (core) types and algorithms.
-   * [MI-visualization](https://github.com/IBM/mi-visualization) - contains OpenGL-based visualization.
-   * [MI-neural-nets](https://github.com/IBM/mi-neural-nets) - contains implementation of (deep) neural nets.
-
-
 ## External dependencies
 
 Additionally it depends on the following external libraries:
@@ -67,6 +60,12 @@ To install GTest on Mac OS X:
 
     brew install --HEAD https://gist.githubusercontent.com/Kronuz/96ac10fbd8472eb1e7566d740c4034f8/raw/gtest.rb
 
+## MIC dependencies
+   * [MI-Toolchain](https://github.com/IBM/mi-toolchain) - the core of MIC framework.
+   * [MI-Algorithms](https://github.com/IBM/mi-algorithms) - contains basic (core) types and algorithms.
+   * [MI-Visualization](https://github.com/IBM/mi-visualization) - contains OpenGL-based visualization.
+   * [MI-Neural-Nets](https://github.com/IBM/mi-neural-nets) - contains implementation of (deep) neural nets.
+
 ### Installation of all MIC dependencies (optional)
 
 This step is required only when not downloaded/installed the listed MIC dependencies earlier.
@@ -75,7 +74,7 @@ In directory scripts one can find script that will download and install all requ
 
     git clone git@github.com:IBM/mi-reinforcement-learning.git
     cd mi-reinforcement-learning
-    ./srcipt/install_mic_deps.sh ../mic
+    ./scripts/install_mic_deps.sh ../mic
 
 Then one can install the module by calling the following.
 
@@ -84,7 +83,7 @@ Then one can install the module by calling the following.
 Please note that it will create a directory 'deps' and download all sources into that directory.
 After compilation all dependencies will be installed in the directory '../mic'.
 
-### Installation of MI-reinforcement-learning
+## Installation of MI-Reinforcement-Learning
 The following assumes that all MIC dependencies are installed in the directory '../mic'.
 
     git clone git@github.com:IBM/mi-reinforcement-learning.git
@@ -101,7 +100,7 @@ The following assumes that all MIC dependencies are installed in the directory '
 
 In order to locally generate a "living" documentation of the code please run Doxygen:
 
-    cd ~/workspace/mi-reinforcement-learning
+    cd mi-reinforcement-learning
     doxygen mi-reinforcement-learning.doxyfile
     firefox html/index.html
 
