@@ -25,7 +25,7 @@ set -e
 
 # List of MI modules with versions.
 modules=( "mi-toolchain" "mi-algorithms" "mi-visualization" "mi-neural-nets" )
-versions=( "v1.3.0" "v1.2.2" "v1.2.2" "v1.2.2" )
+versions=( "v1.3.0" "v1.3.0" "v1.3.0" "v1.3.0" )
 
 # Prepare dir for dependencies.
 rm -Rf deps # Always fresh-and-clean!

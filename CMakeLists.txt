@@ -17,7 +17,7 @@ project(MIReinforcementLearning CXX)
 
 #  Set current version number.
 set (MIReinforcementLearning_VERSION_MAJOR 1)
-set (MIReinforcementLearning_VERSION_MINOR 1)
+set (MIReinforcementLearning_VERSION_MINOR 3)
 set (MIReinforcementLearning_VERSION_PATCH 0)
 set (MIReinforcementLearning_VERSION ${MIReinforcementLearning_VERSION_MAJOR}.${MIReinforcementLearning_VERSION_MINOR}.${MIReinforcementLearning_VERSION_PATCH})
 
@@ -69,13 +69,13 @@ include_directories( ${EIGEN3_INCLUDE_DIR} )
 find_package(MIToolchain 1.3 REQUIRED)
 
 # Find MIC Algorithms
-find_package(MIAlgorithms 1.2 REQUIRED)
+find_package(MIAlgorithms 1.3 REQUIRED)
 
 # Find MI Neural Nets
-find_package(MINeuralNets 1.2 REQUIRED)
+find_package(MINeuralNets 1.3 REQUIRED)
 
 # Find MIC Visualization
-find_package(MIVisualization 1.2 REQUIRED)
+find_package(MIVisualization 1.3 REQUIRED)
 
 # =======================================================================
 # RPATH settings

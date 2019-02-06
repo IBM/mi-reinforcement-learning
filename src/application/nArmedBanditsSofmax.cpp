@@ -22,7 +22,7 @@
 
 #include <application/nArmedBanditsSofmax.hpp>
 
-#include  <data_utils/RandomGenerator.hpp>
+#include  <utils/RandomGenerator.hpp>
 
 #include <math.h>
 
@@ -62,7 +62,7 @@ void nArmedBanditsSofmax::initialize(int argc, char* argv[]) {
 	// Initialize GLUT! :]
 	VGL_MANAGER->initializeGLUT(argc, argv);
 
-	reward_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	reward_collector_ptr = std::make_shared < mic::utils::DataCollector<std::string, float> >( );
 	// Add containers to collector.
 	reward_collector_ptr->createContainer("average_reward", 0, 10, mic::types::color_rgba(255, 0, 0, 180));
 	reward_collector_ptr->createContainer("correct_arms_percentage", 0, 100, mic::types::color_rgba(0, 255, 0, 180));

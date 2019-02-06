@@ -24,7 +24,7 @@
 #define SRC_TYPES_MNISTDIGIT_HPP_
 
 #include <types/Environment.hpp>
-#include <data_io/MNISTMatrixImporter.hpp>
+#include <importers/MNISTMatrixImporter.hpp>
 
 
 namespace mic {
@@ -163,7 +163,7 @@ public:
 protected:
 
 	/// Importer responsible for loading MNIST dataset.
-	mic::data_io::MNISTMatrixImporter<float> mnist_importer;
+	mic::importers::MNISTMatrixImporter<float> mnist_importer;
 
 	/*!
 	 * Property: MNISTDigit digit - number of sample.

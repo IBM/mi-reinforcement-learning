@@ -22,7 +22,7 @@
 
 #include <algorithms/MazeHistogramFilter.hpp>
 
-#include <data_io/DataCollector.hpp>
+#include <utils/DataCollector.hpp>
 
 namespace mic {
 namespace algorithms {

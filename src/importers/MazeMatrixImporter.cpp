@@ -20,7 +20,7 @@
  * \date Jan 30, 2016
  */
 
-#include <data_io/MazeMatrixImporter.hpp>
+#include <importers/MazeMatrixImporter.hpp>
 
 #include <fstream>
 
@@ -29,7 +29,7 @@
 #include <sstream>
 
 namespace mic {
-namespace data_io {
+namespace importers {
 
 MazeMatrixImporter::MazeMatrixImporter(std::string node_name_) : Importer (node_name_),
 		data_filename("data_filename","mazes.csv")
@@ -120,5 +120,5 @@ bool MazeMatrixImporter::importData(){
 	}//: else
 }
 
-} /* namespace data_io */
+} /* namespace importers */
 } /* namespace mic */

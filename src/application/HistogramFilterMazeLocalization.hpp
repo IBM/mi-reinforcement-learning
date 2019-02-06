@@ -25,7 +25,7 @@
 
 #include <types/MatrixTypes.hpp>
 
-#include <data_io/MazeMatrixImporter.hpp>
+#include <importers/MazeMatrixImporter.hpp>
 
 #include <algorithms/MazeHistogramFilter.hpp>
 
@@ -98,17 +98,17 @@ private:
 	WindowCollectorChart<float>* w_current_coordinate_y;
 
 	/// Data collector with maximal maze/x/y/ probabilities.
-	mic::data_io::DataCollectorPtr<std::string, float> max_probabilities_collector_ptr;
+	mic::utils::DataCollectorPtr<std::string, float> max_probabilities_collector_ptr;
 
-	mic::data_io::DataCollectorPtr<std::string, float> maze_collector_ptr;
-	mic::data_io::DataCollectorPtr<std::string, float> coordinate_x_collector_ptr;
-	mic::data_io::DataCollectorPtr<std::string, float> coordinate_y_collector_ptr;
+	mic::utils::DataCollectorPtr<std::string, float> maze_collector_ptr;
+	mic::utils::DataCollectorPtr<std::string, float> coordinate_x_collector_ptr;
+	mic::utils::DataCollectorPtr<std::string, float> coordinate_y_collector_ptr;
 
 	/// Window for displaying chart with maximal maze/x/y/ probabilities.
 	WindowCollectorChart<float> * w_max_probabilities_chart;
 
 	/// Importer responsible for loading mazes from file.
-	mic::data_io::MazeMatrixImporter importer;
+	mic::importers::MazeMatrixImporter importer;
 
 	/// Histogram filter.
 	mic::algorithms::MazeHistogramFilter hf;

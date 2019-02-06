@@ -22,7 +22,7 @@
 
 #include <application/HistogramFilterMazeLocalization.hpp>
 
-#include <data_io/DataCollector.hpp>
+#include <utils/DataCollector.hpp>
 
 namespace mic {
 namespace application {
@@ -83,19 +83,19 @@ void HistogramFilterMazeLocalization::initialize(int argc, char* argv[]) {
 
 	// Create the visualization windows - must be created in the same, main thread :]
 	w_current_maze_chart = new WindowCollectorChart<float>("Current_maze", 256, 256, 0, 0);
-	maze_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	maze_collector_ptr = std::make_shared < mic::utils::DataCollector<std::string, float> >( );
 	w_current_maze_chart->setDataCollectorPtr(maze_collector_ptr);
 
 	w_current_coordinate_x = new WindowCollectorChart<float>("Current_x", 256, 256, 0, 326);
-	coordinate_x_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	coordinate_x_collector_ptr = std::make_shared < mic::utils::DataCollector<std::string, float> >( );
 	w_current_coordinate_x->setDataCollectorPtr(coordinate_x_collector_ptr);
 
 	w_current_coordinate_y = new WindowCollectorChart<float>("Current_y", 256, 256, 326, 326);
-	coordinate_y_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	coordinate_y_collector_ptr = std::make_shared < mic::utils::DataCollector<std::string, float> >( );
 	w_current_coordinate_y->setDataCollectorPtr(coordinate_y_collector_ptr);
 
 	w_max_probabilities_chart = new WindowCollectorChart<float>("Max_probabilities", 256, 256, 326, 0);
-	max_probabilities_collector_ptr = std::make_shared < mic::data_io::DataCollector<std::string, float> >( );
+	max_probabilities_collector_ptr = std::make_shared < mic::utils::DataCollector<std::string, float> >( );
 	w_max_probabilities_chart->setDataCollectorPtr(max_probabilities_collector_ptr);
 
 }
@@ -124,7 +124,7 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 
 	// Export probabilities to file (truncate it).
 
-	mic::data_io::DataCollector<std::string, int>::exportMatricesToCsv(statistics_filename, "mazes", importer.data());
+	mic::utils::DataCollector<std::string, int>::exportMatricesToCsv(statistics_filename, "mazes", importer.data());
 
 	std::vector<std::string> maze_pose_labels;
 	for (size_t y=0; y < (size_t)importer.data(0)->rows(); y++)
@@ -132,21 +132,21 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 			std::string label = "(" + std::to_string(y) + ";" + std::to_string(x) + ")";
 			maze_pose_labels.push_back(label);
 		}//: for
-	mic::data_io::DataCollector<std::string, std::string>::exportVectorToCsv(statistics_filename, "maze pose labels",maze_pose_labels, true);
+	mic::utils::DataCollector<std::string, std::string>::exportVectorToCsv(statistics_filename, "maze pose labels",maze_pose_labels, true);
 
 
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "observation distribution P(o)", hf.maze_patch_probabilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "observation distribution P(o)", hf.maze_patch_probabilities, true);
 	std::vector<int> obs_labels = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-	mic::data_io::DataCollector<std::string, int>::exportVectorToCsv(statistics_filename, "observation labels",obs_labels, true);
+	mic::utils::DataCollector<std::string, int>::exportVectorToCsv(statistics_filename, "observation labels",obs_labels, true);
 
-	mic::data_io::DataCollector<std::string, double>::exportMatricesToCsv(statistics_filename, "initial P(p)", hf.maze_position_probabilities, true);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "initial P(m)", hf.maze_probabilities, true);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "initial P(x)", hf.maze_x_coordinate_probilities, true);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "initial P(y)", hf.maze_y_coordinate_probilities, true);
+	mic::utils::DataCollector<std::string, double>::exportMatricesToCsv(statistics_filename, "initial P(p)", hf.maze_position_probabilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "initial P(m)", hf.maze_probabilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "initial P(x)", hf.maze_x_coordinate_probilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "initial P(y)", hf.maze_y_coordinate_probilities, true);
 	// Export hidden state
-	mic::data_io::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, "hidden_maze_number", hf.hidden_maze_number, true);
-	mic::data_io::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, "hidden_x", hf.hidden_x, true);
-	mic::data_io::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, "hidden_y", hf.hidden_y, true);
+	mic::utils::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, "hidden_maze_number", hf.hidden_maze_number, true);
+	mic::utils::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, "hidden_x", hf.hidden_x, true);
+	mic::utils::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, "hidden_y", hf.hidden_y, true);
 
 	// Create data containers - for visualization.
 	createDataContainers();
@@ -156,16 +156,16 @@ void HistogramFilterMazeLocalization::initializePropertyDependentVariables() {
 
 	// Get first observation.
 	hf.sense(hit_factor, miss_factor);
-	mic::data_io::DataCollector<std::string, short>::exportValueToCsv(statistics_filename, "First observation", hf.obs, true);
+	mic::utils::DataCollector<std::string, short>::exportValueToCsv(statistics_filename, "First observation", hf.obs, true);
 
 	// Update aggregated probabilities.
 	hf.updateAggregatedProbabilities();
 
 	// Export probabilities to file.
-	mic::data_io::DataCollector<std::string, double>::exportMatricesToCsv(statistics_filename, "P(p) after first observation", hf.maze_position_probabilities, true);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "P(m) after first observation", hf.maze_probabilities, true);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "P(x) after first observation", hf.maze_x_coordinate_probilities, true);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "P(y) after first observation", hf.maze_y_coordinate_probilities, true);
+	mic::utils::DataCollector<std::string, double>::exportMatricesToCsv(statistics_filename, "P(p) after first observation", hf.maze_position_probabilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "P(m) after first observation", hf.maze_probabilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "P(x) after first observation", hf.maze_x_coordinate_probilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, "P(y) after first observation", hf.maze_y_coordinate_probilities, true);
 
 	// Store the first state.
 	storeCurrentStateInDataContainers(true);
@@ -311,9 +311,9 @@ bool HistogramFilterMazeLocalization::performSingleStep() {
 	}//: switch action
 
 	std:: string label = "Action d_x at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, int>::exportValueToCsv(statistics_filename, label, act.dx, true);
+	mic::utils::DataCollector<std::string, int>::exportValueToCsv(statistics_filename, label, act.dx, true);
 	label = "Action d_y at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, int>::exportValueToCsv(statistics_filename, label, act.dy, true);
+	mic::utils::DataCollector<std::string, int>::exportValueToCsv(statistics_filename, label, act.dy, true);
 
 	// Perform move.
 	hf.probabilisticMove(act, exact_move_probability, overshoot_move_probability, undershoot_move_probability);
@@ -322,27 +322,27 @@ bool HistogramFilterMazeLocalization::performSingleStep() {
 	hf.sense(hit_factor, miss_factor);
 
 	label = "Observation (after motion) at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, short>::exportValueToCsv(statistics_filename, label, hf.obs, true);
+	mic::utils::DataCollector<std::string, short>::exportValueToCsv(statistics_filename, label, hf.obs, true);
 
 	// Update state.
 	hf.updateAggregatedProbabilities();
 
 	// Export probabilities to file.
 	label = "P(p) at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, double>::exportMatricesToCsv(statistics_filename, label, hf.maze_position_probabilities, true);
+	mic::utils::DataCollector<std::string, double>::exportMatricesToCsv(statistics_filename, label, hf.maze_position_probabilities, true);
 	label = "P(m) at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, label, hf.maze_probabilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, label, hf.maze_probabilities, true);
 	label = "P(x) at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, label, hf.maze_x_coordinate_probilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, label, hf.maze_x_coordinate_probilities, true);
 	label = "P(y) at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, label, hf.maze_y_coordinate_probilities, true);
+	mic::utils::DataCollector<std::string, double>::exportVectorToCsv(statistics_filename, label, hf.maze_y_coordinate_probilities, true);
 
 	label = "hidden_maze_number at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, label, hf.hidden_maze_number, true);
+	mic::utils::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, label, hf.hidden_maze_number, true);
 	label = "hidden_x at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, label, hf.hidden_x, true);
+	mic::utils::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, label, hf.hidden_x, true);
 	label = "hidden_y at " + std::to_string(iteration);
-	mic::data_io::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, label, hf.hidden_y, true);
+	mic::utils::DataCollector<std::string, double>::exportValueToCsv(statistics_filename, label, hf.hidden_y, true);
 
 
 

@@ -97,7 +97,7 @@ private:
 	WindowCollectorChart<float>* w_chart;
 
 	/// Data collector.
-	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
+	mic::utils::DataCollectorPtr<std::string, float> collector_ptr;
 
 	/// Window displaying the whole environment.
 	WindowMazeOfDigits* wmd_environment;

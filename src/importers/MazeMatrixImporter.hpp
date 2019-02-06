@@ -20,17 +20,17 @@
  * \date Jan 30, 2016
  */
 
-#ifndef SRC_DATA_IO_MAZEMATRIXIMPORTER_HPP_
-#define SRC_DATA_IO_MAZEMATRIXIMPORTER_HPP_
+#ifndef SRC_importers_MAZEMATRIXIMPORTER_HPP_
+#define SRC_importers_MAZEMATRIXIMPORTER_HPP_
 
-#include <data_io/Importer.hpp>
+#include <importers/Importer.hpp>
 
 #include <types/MatrixTypes.hpp>
 
 namespace mic {
-namespace data_io {
+namespace importers {
 
-class MazeMatrixImporter : public mic::data_io::Importer< mic::types::MatrixXi , size_t> {
+class MazeMatrixImporter : public mic::importers::Importer< mic::types::MatrixXi , size_t> {
 public:
 	/*!
 	 * Constructor. Sets MNIST image default properties. Registers properties.
@@ -68,7 +68,7 @@ protected:
 
 };
 
-} /* namespace data_io */
+} /* namespace importers */
 } /* namespace mic */
 
 namespace mic {
@@ -90,4 +90,4 @@ typedef mic::types::Batch<mic::types::MatrixXi, size_t> MazeBatch;
 }//: namespace mic
 
 
-#endif /* SRC_DATA_IO_MAZEMATRIXIMPORTER_HPP_ */
+#endif /* SRC_importers_MAZEMATRIXIMPORTER_HPP_ */

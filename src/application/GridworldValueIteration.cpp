@@ -22,7 +22,7 @@
 
 
 #include <limits>
-#include <data_utils/RandomGenerator.hpp>
+#include <utils/RandomGenerator.hpp>
 #include <application/GridworldValueIteration.hpp>
 
 namespace mic {

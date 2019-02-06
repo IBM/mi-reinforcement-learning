@@ -29,7 +29,7 @@ using namespace mic::opengl::visualization;
 
 #include <types/MatrixTypes.hpp>
 
-#include <data_io/MazeMatrixImporter.hpp>
+#include <importers/MazeMatrixImporter.hpp>
 
 #include <types/Action2D.hpp>
 
@@ -89,13 +89,13 @@ protected:
 private:
 
 	/// Data collector.
-	mic::data_io::DataCollectorPtr<std::string, float> collector_ptr;
+	mic::utils::DataCollectorPtr<std::string, float> collector_ptr;
 
 	/// Window for displaying chart with statistics on current maze number.
 	WindowCollectorChart<float>* w_localization_time_chart;
 
 	/// Importer responsible for loading mazes from file.
-	mic::data_io::MazeMatrixImporter importer;
+	mic::importers::MazeMatrixImporter importer;
 
 	/// Histogram filter.
 	mic::algorithms::MazeHistogramFilter hf;

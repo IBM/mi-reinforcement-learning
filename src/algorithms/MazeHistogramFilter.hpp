@@ -27,7 +27,7 @@
 #include <types/MatrixTypes.hpp>
 
 #include<logger/Log.hpp>
-#include<data_utils/RandomGenerator.hpp>
+#include<utils/RandomGenerator.hpp>
 
 #include <types/Action2D.hpp>
 
